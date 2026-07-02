@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arcane Hub - Leyline Authentication</title>
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -11,106 +12,24 @@
             --text-color: #c5a880;
             --text-light: #fff;
             --accent-color: #45f3ff;
-            --danger-color: #ff4d4d;
         }
-
-        body {
-            font-family: 'Georgia', serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .auth-card {
-            background: var(--panel-bg);
-            border: 1px solid #2d3748;
-            border-radius: 8px;
-            padding: 30px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            text-align: center;
-        }
-
-        h1 {
-            color: var(--text-light);
-            font-size: 1.8rem;
-            margin-bottom: 25px;
-            letter-spacing: 1px;
-        }
-
-        .form-group {
-            text-align: left;
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            font-size: 0.85rem;
-            color: #888;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            background: #0b0c10;
-            border: 1px solid #333;
-            border-radius: 4px;
-            color: #fff;
-            font-size: 1rem;
-            box-sizing: border-box;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-        }
-
-        .auth-btn {
-            width: 100%;
-            background: transparent;
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
-            padding: 12px;
-            font-size: 1.1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            text-transform: uppercase;
-            font-weight: bold;
-            margin-top: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .auth-btn:hover {
-            background: var(--accent-color);
-            color: #000;
-        }
-
-        .switch-mode {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .switch-mode span {
-            color: var(--text-color);
-            cursor: pointer;
-            text-decoration: underline;
-        }
+        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .auth-card { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 8px; padding: 30px; width: 100%; max-width: 400px; text-align: center; }
+        h1 { color: var(--text-light); font-size: 1.8rem; margin-bottom: 25px; }
+        .form-group { text-align: left; margin-bottom: 15px; }
+        label { display: block; font-size: 0.85rem; color: #888; margin-bottom: 5px; text-transform: uppercase; }
+        input { width: 100%; padding: 12px; background: #0b0c10; border: 1px solid #333; border-radius: 4px; color: #fff; font-size: 1rem; box-sizing: border-box; }
+        input:focus { outline: none; border-color: var(--accent-color); }
+        .auth-btn { width: 100%; background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 12px; font-size: 1.1rem; border-radius: 4px; cursor: pointer; text-transform: uppercase; font-weight: bold; margin-top: 15px; }
+        .auth-btn:hover { background: var(--accent-color); color: #000; }
+        .switch-mode { margin-top: 20px; font-size: 0.9rem; color: #666; }
+        .switch-mode span { color: var(--text-color); cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
 
     <div class="auth-card">
         <h1 id="authTitle">Leyline Connection</h1>
-        
         <form id="authForm">
             <div class="form-group">
                 <label for="username">Mage Identity Tag</label>
@@ -122,114 +41,70 @@
             </div>
             <button type="submit" id="submitBtn" class="auth-btn">Establish Link</button>
         </form>
-
         <div class="switch-mode" id="switchContainer">
             New to the order? <span id="toggleMode">Forge New Core Account</span>
         </div>
     </div>
 
     <script>
+        // Start GunDB open peer network connection mesh
+        const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+        const globalMages = gun.get('aminerproblem5_magic_system_v2');
+
         let isSignUp = false;
 
-        // Clean event attachment setup function
         function setupToggleListener() {
             const toggleBtn = document.getElementById('toggleMode');
             if (toggleBtn) {
                 toggleBtn.onclick = function() {
                     isSignUp = !isSignUp;
-                    const authTitle = document.getElementById('authTitle');
-                    const submitBtn = document.getElementById('submitBtn');
-                    const switchContainer = document.getElementById('switchContainer');
-
-                    if (isSignUp) {
-                        authTitle.innerText = "Forge New Core Account";
-                        submitBtn.innerText = "Sign Up Signature";
-                        switchContainer.innerHTML = `Already registered? <span id="toggleMode">Link Existing Core</span>`;
-                    } else {
-                        authTitle.innerText = "Leyline Connection";
-                        submitBtn.innerText = "Establish Link";
-                        switchContainer.innerHTML = `New to the order? <span id="toggleMode">Forge New Core Account</span>`;
-                    }
-                    // Re-fire listener for the newly generated innerHTML text
+                    document.getElementById('authTitle').innerText = isSignUp ? "Forge New Core Account" : "Leyline Connection";
+                    document.getElementById('submitBtn').innerText = isSignUp ? "Sign Up Signature" : "Establish Link";
+                    document.getElementById('switchContainer').innerHTML = isSignUp ? 
+                        `Already registered? <span id="toggleMode">Link Existing Core</span>` : 
+                        `New to the order? <span id="toggleMode">Forge New Core Account</span>`;
                     setupToggleListener();
                 };
             }
         }
-
-        // Initialize form interactions on window mount
         setupToggleListener();
 
         document.getElementById('authForm').onsubmit = function(e) {
             e.preventDefault();
-            
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
 
-            if (!user || !pass) {
-                alert("Please fill out all activation fields.");
-                return;
-            }
-
-            // Get database or initialize a clean one if empty
-            let db = JSON.parse(localStorage.getItem('mage_users')) || {};
-
-            // 👑 THE MASTER OWNER KEY OVERRIDE
             if (user === "AdminOwner" && pass === "MasterKey2026") {
-                const ownerSession = {
-                    username: "AdminOwner",
-                    rank: "Grandmaster",
-                    power: "Infinite",
-                    hasLicense: true,
-                    isOwner: true
-                };
+                const ownerSession = { username: "AdminOwner", rank: "Grandmaster", power: "Infinite", hasLicense: true, isOwner: true };
                 sessionStorage.setItem('current_mage_session', JSON.stringify(ownerSession));
-                
-                db["AdminOwner"] = { pass: "MasterKey2026", rank: "Grandmaster", power: 999999, hasLicense: true, isOwner: true };
-                localStorage.setItem('mage_users', JSON.stringify(db));
-                
-                alert("👑 Welcome back, Master Artisan! Infinite power initialized.");
+                globalMages.get("AdminOwner").put({ pass: "MasterKey2026", rank: "Grandmaster", power: 999999, hasLicense: true, isOwner: true });
+                alert("👑 Master Owner protocols initialized!");
                 window.location.href = "index.html";
                 return;
             }
 
-            if (isSignUp) {
-                // SIGN UP PROCESS
-                if (db[user]) {
-                    alert("❌ This identification sequence is already occupied!");
-                    return;
+            // Look up directly inside the shared internet mesh node database
+            globalMages.get(user).once(function(data) {
+                if (isSignUp) {
+                    if (data && data.pass) {
+                        alert("❌ This name is already taken globally!");
+                        return;
+                    }
+                    globalMages.get(user).put({ pass: pass, rank: "Initiate", power: 0, hasLicense: false, isOwner: false });
+                    alert("✨ Account forged into network clouds! Please log in.");
+                    window.location.reload();
+                } else {
+                    if (!data || data.pass !== pass) {
+                        alert("❌ Incorrect password or profile does not exist on network paths.");
+                        return;
+                    }
+                    const userSession = { username: user, rank: data.rank, power: data.power, hasLicense: data.hasLicense, isOwner: data.isOwner };
+                    sessionStorage.setItem('current_mage_session', JSON.stringify(userSession));
+                    alert(`Welcome back, ${user}!`);
+                    window.location.href = "index.html";
                 }
-                
-                db[user] = {
-                    pass: pass,
-                    rank: "Initiate",
-                    power: 0,
-                    hasLicense: false,
-                    isOwner: false
-                };
-                localStorage.setItem('mage_users', JSON.stringify(db));
-                alert("✨ Signature recorded in storage matrix! Switching to link screen...");
-                window.location.reload();
-            } else {
-                // LOGIN PROCESS
-                if (!db[user] || db[user].pass !== pass) {
-                    alert("❌ The Cipher failed. Identity tag or validation password does not line up.");
-                    return;
-                }
-
-                const userSession = {
-                    username: user,
-                    rank: db[user].rank,
-                    power: db[user].power,
-                    hasLicense: db[user].hasLicense,
-                    isOwner: db[user].isOwner
-                };
-                sessionStorage.setItem('current_mage_session', JSON.stringify(userSession));
-                
-                alert(`Welcome back, ${user}. Access authorized.`);
-                window.location.href = "index.html";
-            }
+            });
         };
     </script>
 </body>
-</html>
 </html>
