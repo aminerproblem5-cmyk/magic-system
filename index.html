@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcane Hub - Order Management System</title>
+    <title>Arcane Hub - Shared Network Registry</title>
+    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -14,253 +15,105 @@
             --danger-color: #ff4d4d;
             --success-color: #2ed573;
         }
-
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Georgia', serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        header {
-            background: linear-gradient(to bottom, #11141a, var(--bg-color));
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #222;
-        }
-
-        .user-panel {
-            background: #1f2833;
-            padding: 10px 20px;
-            border-radius: 4px;
-            border: 1px solid #333;
-            color: #fff;
-            font-size: 0.9rem;
-        }
-
-        .logout-btn {
-            background: transparent;
-            border: 1px solid var(--danger-color);
-            color: var(--danger-color);
-            padding: 4px 10px;
-            margin-left: 10px;
-            cursor: pointer;
-            border-radius: 3px;
-        }
-
-        .main-grid {
-            max-width: 1200px;
-            width: 100%;
-            margin: 30px auto;
-            padding: 0 20px;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 30px;
-        }
-
-        @media (min-width: 900px) {
-            .main-grid { grid-template-columns: 1.1fr 1fr; }
-            .full-span { grid-column: span 2; }
-        }
-
-        .panel {
-            background: var(--panel-bg);
-            border: 1px solid #2d3748;
-            border-radius: 6px;
-            padding: 25px;
-        }
-
-        .navigation-box {
-            background-color: #1f2833;
-            border: 1px solid #333;
-            border-radius: 6px;
-            padding: 20px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        h2 {
-            color: var(--text-light);
-            font-size: 1.3rem;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #222;
-            padding-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* CARD ACTION CONTROLS */
-        .btn-action {
-            width: 100%;
-            background: transparent;
-            border: 1px solid var(--accent-color);
-            color: var(--accent-color);
-            padding: 14px;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 10px;
-            border-radius: 4px;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-        }
-
+        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background: linear-gradient(to bottom, #11141a, var(--bg-color)); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .user-panel { background: #1f2833; padding: 10px 20px; border-radius: 4px; border: 1px solid #333; color: #fff; font-size: 0.9rem; }
+        .logout-btn { background: transparent; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 4px 10px; margin-left: 10px; cursor: pointer; border-radius: 3px; }
+        .main-grid { max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr; gap: 30px; }
+        @media (min-width: 900px) { .main-grid { grid-template-columns: 1.1fr 1fr; } .full-span { grid-column: span 2; } }
+        .panel { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 25px; }
+        .navigation-box { background-color: #1f2833; border: 1px solid #333; border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 10px; }
+        h2 { color: var(--text-light); font-size: 1.3rem; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 8px; text-transform: uppercase; }
+        .btn-action { width: 100%; background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 14px; font-size: 1.1rem; text-transform: uppercase; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 4px; text-decoration: none; display: inline-block; text-align: center; }
         .btn-action:hover { background: rgba(69, 243, 255, 0.05); }
-
-        /* ADMINISTRATIVE MANAGEMENT */
-        .admin-zone {
-            background: rgba(69, 243, 255, 0.02);
-            border: 1px solid #233a42;
-            display: none; 
-        }
-
-        .promotion-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px;
-            background: #0b0c10;
-            border-radius: 4px;
-            margin-bottom: 10px;
-            border-left: 3px solid var(--accent-color);
-        }
-
-        .rank-select {
-            background: #151922;
-            color: #fff;
-            border: 1px solid #444;
-            padding: 6px;
-            border-radius: 4px;
-            margin-right: 10px;
-        }
-
-        .promo-btn {
-            background: var(--success-color);
-            color: #000;
-            border: none;
-            padding: 6px 12px;
-            font-weight: bold;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        /* TABLE VIEWPORT */
+        .admin-zone { background: rgba(69, 243, 255, 0.02); border: 1px solid #233a42; display: none; }
+        .promotion-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #0b0c10; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid var(--accent-color); }
+        .rank-select { background: #151922; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; margin-right: 10px; }
+        .promo-btn { background: var(--success-color); color: #000; border: none; padding: 6px 12px; font-weight: bold; border-radius: 3px; cursor: pointer; }
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; color: #666; font-size: 0.8rem; text-transform: uppercase; padding: 10px; border-bottom: 2px solid #222; }
         td { padding: 12px 10px; border-bottom: 1px solid #1a202c; color: #e2e8f0; }
-
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            color: #000;
-            background: #a4b0be;
-        }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: #000; }
         .rank-Initiate { background: #747d8c; color: #fff; }
         .rank-Acolyte { background: #ffa502; }
         .rank-Mage { background: #2ed573; }
         .rank-Archmage { background: #1e90ff; color: #fff; }
         .rank-Grandmaster { background: #ff4757; color: #fff; box-shadow: 0 0 10px rgba(255, 71, 87, 0.5); }
-
-        .infinite-text {
-            font-weight: bold;
-            color: #ff4500;
-            text-shadow: 0 0 8px rgba(255,69,0,0.6);
-            animation: pulse 1.5s infinite linear;
-        }
-        @keyframes pulse { 0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; } }
+        .infinite-text { font-weight: bold; color: #ff4500; text-shadow: 0 0 8px rgba(255,69,0,0.6); }
     </style>
 </head>
 <body>
 
     <header>
-        <h1 style="color: #fff; font-size: 1.5rem;">The Grand Arcanum Council</h1>
-        <div class="user-panel" id="userPanel">
-            Detecting local session presence...
-        </div>
+        <h1 style="color: #fff; font-size: 1.5rem;">The Shared Arcanum Council</h1>
+        <div class="user-panel" id="userPanel">Connecting to global leyline mesh...</div>
     </header>
 
     <div class="main-grid">
-
-        <!-- NEW WELCOME & NAVIGATION GATEWAY BOX -->
         <div class="navigation-box full-span">
-            <h2 style="border-bottom: none; margin-bottom: 5px;">Council Nexus Gate</h2>
-            <p style="color: #a4b0be; margin-bottom: 15px;">Welcome to the Magic Registry Hub. If you are a certified caster or an Overseer, verify your alignment below.</p>
+            <h2>Council Nexus Gate</h2>
+            <p style="color: #a4b0be; margin-bottom: 15px;">Global Sync Active. Register your status across multiple dimensions.</p>
             <a href="login.html" class="btn-action" style="border-color: var(--text-color); color: var(--text-color); max-width: 300px; margin: 0 auto; display: block;">Go to Login Vault</a>
         </div>
         
-        <!-- ADMIN AREA FOR OWNER AND LICENSED OVERSEERS -->
         <div class="panel admin-zone full-span" id="adminZone">
-            <h2 style="color: var(--accent-color);">Licenced Overseer Jurisdiction Panel</h2>
-            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #7f8c8d;">Your Rank-Up License gives you jurisdiction to promote or grant licenses to mages lower than your rank sequence.</p>
+            <h2 style="color: var(--accent-color);">Licensed Overseer Panel (Global Matrix)</h2>
             <div id="promotionRoster"></div>
         </div>
 
-        <!-- LEFT: TRIAL STAT AREA -->
         <div class="panel">
             <h2>Arcane Inscription Terminal</h2>
             <div id="trialArena">
-                <p style="margin-bottom: 15px;">You must log in to record scores into the system archives.</p>
-                <button class="btn-action" onclick="window.location.href='login.html'">Redirect to Login Vault</button>
+                <p>Log in to record sync parameters into the planetary lattice.</p>
             </div>
-            
             <div id="activeTrialControls" style="display: none; text-align: center;">
                 <div style="background:#0b0c10; padding:20px; border-radius:6px; margin-bottom:15px; border:1px dashed #333;">
-                    <div style="font-size:0.8rem; color:#555; text-transform:uppercase;">Registered Core Output</div>
-                    <div id="powerDisplay" style="font-size:2.5rem; font-weight:bold; font-family:monospace; margin:10px 0; color:#fff;">0 MP</div>
-                    <div id="ownerNotice" style="display:none; color:var(--accent-color); font-size:0.9rem; font-style:italic;">👑 Grandmaster protocols engaged. Cosmic stability absolute.</div>
+                    <div id="powerDisplay" style="font-size:2.5rem; font-weight:bold; color:#fff;">0 MP</div>
+                    <div id="ownerNotice" style="display:none; color:var(--accent-color);">👑 Grandmaster Authority Active</div>
                 </div>
                 <button id="actionBtn" class="btn-action">Run Channeling Ritual</button>
             </div>
         </div>
 
-        <!-- RIGHT: BOARD MATRIX -->
         <div class="panel">
-            <h2>High-Order Registry Matrix</h2>
+            <h2>Global Live Registry Board</h2>
             <table>
                 <thead>
-                    <tr>
-                        <th>Mage Identity</th>
-                        <th>Order Status Rank</th>
-                        <th>Power Capacity</th>
-                        <th>Lic.</th>
-                    </tr>
+                    <tr><th>Mage Identity</th><th>Rank</th><th>Power</th><th>Lic.</th></tr>
                 </thead>
                 <tbody id="matrixBody"></tbody>
             </table>
         </div>
-
     </div>
 
     <script>
         const rankWeights = { "Initiate": 1, "Acolyte": 2, "Mage": 3, "Archmage": 4, "Grandmaster": 5 };
+        
+        const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
+        const globalMages = gun.get('aminerproblem5_magic_system_v2');
 
         let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
-        let userDatabase = JSON.parse(localStorage.getItem('mage_users')) || {};
+        let networkUsers = {};
+
+        // Stream entire system network into the array instantly upon changes
+        globalMages.map().on(function(data, key) {
+            if (data && data.rank) {
+                networkUsers[key] = data;
+                buildRegistryMatrix();
+                buildAdminJurisdiction();
+            }
+        });
 
         function renderHeader() {
             const container = document.getElementById('userPanel');
             if (!session) {
-                container.innerHTML = `Guest Session &bull; <button class="logout-btn" style="border-color:var(--accent-color); color:var(--accent-color);" onclick="window.location.href='login.html'">Login</button>`;
+                container.innerHTML = `Guest Core &bull; <button class="logout-btn" onclick="window.location.href='login.html'">Login</button>`;
                 return;
             }
-
-            container.innerHTML = `
-                Linked Identity: <strong>${session.username}</strong> 
-                [<span style="color:var(--accent-color); font-weight:bold;">${userDatabase[session.username]?.rank || session.rank}</span>] 
-                <button class="logout-btn" onclick="terminateSession()">Disconnect</button>
-            `;
+            globalMages.get(session.username).once(function(user) {
+                container.innerHTML = `Linked: <strong>${session.username}</strong> [<span style="color:var(--accent-color);">${user?.rank || 'Initiate'}</span>] <button class="logout-btn" onclick="terminateSession()">Disconnect</button>`;
+            });
         }
 
         function terminateSession() {
@@ -272,30 +125,14 @@
             const tbody = document.getElementById('matrixBody');
             tbody.innerHTML = '';
 
-            let users = Object.keys(userDatabase).map(key => ({
-                username: key,
-                ...userDatabase[key]
-            }));
+            let sorted = Object.keys(networkUsers).map(k => ({ username: k, ...networkUsers[k] }));
+            sorted.sort((a,b) => b.power - a.power);
 
-            users.sort((a,b) => b.power - a.power);
-
-            if (users.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#555;">No records exist inside local network lines.</td></tr>`;
-                return;
-            }
-
-            users.forEach(u => {
-                const isInf = u.isOwner || u.rank === "Grandmaster";
-                const scoreField = isInf ? `<span class="infinite-text">∞ MP</span>` : `${u.power} MP`;
-                const licenseIcon = u.hasLicense ? `📜` : `❌`;
-
+            sorted.forEach(u => {
+                const isInf = u.rank === "Grandmaster";
+                const scoreField = isInf ? `<span class="infinite-text">∞ MP</span>` : `${u.power || 0} MP`;
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${escapeHTML(u.username)}</strong> ${u.isOwner ? '👑' : ''}</td>
-                    <td><span class="badge rank-${u.rank}">${u.rank}</span></td>
-                    <td>${scoreField}</td>
-                    <td style="text-align:center;">${licenseIcon}</td>
-                `;
+                tr.innerHTML = `<td><strong>${u.username}</strong></td><td><span class="badge rank-${u.rank}">${u.rank}</span></td><td>${scoreField}</td><td>${u.hasLicense ? '📜' : '❌'}</td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -305,99 +142,65 @@
             document.getElementById('trialArena').style.display = 'none';
             document.getElementById('activeTrialControls').style.display = 'block';
 
-            const activeUser = userDatabase[session.username];
-            const pDisplay = document.getElementById('powerDisplay');
-            const actionBtn = document.getElementById('actionBtn');
+            globalMages.get(session.username).once(function(activeUser) {
+                const pDisplay = document.getElementById('powerDisplay');
+                const actionBtn = document.getElementById('actionBtn');
 
-            if (activeUser?.isOwner || activeUser?.rank === "Grandmaster") {
-                pDisplay.innerHTML = `<span class="infinite-text">∞ MP</span>`;
-                document.getElementById('ownerNotice').style.display = 'block';
-                actionBtn.innerText = "Authority Configured";
-                actionBtn.disabled = true;
-                actionBtn.style.borderColor = '#444';
-                actionBtn.style.color = '#444';
-            } else {
-                pDisplay.innerText = `${activeUser?.power || 0} MP`;
-                actionBtn.onclick = executeSafeMockTrial;
-            }
-        }
-
-        function executeSafeMockTrial() {
-            const roll = Math.floor(Math.random() * 450) + 50;
-            userDatabase[session.username].power = roll;
-            localStorage.setItem('mage_users', JSON.stringify(userDatabase));
-            alert(`Ritual stabilized! Captured frequency: ${roll} MP.`);
-            window.location.reload();
+                if (activeUser?.rank === "Grandmaster") {
+                    pDisplay.innerHTML = `<span class="infinite-text">∞ MP</span>`;
+                    document.getElementById('ownerNotice').style.display = 'block';
+                    actionBtn.disabled = true;
+                } else {
+                    pDisplay.innerText = `${activeUser?.power || 0} MP`;
+                    actionBtn.onclick = function() {
+                        const roll = Math.floor(Math.random() * 450) + 50;
+                        globalMages.get(session.username).put({ power: roll });
+                        alert(`Synchronized score: ${roll} MP!`);
+                    };
+                }
+            });
         }
 
         function buildAdminJurisdiction() {
             if (!session) return;
-            const myUser = userDatabase[session.username];
-            
-            if (!myUser || !myUser.hasLicense) return;
+            globalMages.get(session.username).once(function(myUser) {
+                if (!myUser || !myUser.hasLicense) return;
+                document.getElementById('adminZone').style.display = 'block';
+                const rosterContainer = document.getElementById('promotionRoster');
+                rosterContainer.innerHTML = '';
 
-            document.getElementById('adminZone').style.display = 'block';
-            const rosterContainer = document.getElementById('promotionRoster');
-            rosterContainer.innerHTML = '';
+                const myWeight = rankWeights[myUser.rank] || 0;
 
-            const myWeight = rankWeights[myUser.rank] || 0;
-
-            Object.keys(userDatabase).forEach(targetName => {
-                if (targetName === session.username) return;
-
-                const targetUser = userDatabase[targetName];
-                const targetWeight = rankWeights[targetUser.rank] || 0;
-
-                if (myWeight > targetWeight) {
-                    const row = document.createElement('div');
-                    row.className = 'promotion-row';
-                    row.innerHTML = `
-                        <div>
-                            <strong>${escapeHTML(targetName)}</strong> 
-                            (Current Rank: <span style="color:var(--accent-color); font-weight:bold;">${targetUser.rank}</span>)
-                        </div>
-                        <div>
-                            <select id="rankSelect-${targetName}" class="rank-select">
-                                <option value="Initiate">Initiate</option>
-                                <option value="Acolyte">Acolyte</option>
-                                <option value="Mage">Mage</option>
-                                <option value="Archmage">Archmage</option>
-                            </select>
-                            <label style="display:inline-flex; font-size:0.8rem; margin-right:10px; color:#aaa;">
-                                <input type="checkbox" id="licCheck-${targetName}" ${targetUser.hasLicense ? 'checked' : ''} style="width:auto; margin-right:4px;"> Grant License
-                            </label>
-                            <button class="promo-btn" onclick="executePromotion('${targetName}')">Authorize</button>
-                        </div>
-                    `;
-                    rosterContainer.appendChild(row);
-                }
+                Object.keys(networkUsers).forEach(targetName => {
+                    if (targetName === session.username) return;
+                    const targetUser = networkUsers[targetName];
+                    if (myWeight > (rankWeights[targetUser.rank] || 0)) {
+                        const row = document.createElement('div');
+                        row.className = 'promotion-row';
+                        row.innerHTML = `
+                            <div><strong>${targetName}</strong> (${targetUser.rank})</div>
+                            <div>
+                                <select id="rankSelect-${targetName}" class="rank-select">
+                                    <option value="Initiate">Initiate</option><option value="Acolyte">Acolyte</option><option value="Mage">Mage</option><option value="Archmage">Archmage</option>
+                                </select>
+                                <input type="checkbox" id="licCheck-${targetName}" ${targetUser.hasLicense ? 'checked' : ''}> Grant Lic
+                                <button class="promo-btn" onclick="executePromotion('${targetName}')">Authorize</button>
+                            </div>`;
+                        rosterContainer.appendChild(row);
+                    }
+                });
             });
-
-            if (rosterContainer.children.length === 0) {
-                rosterContainer.innerHTML = `<div style="color:#666; font-style:italic; text-align:center; padding:10px;">No junior mages are currently inside your sphere of authority.</div>`;
-            }
         }
 
         function executePromotion(target) {
             const chosenRank = document.getElementById(`rankSelect-${target}`).value;
             const giveLicense = document.getElementById(`licCheck-${target}`).checked;
-
-            userDatabase[target].rank = chosenRank;
-            userDatabase[target].hasLicense = giveLicense;
-            
-            localStorage.setItem('mage_users', JSON.stringify(userDatabase));
-            alert(`Arcane validation success: ${target} updated successfully.`);
-            window.location.reload();
-        }
-
-        function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
+            globalMages.get(target).put({ rank: chosenRank, hasLicense: giveLicense });
+            alert(`Promoted ${target}!`);
         }
 
         renderHeader();
-        buildRegistryMatrix();
         buildActionTerminal();
-        buildAdminJurisdiction();
     </script>
 </body>
 </html>
