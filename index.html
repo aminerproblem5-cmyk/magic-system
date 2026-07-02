@@ -39,7 +39,6 @@
         th { text-align: left; color: #666; font-size: 0.8rem; text-transform: uppercase; padding: 10px; border-bottom: 2px solid #222; }
         td { padding: 12px 10px; border-bottom: 1px solid #1a202c; color: #e2e8f0; font-size: 0.95rem; }
         
-        /* MULTI-RANK SYSTEM VISUALS */
         .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: #000; text-transform: uppercase; }
         .rank-Novice { background: #747d8c; color: #fff; }
         .rank-Apprentice { background: #a4b0be; }
@@ -56,7 +55,6 @@
         
         .infinite-text { font-weight: bold; color: #ff4500; text-shadow: 0 0 8px rgba(255,69,0,0.6); }
 
-        /* CODEX DESIGN STYLES */
         .codex-list { list-style: none; }
         .codex-item { padding: 10px; border-bottom: 1px dashed #222; display: flex; justify-content: space-between; align-items: center; }
         .codex-item span { font-size: 0.85rem; font-family: monospace; color: #888; }
@@ -70,20 +68,24 @@
     </header>
 
     <div class="main-grid">
-    <div class="navigation-box full-span">
-    <h2>Council Nexus Gate</h2>
-    <p style="color: #a4b0be; margin-bottom: 15px;">Planetary Server Sync Status Active. Access your vaults and reference manifests below.</p>
-    <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; max-width: 600px; margin: 0 auto;">
-        <a href="login.html" class="btn-action" style="border-color: var(--text-color); color: var(--text-color); flex: 1; min-width: 200px; margin: 0; padding: 10px;">Go to Login Vault</a>
-        <a href="codex.html" class="btn-action" style="border-color: var(--accent-color); color: var(--accent-color); flex: 1; min-width: 200px; margin: 0; padding: 10px;">Open Library Codex</a>
-    </div>
-</div>
+        <!-- FIXED NAVIGATION PORTAL PANEL -->
+        <div class="navigation-box full-span">
+            <h2>Council Nexus Gate</h2>
+            <p style="color: #a4b0be; margin-bottom: 15px;">Planetary Server Sync Status Active. Access your core modules below.</p>
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; max-width: 800px; margin: 0 auto;">
+                <a href="login.html" class="btn-action" style="border-color: var(--text-color); color: var(--text-color); flex: 1; min-width: 180px; margin: 0; padding: 10px;">Login Vault</a>
+                <a href="chat.html" class="btn-action" style="border-color: var(--accent-color); color: var(--accent-color); flex: 1; min-width: 180px; margin: 0; padding: 10px;">Live Chat Crypt</a>
+                <a href="codex.html" class="btn-action" style="border-color: #9b59b6; color: #9b59b6; flex: 1; min-width: 180px; margin: 0; padding: 10px;">Library Codex</a>
+            </div>
+        </div>
         
+        <!-- PROMOTION PANEL -->
         <div class="panel admin-zone full-span" id="adminZone">
             <h2 style="color: var(--accent-color);">Licensed Overseer Decree Panel</h2>
             <div id="promotionRoster"></div>
         </div>
 
+        <!-- TRIAL ACTION CONTROLS -->
         <div class="panel">
             <h2>Arcane Inscription Terminal</h2>
             <div id="trialArena">
@@ -98,6 +100,7 @@
             </div>
         </div>
 
+        <!-- LIVE LEADERBOARD MATRIX -->
         <div class="panel">
             <h2>Global Live Registry Board</h2>
             <table>
@@ -108,6 +111,7 @@
             </table>
         </div>
 
+        <!-- THE ARCANUM CODEX MANUAL FILE -->
         <div class="panel full-span">
             <h2 style="color: #c5a880; border-color: #333;">The Grand Order Codex Manual</h2>
             <p style="font-size:0.9rem; color:#7f8c8d; margin-bottom:15px;">Official sequence chart outlining rank weights and regulatory promotion capacities inside the shared layout lines.</p>
@@ -184,7 +188,6 @@
                         const row = document.createElement('div');
                         row.className = 'promotion-row';
                         
-                        // Generate all options dynamically
                         let optionStrings = "";
                         Object.keys(rankWeights).forEach(rName => {
                             if (rankWeights[rName] < myWeight) {
