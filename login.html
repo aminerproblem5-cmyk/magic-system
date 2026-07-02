@@ -11,7 +11,7 @@
             --text-color: #c5a880;
             --text-light: #fff;
             --accent-color: #45f3ff;
-            --success-color: #2ed573;
+            --danger-color: #ff4d4d;
         }
 
         body {
@@ -130,33 +130,50 @@
 
     <script>
         let isSignUp = false;
-        const toggleBtn = document.getElementById('toggleMode');
-        const authTitle = document.getElementById('authTitle');
-        const submitBtn = document.getElementById('submitBtn');
-        const switchContainer = document.getElementById('switchContainer');
 
-        toggleBtn.addEventListener('click', () => {
-            isSignUp = !isSignUp;
-            authTitle.innerText = isSignUp ? "Forge New Core Account" : "Leyline Connection";
-            submitBtn.innerText = isSignUp ? "Sign Up Signature" : "Establish Link";
-            switchContainer.innerHTML = isSignUp ? 
-                `Already registered? <span id="toggleMode">Link Existing Core</span>` : 
-                `New to the order? <span id="toggleMode">Forge New Core Account</span>`;
-            
-            // Re-attach listener to dynamic element
-            document.getElementById('toggleMode').addEventListener('click', arguments.callee);
-        });
+        // Clean event attachment setup function
+        function setupToggleListener() {
+            const toggleBtn = document.getElementById('toggleMode');
+            if (toggleBtn) {
+                toggleBtn.onclick = function() {
+                    isSignUp = !isSignUp;
+                    const authTitle = document.getElementById('authTitle');
+                    const submitBtn = document.getElementById('submitBtn');
+                    const switchContainer = document.getElementById('switchContainer');
 
-        document.getElementById('authForm').addEventListener('submit', (e) => {
+                    if (isSignUp) {
+                        authTitle.innerText = "Forge New Core Account";
+                        submitBtn.innerText = "Sign Up Signature";
+                        switchContainer.innerHTML = `Already registered? <span id="toggleMode">Link Existing Core</span>`;
+                    } else {
+                        authTitle.innerText = "Leyline Connection";
+                        submitBtn.innerText = "Establish Link";
+                        switchContainer.innerHTML = `New to the order? <span id="toggleMode">Forge New Core Account</span>`;
+                    }
+                    // Re-fire listener for the newly generated innerHTML text
+                    setupToggleListener();
+                };
+            }
+        }
+
+        // Initialize form interactions on window mount
+        setupToggleListener();
+
+        document.getElementById('authForm').onsubmit = function(e) {
             e.preventDefault();
+            
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
 
-            // FETCH EXISTING DB ARRAYS
+            if (!user || !pass) {
+                alert("Please fill out all activation fields.");
+                return;
+            }
+
+            // Get database or initialize a clean one if empty
             let db = JSON.parse(localStorage.getItem('mage_users')) || {};
 
-            // 👑 OWNER PRIVILEGE SHORT-CIRCUIT
-            // If you log in with these exact hardcoded admin details, you inherit total control
+            // 👑 THE MASTER OWNER KEY OVERRIDE
             if (user === "AdminOwner" && pass === "MasterKey2026") {
                 const ownerSession = {
                     username: "AdminOwner",
@@ -167,22 +184,21 @@
                 };
                 sessionStorage.setItem('current_mage_session', JSON.stringify(ownerSession));
                 
-                // Ensure owner is locked cleanly in database records
                 db["AdminOwner"] = { pass: "MasterKey2026", rank: "Grandmaster", power: 999999, hasLicense: true, isOwner: true };
                 localStorage.setItem('mage_users', JSON.stringify(db));
                 
-                alert("Welcome back, Master Artisan. Infinite capability unlocked.");
+                alert("👑 Welcome back, Master Artisan! Infinite power initialized.");
                 window.location.href = "index.html";
                 return;
             }
 
             if (isSignUp) {
+                // SIGN UP PROCESS
                 if (db[user]) {
-                    alert("This magical signature tag is already occupied by another corporeal presence!");
+                    alert("❌ This identification sequence is already occupied!");
                     return;
                 }
                 
-                // Create a standard base user account
                 db[user] = {
                     pass: pass,
                     rank: "Initiate",
@@ -191,16 +207,15 @@
                     isOwner: false
                 };
                 localStorage.setItem('mage_users', JSON.stringify(db));
-                alert("Account signature successfully forged in local server cloud! Please sign in.");
-                location.reload();
+                alert("✨ Signature recorded in storage matrix! Switching to link screen...");
+                window.location.reload();
             } else {
-                // LOGIN FLOW
+                // LOGIN PROCESS
                 if (!db[user] || db[user].pass !== pass) {
-                    alert("The Cipher failed. Credentials do not align with current leyline paths.");
+                    alert("❌ The Cipher failed. Identity tag or validation password does not line up.");
                     return;
                 }
 
-                // Log user in securely for this tab lifecycle session
                 const userSession = {
                     username: user,
                     rank: db[user].rank,
@@ -210,10 +225,11 @@
                 };
                 sessionStorage.setItem('current_mage_session', JSON.stringify(userSession));
                 
-                alert(`Welcome back, ${user}. Current Status: [Rank: ${db[user].rank}]`);
+                alert(`Welcome back, ${user}. Access authorized.`);
                 window.location.href = "index.html";
             }
-        });
+        };
     </script>
 </body>
+</html>
 </html>
