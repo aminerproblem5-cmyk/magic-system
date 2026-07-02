@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Arcanum Council - Live Crypt Chat</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --panel-bg: #151922;
+            --text-color: #c5a880;
+            --text-light: #fff;
+            --accent-color: #45f3ff;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; height: 100vh; }
+        
+        header { background: #11141a; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .back-btn { text-decoration: none; color: var(--accent-color); border: 1px solid var(--accent-color); padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; }
+        
+        .chat-container { max-width: 900px; width: 100%; margin: 20px auto; background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 8px; display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+        
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        
+        .message-row { background: #0b0c10; padding: 12px; border-radius: 6px; border-left: 3px solid #333; line-height: 1.4; }
+        .msg-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; font-size: 0.85rem; }
+        .msg-user { font-weight: bold; color: #fff; }
+        .msg-text { color: #e2e8f0; font-family: sans-serif; font-size: 0.95rem; word-break: break-word; }
+        
+        .badge { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #000; text-transform: uppercase; }
+        .rank-Novice { background: #747d8c; color: #fff; }
+        .rank-Apprentice { background: #a4b0be; }
+        .rank-Disciple { background: #ced6e0; }
+        .rank-Elementalist { background: #ffa502; }
+        .rank-Evoker { background: #ff7f50; color: #fff; }
+        .rank-Arcanist { background: #ff6b81; color: #fff; }
+        .rank-Sorcerer { background: #2ed573; }
+        .rank-Battlemage { background: #1e90ff; color: #fff; }
+        .rank-Archmage { background: #9b59b6; color: #fff; }
+        .rank-Paragon { background: #f1c40f; box-shadow: 0 0 4px #f1c40f; }
+        .rank-Demigod { background: #e67e22; color: #fff; box-shadow: 0 0 6px #e67e22; }
+        .rank-Grandmaster { background: #ff4757; color: #fff; box-shadow: 0 0 8px #ff4757; }
+
+        .chat-input-area { padding: 15px; background: #11141a; border-top: 1px solid #222; display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; background: #0b0c10; border: 1px solid #333; padding: 12px; border-radius: 4px; color: #fff; font-size: 1rem; }
+        input[type="text"]:focus { outline: none; border-color: var(--accent-color); }
+        .send-btn { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 0 20px; font-weight: bold; text-transform: uppercase; border-radius: 4px; cursor: pointer; }
+        .send-btn:hover { background: var(--accent-color); color: #000; }
+        
+        .locked-notice { padding: 15px; text-align: center; color: #ff4d4d; font-style: italic; background: rgba(255,77,77,0.05); }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 style="color: #fff; font-size: 1.2rem; letter-spacing: 1px;">Council Communication Crypt</h1>
+        <a href="index.html" class="back-btn">← Main Board</a>
+    </header>
+
+    <div class="chat-container">
+        <!-- MESSAGES SCREEN -->
+        <div class="chat-messages" id="chatBox">
+            <p style="text-align:center; color:#555; font-style:italic; margin-top:20px;">Decrypting server communications...</p>
+        </div>
+
+        <!-- INPUT ACTION PANEL -->
+        <div id="inputSection">
+            <div class="locked-notice">You must be logged into a valid Mage identity profile to transmit messages.</div>
+        </div>
+    </div>
+
+    <script>
+        const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com";
+        const session = JSON.parse(sessionStorage.getItem('current_mage_session'));
+        let userDatabaseCache = {};
+
+        // 1. Establish layout inputs if validated
+        function initInterface() {
+            const inputSection = document.getElementById('inputSection');
+            if (session && session.username) {
+                inputSection.innerHTML = `
+                    <form id="chatForm" class="chat-input-area">
+                        <input type="text" id="msgInput" placeholder="Cast message into the dynamic leyline..." required autocomplete="off" maxlength="250">
+                        <button type="submit" class="send-btn">Transmit</button>
+                    </form>
+                `;
+                document.getElementById('chatForm').onsubmit = sendMessage;
+            }
+        }
+
+        // 2. Fetch ranks and feed message boards
+        async function fetchMessages() {
+            try {
+                // Fetch user ranks for live badges
+                const usersRes = await fetch(`${dbURL}/mages.json`);
+                userDatabaseCache = await usersRes.json() || {};
+
+                // Fetch chat records
+                const chatRes = await fetch(`${dbURL}/chat.json`);
+                const chatData = await chatRes.json() || {};
+
+                renderMessages(chatData);
+            } catch (err) {
+                console.error("Crypt read block:", err);
+            }
+        }
+
+        function renderMessages(chatData) {
+            const chatBox = document.getElementById('chatBox');
+            const atBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 100;
+            
+            chatBox.innerHTML = '';
+            
+            const keys = Object.keys(chatData);
+            if (keys.length === 0) {
+                chatBox.innerHTML = `<p style="text-align:center; color:#555; font-style:italic; margin-top:20px;">The scroll is blank. No messages have been transmitted yet.</p>`;
+                return;
+            }
+
+            // Take the last 40 entries to keep it snappy
+            const boundedKeys = keys.slice(-40);
+
+            boundedKeys.forEach(k => {
+                const msg = chatData[k];
+                const targetProfile = userDatabaseCache[msg.user] || { rank: "Novice" };
+                const currentRank = targetProfile.rank || "Novice";
+
+                const row = document.createElement('div');
+                row.className = 'message-row';
+                if (currentRank === "Grandmaster") row.style.borderLeftColor = 'var(--accent-color)';
+
+                row.innerHTML = `
+                    <div class="msg-meta">
+                        <span class="msg-user">${msg.user}</span>
+                        <span class="badge rank-${currentRank}">${currentRank}</span>
+                    </div>
+                    <div class="msg-text"></div>
+                `;
+                
+                // Safe text validation deployment to prevent code injections
+                row.querySelector('.msg-text').innerText = msg.text;
+                chatBox.appendChild(row);
+            });
+
+            if (atBottom) {
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        async function sendMessage(e) {
+            e.preventDefault();
+            const input = document.getElementById('msgInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const payload = {
+                user: session.username,
+                text: text,
+                timestamp: Date.now()
+            };
+
+            input.value = '';
+            
+            await fetch(`${dbURL}/chat.json`, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+
+            fetchMessages();
+        }
+
+        initInterface();
+        fetchMessages();
+        // Continuous line polling sequence every 3 seconds for instant text syncs
+        setInterval(fetchMessages, 3000);
+    </script>
+</body>
+</html>
