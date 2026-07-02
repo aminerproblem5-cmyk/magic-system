@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcane Hub - The Five Great Mancies</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --panel-bg: #1f2833;
+            --text-color: #c5a880;
+            --text-light: #fff;
+            --accent-color: #45f3ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+            background: radial-gradient(circle, #1a233a 0%, #0b0c10 100%);
+            border-bottom: 2px solid #222;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            color: var(--text-light);
+            letter-spacing: 3px;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(69, 243, 255, 0.2);
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            font-style: italic;
+            color: #888;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .main-content {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            flex: 1;
+        }
+
+        .intro-box {
+            background-color: var(--panel-bg);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+        }
+
+        .intro-box h2 {
+            color: var(--text-light);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .intro-box p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            color: #a4b0be;
+        }
+
+        /* Portal Button to Codex */
+        .portal-btn {
+            display: inline-block;
+            background: transparent;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-family: sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 15px 40px;
+            border: 2px solid var(--text-color);
+            border-radius: 4px;
+            transition: all 0.4s ease;
+            box-shadow: 0 0 10px rgba(197, 168, 128, 0.1);
+        }
+
+        .portal-btn:hover {
+            background: var(--text-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 25px rgba(197, 168, 128, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .quick-lore {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .quick-lore { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 2.5rem; }
+        }
+
+        .lore-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid #222;
+            padding: 20px;
+            border-radius: 6px;
+        }
+
+        .lore-card h3 {
+            color: var(--text-light);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #555;
+            font-size: 0.9rem;
+            border-top: 1px solid #222;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero">
+        <h1>The Grand Arcanum</h1>
+        <p>Enter the world of the five fundamental forces and the stones that bind them.</p>
+    </header>
+
+    <div class="main-content">
+        <div class="intro-box">
+            <h2>Welcome, Initiate</h2>
+            <p>
+                Reality is divided into five absolute pillars: Pyromancy, Aeromancy, Necromancy, Geomancy, and Hydromancy. Without a proper conduit, these cosmic forces are completely unreachable to human hands. Only by utilizing precisely carved Focus Slates can a mage open the gateway to the elements.
+            </p>
+            <a href="codex.html" class="portal-btn">Open the Element Codex</a>
+        </div>
+
+        <div class="quick-lore">
+            <div class="lore-card">
+                <h3>The Focus Slates</h3>
+                <p>Every spell requires a stone precisely 2.5" x 3.5". These slates anchor elemental energy. Lose your stone, and you lose your magic.</p>
+            </div>
+            <div class="lore-card">
+                <h3>The 45 Branches</h3>
+                <p>Each of the 5 Great Mancies cascades downwards into a complex tree of sub-elements and hyper-specific micro-sub arts.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Master Codex Arcana &bull; Constructed for Worldbuilding Systems</p>
+    </footer>
+
+</body>
+</html>
