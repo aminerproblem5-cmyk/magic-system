@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcane Hub - Live Network Leaderboard</title>
+    <title>The Grand Arcanum Council & Codex Matrix</title>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -19,57 +19,77 @@
         header { background: linear-gradient(to bottom, #11141a, var(--bg-color)); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
         .user-panel { background: #1f2833; padding: 10px 20px; border-radius: 4px; border: 1px solid #333; color: #fff; font-size: 0.9rem; }
         .logout-btn { background: transparent; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 4px 10px; margin-left: 10px; cursor: pointer; border-radius: 3px; }
-        .main-grid { max-width: 1200px; width: 100%; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr; gap: 30px; }
-        @media (min-width: 900px) { .main-grid { grid-template-columns: 1.1fr 1fr; } .full-span { grid-column: span 2; } }
-        .panel { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 25px; }
-        .navigation-box { background-color: #1f2833; border: 1px solid #333; border-radius: 6px; padding: 20px; text-align: center; margin-bottom: 10px; }
-        h2 { color: var(--text-light); font-size: 1.3rem; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 8px; text-transform: uppercase; }
+        
+        .main-grid { max-width: 1300px; width: 100%; margin: 25px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr; gap: 25px; }
+        @media (min-width: 950px) { .main-grid { grid-template-columns: 1.2fr 1fr; } .full-span { grid-column: span 2; } }
+        
+        .panel { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 25px; height: fit-content; }
+        .navigation-box { background-color: #1f2833; border: 1px solid #333; border-radius: 6px; padding: 20px; text-align: center; }
+        h2 { color: var(--text-light); font-size: 1.3rem; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        
         .btn-action { width: 100%; background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 14px; font-size: 1.1rem; text-transform: uppercase; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 4px; text-decoration: none; display: inline-block; text-align: center; }
         .btn-action:hover { background: rgba(69, 243, 255, 0.05); }
+        
         .admin-zone { background: rgba(69, 243, 255, 0.02); border: 1px solid #233a42; display: none; }
-        .promotion-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #0b0c10; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid var(--accent-color); }
-        .rank-select { background: #151922; color: #fff; border: 1px solid #444; padding: 6px; border-radius: 4px; margin-right: 10px; }
-        .promo-btn { background: var(--success-color); color: #000; border: none; padding: 6px 12px; font-weight: bold; border-radius: 3px; cursor: pointer; }
+        .promotion-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 12px; background: #0b0c10; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid var(--accent-color); gap: 10px; }
+        .rank-select { background: #151922; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; margin-right: 10px; }
+        .promo-btn { background: var(--success-color); color: #000; border: none; padding: 8px 14px; font-weight: bold; border-radius: 3px; cursor: pointer; }
+        
         table { width: 100%; border-collapse: collapse; }
         th { text-align: left; color: #666; font-size: 0.8rem; text-transform: uppercase; padding: 10px; border-bottom: 2px solid #222; }
-        td { padding: 12px 10px; border-bottom: 1px solid #1a202c; color: #e2e8f0; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: #000; }
-        .rank-Initiate { background: #747d8c; color: #fff; }
-        .rank-Acolyte { background: #ffa502; }
-        .rank-Mage { background: #2ed573; }
-        .rank-Archmage { background: #1e90ff; color: #fff; }
-        .rank-Grandmaster { background: #ff4757; color: #fff; box-shadow: 0 0 10px rgba(255, 71, 87, 0.5); }
+        td { padding: 12px 10px; border-bottom: 1px solid #1a202c; color: #e2e8f0; font-size: 0.95rem; }
+        
+        /* MULTI-RANK SYSTEM VISUALS */
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: #000; text-transform: uppercase; }
+        .rank-Novice { background: #747d8c; color: #fff; }
+        .rank-Apprentice { background: #a4b0be; }
+        .rank-Disciple { background: #ced6e0; }
+        .rank-Elementalist { background: #ffa502; }
+        .rank-Evoker { background: #ff7f50; color: #fff; }
+        .rank-Arcanist { background: #ff6b81; color: #fff; }
+        .rank-Sorcerer { background: #2ed573; }
+        .rank-Battlemage { background: #1e90ff; color: #fff; }
+        .rank-Archmage { background: #9b59b6; color: #fff; }
+        .rank-Paragon { background: #f1c40f; box-shadow: 0 0 6px #f1c40f; }
+        .rank-Demigod { background: #e67e22; color: #fff; box-shadow: 0 0 10px #e67e22; }
+        .rank-Grandmaster { background: #ff4757; color: #fff; box-shadow: 0 0 12px #ff4757; font-weight: 900; }
+        
         .infinite-text { font-weight: bold; color: #ff4500; text-shadow: 0 0 8px rgba(255,69,0,0.6); }
+
+        /* CODEX DESIGN STYLES */
+        .codex-list { list-style: none; }
+        .codex-item { padding: 10px; border-bottom: 1px dashed #222; display: flex; justify-content: space-between; align-items: center; }
+        .codex-item span { font-size: 0.85rem; font-family: monospace; color: #888; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1 style="color: #fff; font-size: 1.5rem;">The Shared Arcanum Council</h1>
-        <div class="user-panel" id="userPanel">Connecting to global network...</div>
+        <h1 style="color: #fff; font-size: 1.4rem; letter-spacing: 1px;">The Shared Arcanum Council</h1>
+        <div class="user-panel" id="userPanel">Syncing lines...</div>
     </header>
 
     <div class="main-grid">
         <div class="navigation-box full-span">
             <h2>Council Nexus Gate</h2>
-            <p style="color: #a4b0be; margin-bottom: 15px;">Live Cloud Sync Active. Compete globally with your friends.</p>
-            <a href="login.html" class="btn-action" style="border-color: var(--text-color); color: var(--text-color); max-width: 300px; margin: 0 auto; display: block;">Go to Login Vault</a>
+            <p style="color: #a4b0be; margin-bottom: 12px;">Planetary Server Sync Status Active. View user updates below.</p>
+            <a href="login.html" class="btn-action" style="border-color: var(--text-color); color: var(--text-color); max-width: 260px; margin: 0 auto; display: block; padding: 10px;">Go to Login Vault</a>
         </div>
         
         <div class="panel admin-zone full-span" id="adminZone">
-            <h2 style="color: var(--accent-color);">Licensed Overseer Panel</h2>
+            <h2 style="color: var(--accent-color);">Licensed Overseer Decree Panel</h2>
             <div id="promotionRoster"></div>
         </div>
 
         <div class="panel">
             <h2>Arcane Inscription Terminal</h2>
             <div id="trialArena">
-                <p>Log in to record scores into the planetary network.</p>
+                <p>Verify your core sequence within the Login Vault to upload power configurations.</p>
             </div>
             <div id="activeTrialControls" style="display: none; text-align: center;">
                 <div style="background:#0b0c10; padding:20px; border-radius:6px; margin-bottom:15px; border:1px dashed #333;">
                     <div id="powerDisplay" style="font-size:2.5rem; font-weight:bold; color:#fff;">0 MP</div>
-                    <div id="ownerNotice" style="display:none; color:var(--accent-color);">👑 Grandmaster Authority Active</div>
+                    <div id="ownerNotice" style="display:none; color:var(--accent-color); font-weight:bold;">👑 Owner Grandmaster Core Active</div>
                 </div>
                 <button id="actionBtn" class="btn-action">Run Channeling Ritual</button>
             </div>
@@ -79,19 +99,43 @@
             <h2>Global Live Registry Board</h2>
             <table>
                 <thead>
-                    <tr><th>Mage Identity</th><th>Rank</th><th>Power</th><th>Lic.</th></tr>
+                    <tr><th>Mage Identity</th><th>Order Status Rank</th><th>Power Capacity</th><th>Lic.</th></tr>
                 </thead>
                 <tbody id="matrixBody"></tbody>
             </table>
         </div>
+
+        <div class="panel full-span">
+            <h2 style="color: #c5a880; border-color: #333;">The Grand Order Codex Manual</h2>
+            <p style="font-size:0.9rem; color:#7f8c8d; margin-bottom:15px;">Official sequence chart outlining rank weights and regulatory promotion capacities inside the shared layout lines.</p>
+            <ul class="codex-list">
+                <li class="codex-item"><strong>Grandmaster [Owner Level]</strong> <span style="color:var(--danger-color)">Absolute Override Authority (∞ MP Limit)</span></li>
+                <li class="codex-item"><strong>Demigod [Council Sub-Rank II]</strong> <span>Hierarchy Value: Tier 11 &bull; Grants Licenses</span></li>
+                <li class="codex-item"><strong>Paragon [Council Sub-Rank I]</strong> <span>Hierarchy Value: Tier 10 &bull; Grants Licenses</span></li>
+                <li class="codex-item"><strong>Archmage [Mastery Sub-Rank III]</strong> <span>Hierarchy Value: Tier 9</span></li>
+                <li class="codex-item"><strong>Battlemage [Mastery Sub-Rank II]</strong> <span>Hierarchy Value: Tier 8</span></li>
+                <li class="codex-item"><strong>Sorcerer [Mastery Sub-Rank I]</strong> <span>Hierarchy Value: Tier 7</span></li>
+                <li class="codex-item"><strong>Arcanist [Adept Sub-Rank III]</strong> <span>Hierarchy Value: Tier 6</span></li>
+                <li class="codex-item"><strong>Evoker [Adept Sub-Rank II]</strong> <span>Hierarchy Value: Tier 5</span></li>
+                <li class="codex-item"><strong>Elementalist [Adept Sub-Rank I]</strong> <span>Hierarchy Value: Tier 4</span></li>
+                <li class="codex-item"><strong>Disciple [Initiate Sub-Rank III]</strong> <span>Hierarchy Value: Tier 3</span></li>
+                <li class="codex-item"><strong>Apprentice [Initiate Sub-Rank II]</strong> <span>Hierarchy Value: Tier 2</span></li>
+                <li class="codex-item"><strong>Novice [Initiate Sub-Rank I]</strong> <span>Hierarchy Value: Tier 1 &bull; Starting Base Line</span></li>
+            </ul>
+        </div>
     </div>
 
     <script>
-        const rankWeights = { "Initiate": 1, "Acolyte": 2, "Mage": 3, "Archmage": 4, "Grandmaster": 5 };
-        // YOUR EXCLUSIVE PRIVATE FIREBASE LINK
+        const rankWeights = { 
+            "Novice": 1, "Apprentice": 2, "Disciple": 3,
+            "Elementalist": 4, "Evoker": 5, "Arcanist": 6,
+            "Sorcerer": 7, "Battlemage": 8, "Archmage": 9,
+            "Paragon": 10, "Demigod": 11, "Grandmaster": 12 
+        };
+        
         const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
-
         let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
+        let isEditingPromotion = false;
 
         async function syncNetworkData() {
             try {
@@ -99,9 +143,11 @@
                 const networkUsers = await res.json() || {};
                 
                 buildRegistryMatrix(networkUsers);
-                buildHeaderAndAdmin(networkUsers);
+                if (!isEditingPromotion) {
+                    buildHeaderAndAdmin(networkUsers);
+                }
             } catch (e) {
-                console.error("Sync stall", e);
+                console.error("Sync link hold...", e);
             }
         }
 
@@ -123,25 +169,42 @@
                 rosterContainer.innerHTML = '';
 
                 const myWeight = rankWeights[myUser.rank] || 0;
+                let targetsAvailable = false;
 
                 Object.keys(networkUsers).forEach(targetName => {
                     if (targetName === session.username) return;
                     const targetUser = networkUsers[targetName];
-                    if (myWeight > (rankWeights[targetUser.rank] || 0)) {
+                    const targetWeight = rankWeights[targetUser.rank] || 0;
+
+                    if (myWeight > targetWeight) {
+                        targetsAvailable = true;
                         const row = document.createElement('div');
                         row.className = 'promotion-row';
+                        
+                        // Generate all options dynamically
+                        let optionStrings = "";
+                        Object.keys(rankWeights).forEach(rName => {
+                            if (rankWeights[rName] < myWeight) {
+                                optionStrings += `<option value="${rName}" ${targetUser.rank === rName ? 'selected' : ''}>${rName}</option>`;
+                            }
+                        });
+
                         row.innerHTML = `
-                            <div><strong>${targetName}</strong> (${targetUser.rank})</div>
+                            <div><strong>${targetName}</strong> (<span style="color:var(--accent-color)">${targetUser.rank}</span>)</div>
                             <div>
-                                <select id="rankSelect-${targetName}" class="rank-select">
-                                    <option value="Initiate">Initiate</option><option value="Acolyte">Acolyte</option><option value="Mage">Mage</option><option value="Archmage">Archmage</option>
+                                <select id="rankSelect-${targetName}" class="rank-select" onfocus="isEditingPromotion=true" onblur="setTimeout(()=>isEditingPromotion=false, 2000)">
+                                    ${optionStrings}
                                 </select>
-                                <input type="checkbox" id="licCheck-${targetName}" ${targetUser.hasLicense ? 'checked' : ''}> Grant Lic
+                                <label style="margin-right:15px; font-size:0.85rem;"><input type="checkbox" id="licCheck-${targetName}" ${targetUser.hasLicense ? 'checked' : ''}> Grant License</label>
                                 <button class="promo-btn" onclick="executePromotion('${targetName}')">Authorize</button>
                             </div>`;
                         rosterContainer.appendChild(row);
                     }
                 });
+
+                if (!targetsAvailable) {
+                    rosterContainer.innerHTML = `<p style="font-style:italic; color:#555; text-align:center;">No subordinate sorcerers are currently configured beneath your tier rating.</p>`;
+                }
             }
         }
 
@@ -155,13 +218,13 @@
             tbody.innerHTML = '';
 
             let sorted = Object.keys(networkUsers).map(k => ({ username: k, ...networkUsers[k] }));
-            sorted.sort((a,b) => b.power - a.power);
+            sorted.sort((a,b) => (rankWeights[b.rank] || 0) - (rankWeights[a.rank] || 0) || b.power - a.power);
 
             sorted.forEach(u => {
                 const isInf = u.rank === "Grandmaster";
                 const scoreField = isInf ? `<span class="infinite-text">∞ MP</span>` : `${u.power || 0} MP`;
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td><strong>${u.username}</strong></td><td><span class="badge rank-${u.rank}">${u.rank}</span></td><td>${scoreField}</td><td>${u.hasLicense ? '📜' : '❌'}</td>`;
+                tr.innerHTML = `<td><strong>${u.username}</strong> ${isInf?'👑':''}</td><td><span class="badge rank-${u.rank}">${u.rank}</span></td><td>${scoreField}</td><td>${u.hasLicense ? '📜' : '❌'}</td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -178,28 +241,27 @@
                 pDisplay.innerHTML = `<span class="infinite-text">∞ MP</span>`;
                 document.getElementById('ownerNotice').style.display = 'block';
                 actionBtn.disabled = true;
+                actionBtn.innerText = "Absolute Authority Sealed";
             } else {
                 actionBtn.onclick = async function() {
-                    const roll = Math.floor(Math.random() * 450) + 50;
+                    const roll = Math.floor(Math.random() * 850) + 150;
                     pDisplay.innerText = `${roll} MP`;
-                    
-                    await fetch(`${dbURL}/${session.username}/power.json`, {
-                        method: 'PUT',
-                        body: JSON.stringify(roll)
-                    });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(roll) });
                     syncNetworkData();
                 };
             }
         }
 
         async function executePromotion(target) {
+            isEditingPromotion = true; 
             const chosenRank = document.getElementById(`rankSelect-${target}`).value;
             const giveLicense = document.getElementById(`licCheck-${target}`).checked;
             
             await fetch(`${dbURL}/${target}/rank.json`, { method: 'PUT', body: JSON.stringify(chosenRank) });
             await fetch(`${dbURL}/${target}/hasLicense.json`, { method: 'PUT', body: JSON.stringify(giveLicense) });
             
-            alert(`Promoted ${target}!`);
+            alert(`Jurisdiction record updated successfully for ${target}!`);
+            isEditingPromotion = false;
             syncNetworkData();
         }
 
