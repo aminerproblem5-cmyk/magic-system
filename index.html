@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcane Hub - Shared Network Registry</title>
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+    <title>Arcane Hub - Live Network Leaderboard</title>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -16,7 +15,7 @@
             --success-color: #2ed573;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; display: flex; flex-direction: column; min-height: 100vh; }
+        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; }
         header { background: linear-gradient(to bottom, #11141a, var(--bg-color)); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
         .user-panel { background: #1f2833; padding: 10px 20px; border-radius: 4px; border: 1px solid #333; color: #fff; font-size: 0.9rem; }
         .logout-btn { background: transparent; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 4px 10px; margin-left: 10px; cursor: pointer; border-radius: 3px; }
@@ -47,25 +46,25 @@
 
     <header>
         <h1 style="color: #fff; font-size: 1.5rem;">The Shared Arcanum Council</h1>
-        <div class="user-panel" id="userPanel">Connecting to global leyline mesh...</div>
+        <div class="user-panel" id="userPanel">Connecting to global network...</div>
     </header>
 
     <div class="main-grid">
         <div class="navigation-box full-span">
             <h2>Council Nexus Gate</h2>
-            <p style="color: #a4b0be; margin-bottom: 15px;">Global Sync Active. Register your status across multiple dimensions.</p>
+            <p style="color: #a4b0be; margin-bottom: 15px;">Live Cloud Sync Active. Compete globally with your friends.</p>
             <a href="login.html" class="btn-action" style="border-color: var(--text-color); color: var(--text-color); max-width: 300px; margin: 0 auto; display: block;">Go to Login Vault</a>
         </div>
         
         <div class="panel admin-zone full-span" id="adminZone">
-            <h2 style="color: var(--accent-color);">Licensed Overseer Panel (Global Matrix)</h2>
+            <h2 style="color: var(--accent-color);">Licensed Overseer Panel</h2>
             <div id="promotionRoster"></div>
         </div>
 
         <div class="panel">
             <h2>Arcane Inscription Terminal</h2>
             <div id="trialArena">
-                <p>Log in to record sync parameters into the planetary lattice.</p>
+                <p>Log in to record scores into the planetary network.</p>
             </div>
             <div id="activeTrialControls" style="display: none; text-align: center;">
                 <div style="background:#0b0c10; padding:20px; border-radius:6px; margin-bottom:15px; border:1px dashed #333;">
@@ -89,82 +88,36 @@
 
     <script>
         const rankWeights = { "Initiate": 1, "Acolyte": 2, "Mage": 3, "Archmage": 4, "Grandmaster": 5 };
-        
-        const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
-        const globalMages = gun.get('aminerproblem5_magic_system_v2');
+        // YOUR EXCLUSIVE PRIVATE FIREBASE LINK
+        const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
 
         let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
-        let networkUsers = {};
 
-        // Stream entire system network into the array instantly upon changes
-        globalMages.map().on(function(data, key) {
-            if (data && data.rank) {
-                networkUsers[key] = data;
-                buildRegistryMatrix();
-                buildAdminJurisdiction();
+        async function syncNetworkData() {
+            try {
+                const res = await fetch(`${dbURL}.json`);
+                const networkUsers = await res.json() || {};
+                
+                buildRegistryMatrix(networkUsers);
+                buildHeaderAndAdmin(networkUsers);
+            } catch (e) {
+                console.error("Sync stall", e);
             }
-        });
+        }
 
-        function renderHeader() {
+        function buildHeaderAndAdmin(networkUsers) {
             const container = document.getElementById('userPanel');
             if (!session) {
                 container.innerHTML = `Guest Core &bull; <button class="logout-btn" onclick="window.location.href='login.html'">Login</button>`;
                 return;
             }
-            globalMages.get(session.username).once(function(user) {
-                container.innerHTML = `Linked: <strong>${session.username}</strong> [<span style="color:var(--accent-color);">${user?.rank || 'Initiate'}</span>] <button class="logout-btn" onclick="terminateSession()">Disconnect</button>`;
-            });
-        }
 
-        function terminateSession() {
-            sessionStorage.removeItem('current_mage_session');
-            window.location.reload();
-        }
+            const myUser = networkUsers[session.username];
+            if (!myUser) return;
 
-        function buildRegistryMatrix() {
-            const tbody = document.getElementById('matrixBody');
-            tbody.innerHTML = '';
+            container.innerHTML = `Linked: <strong>${session.username}</strong> [<span style="color:var(--accent-color);">${myUser.rank}</span>] <button class="logout-btn" onclick="terminateSession()">Disconnect</button>`;
 
-            let sorted = Object.keys(networkUsers).map(k => ({ username: k, ...networkUsers[k] }));
-            sorted.sort((a,b) => b.power - a.power);
-
-            sorted.forEach(u => {
-                const isInf = u.rank === "Grandmaster";
-                const scoreField = isInf ? `<span class="infinite-text">∞ MP</span>` : `${u.power || 0} MP`;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td><strong>${u.username}</strong></td><td><span class="badge rank-${u.rank}">${u.rank}</span></td><td>${scoreField}</td><td>${u.hasLicense ? '📜' : '❌'}</td>`;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function buildActionTerminal() {
-            if (!session) return;
-            document.getElementById('trialArena').style.display = 'none';
-            document.getElementById('activeTrialControls').style.display = 'block';
-
-            globalMages.get(session.username).once(function(activeUser) {
-                const pDisplay = document.getElementById('powerDisplay');
-                const actionBtn = document.getElementById('actionBtn');
-
-                if (activeUser?.rank === "Grandmaster") {
-                    pDisplay.innerHTML = `<span class="infinite-text">∞ MP</span>`;
-                    document.getElementById('ownerNotice').style.display = 'block';
-                    actionBtn.disabled = true;
-                } else {
-                    pDisplay.innerText = `${activeUser?.power || 0} MP`;
-                    actionBtn.onclick = function() {
-                        const roll = Math.floor(Math.random() * 450) + 50;
-                        globalMages.get(session.username).put({ power: roll });
-                        alert(`Synchronized score: ${roll} MP!`);
-                    };
-                }
-            });
-        }
-
-        function buildAdminJurisdiction() {
-            if (!session) return;
-            globalMages.get(session.username).once(function(myUser) {
-                if (!myUser || !myUser.hasLicense) return;
+            if (myUser.hasLicense) {
                 document.getElementById('adminZone').style.display = 'block';
                 const rosterContainer = document.getElementById('promotionRoster');
                 rosterContainer.innerHTML = '';
@@ -189,18 +142,70 @@
                         rosterContainer.appendChild(row);
                     }
                 });
+            }
+        }
+
+        function terminateSession() {
+            sessionStorage.removeItem('current_mage_session');
+            window.location.reload();
+        }
+
+        function buildRegistryMatrix(networkUsers) {
+            const tbody = document.getElementById('matrixBody');
+            tbody.innerHTML = '';
+
+            let sorted = Object.keys(networkUsers).map(k => ({ username: k, ...networkUsers[k] }));
+            sorted.sort((a,b) => b.power - a.power);
+
+            sorted.forEach(u => {
+                const isInf = u.rank === "Grandmaster";
+                const scoreField = isInf ? `<span class="infinite-text">∞ MP</span>` : `${u.power || 0} MP`;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td><strong>${u.username}</strong></td><td><span class="badge rank-${u.rank}">${u.rank}</span></td><td>${scoreField}</td><td>${u.hasLicense ? '📜' : '❌'}</td>`;
+                tbody.appendChild(tr);
             });
         }
 
-        function executePromotion(target) {
-            const chosenRank = document.getElementById(`rankSelect-${target}`).value;
-            const giveLicense = document.getElementById(`licCheck-${target}`).checked;
-            globalMages.get(target).put({ rank: chosenRank, hasLicense: giveLicense });
-            alert(`Promoted ${target}!`);
+        function buildActionTerminal() {
+            if (!session) return;
+            document.getElementById('trialArena').style.display = 'none';
+            document.getElementById('activeTrialControls').style.display = 'block';
+
+            const pDisplay = document.getElementById('powerDisplay');
+            const actionBtn = document.getElementById('actionBtn');
+
+            if (session.username === "AdminOwner") {
+                pDisplay.innerHTML = `<span class="infinite-text">∞ MP</span>`;
+                document.getElementById('ownerNotice').style.display = 'block';
+                actionBtn.disabled = true;
+            } else {
+                actionBtn.onclick = async function() {
+                    const roll = Math.floor(Math.random() * 450) + 50;
+                    pDisplay.innerText = `${roll} MP`;
+                    
+                    await fetch(`${dbURL}/${session.username}/power.json`, {
+                        method: 'PUT',
+                        body: JSON.stringify(roll)
+                    });
+                    syncNetworkData();
+                };
+            }
         }
 
-        renderHeader();
+        async function executePromotion(target) {
+            const chosenRank = document.getElementById(`rankSelect-${target}`).value;
+            const giveLicense = document.getElementById(`licCheck-${target}`).checked;
+            
+            await fetch(`${dbURL}/${target}/rank.json`, { method: 'PUT', body: JSON.stringify(chosenRank) });
+            await fetch(`${dbURL}/${target}/hasLicense.json`, { method: 'PUT', body: JSON.stringify(giveLicense) });
+            
+            alert(`Promoted ${target}!`);
+            syncNetworkData();
+        }
+
+        syncNetworkData();
         buildActionTerminal();
+        setInterval(syncNetworkData, 4000); 
     </script>
 </body>
 </html>
