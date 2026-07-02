@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arcane Hub - Leyline Authentication</title>
-    <script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -47,10 +46,8 @@
     </div>
 
     <script>
-        // Start GunDB open peer network connection mesh
-        const gun = Gun(['https://gun-manhattan.herokuapp.com/gun']);
-        const globalMages = gun.get('aminerproblem5_magic_system_v2');
-
+        // YOUR EXCLUSIVE PRIVATE FIREBASE LINK
+        const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
         let isSignUp = false;
 
         function setupToggleListener() {
@@ -69,41 +66,52 @@
         }
         setupToggleListener();
 
-        document.getElementById('authForm').onsubmit = function(e) {
+        document.getElementById('authForm').onsubmit = async function(e) {
             e.preventDefault();
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value;
 
+            // 👑 THE MASTER OWNER KEY OVERRIDE
             if (user === "AdminOwner" && pass === "MasterKey2026") {
-                const ownerSession = { username: "AdminOwner", rank: "Grandmaster", power: "Infinite", hasLicense: true, isOwner: true };
+                const ownerSession = { username: "AdminOwner", rank: "Grandmaster", hasLicense: true, isOwner: true };
                 sessionStorage.setItem('current_mage_session', JSON.stringify(ownerSession));
-                globalMages.get("AdminOwner").put({ pass: "MasterKey2026", rank: "Grandmaster", power: 999999, hasLicense: true, isOwner: true });
-                alert("👑 Master Owner protocols initialized!");
+                await fetch(`${dbURL}/${user}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ pass: "MasterKey2026", rank: "Grandmaster", power: 999999, hasLicense: true })
+                });
+                alert("👑 Master Owner status synced! Welcome back.");
                 window.location.href = "index.html";
                 return;
             }
 
-            // Look up directly inside the shared internet mesh node database
-            globalMages.get(user).once(function(data) {
+            try {
+                const response = await fetch(`${dbURL}/${user}.json`);
+                const data = await response.json();
+
                 if (isSignUp) {
                     if (data && data.pass) {
-                        alert("❌ This name is already taken globally!");
+                        alert("❌ This identity tag is already taken globally!");
                         return;
                     }
-                    globalMages.get(user).put({ pass: pass, rank: "Initiate", power: 0, hasLicense: false, isOwner: false });
-                    alert("✨ Account forged into network clouds! Please log in.");
+                    await fetch(`${dbURL}/${user}.json`, {
+                        method: 'PUT',
+                        body: JSON.stringify({ pass: pass, rank: "Initiate", power: 0, hasLicense: false })
+                    });
+                    alert("✨ Profile forged online! Ready to login.");
                     window.location.reload();
                 } else {
                     if (!data || data.pass !== pass) {
-                        alert("❌ Incorrect password or profile does not exist on network paths.");
+                        alert("❌ Incorrect cipher or account does not exist.");
                         return;
                     }
-                    const userSession = { username: user, rank: data.rank, power: data.power, hasLicense: data.hasLicense, isOwner: data.isOwner };
+                    const userSession = { username: user, rank: data.rank, hasLicense: data.hasLicense };
                     sessionStorage.setItem('current_mage_session', JSON.stringify(userSession));
                     alert(`Welcome back, ${user}!`);
                     window.location.href = "index.html";
                 }
-            });
+            } catch (err) {
+                alert("Leyline matrix connection timed out. Refresh and try again.");
+            }
         };
     </script>
 </body>
