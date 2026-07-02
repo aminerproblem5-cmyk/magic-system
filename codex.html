@@ -3,423 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Five Great Mancies & Casting Mechanics</title>
+    <title>The Grand Library - Arcane Lore & Laws</title>
     <style>
         :root {
             --bg-color: #0b0c10;
-            --panel-bg: #1f2833;
+            --panel-bg: #151922;
             --text-color: #c5a880;
             --text-light: #fff;
-            --border-color: #45f3ff;
-            
-            /* Element Themes */
-            --pyro: #ff4d4d;
-            --aero: #4da6ff;
-            --necro: #9933ff;
-            --geo: #ffaa00;
-            --hydro: #00ffcc;
+            --accent-color: #45f3ff;
+            --danger-color: #ff4d4d;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; padding: 20px; }
+        
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        header { text-align: center; padding: 40px 0; border-bottom: 1px solid #222; margin-bottom: 30px; }
+        header h1 { color: #fff; font-size: 2.5rem; letter-spacing: 2px; text-transform: uppercase; }
+        header p { color: #888; font-style: italic; margin-top: 5px; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        .back-btn { display: inline-block; text-decoration: none; color: var(--accent-color); border: 1px solid var(--accent-color); padding: 8px 16px; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 20px; transition: all 0.2s; }
+        .back-btn:hover { background: rgba(69, 243, 255, 0.1); }
 
-        body {
-            font-family: 'Georgia', serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            padding: 20px;
-        }
+        .section-card { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 30px; margin-bottom: 25px; }
+        h2 { color: var(--text-light); border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; font-size: 1.3rem; }
+        
+        .magic-types { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 15px; }
+        @media(min-width: 600px) { .magic-types { grid-template-columns: 1fr 1fr; } }
+        
+        .type-box { background: #0b0c10; padding: 15px; border-radius: 4px; border-left: 3px solid var(--accent-color); }
+        .type-box h3 { color: #fff; margin-bottom: 5px; font-size: 1.1rem; }
 
-        header {
-            text-align: center;
-            padding: 50px 20px;
-            background: linear-gradient(180deg, #151922 0%, #0b0c10 100%);
-            border-bottom: 2px solid #333;
-            margin-bottom: 40px;
-        }
-
-        header h1 {
-            font-size: 3rem;
-            color: var(--text-light);
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
-            margin-bottom: 10px;
-            letter-spacing: 2px;
-        }
-
-        header p {
-            font-size: 1.2rem;
-            font-style: italic;
-            color: #888;
-        }
-
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-        }
-
-        /* NEW SECTION: CASTING MECHANICS */
-        .catalyst-section {
-            background: #11141a;
-            border: 2px dashed #444;
-            border-radius: 8px;
-            padding: 30px;
-            margin-bottom: 50px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
-        }
-
-        .catalyst-section h2 {
-            font-size: 2rem;
-            color: var(--text-light);
-            margin-bottom: 15px;
-            text-align: center;
-            letter-spacing: 1px;
-        }
-
-        .catalyst-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .catalyst-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid #222;
-            padding: 20px;
-            border-radius: 6px;
-        }
-
-        .catalyst-card h3 {
-            color: var(--text-light);
-            margin-bottom: 10px;
-            font-size: 1.2rem;
-        }
-
-        /* Slate Visualizer */
-        .slate-mockup {
-            width: 150px;
-            height: 210px; /* Scaled to 2.5" x 3.5" ratio */
-            background: radial-gradient(circle, #2d3748 0%, #1a202c 100%);
-            border: 4px solid #4a5568;
-            border-radius: 10px;
-            margin: 20px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.6);
-            position: relative;
-        }
-
-        .slate-mockup::before {
-            content: "ᛔ";
-            font-size: 3.5rem;
-            color: var(--text-color);
-            opacity: 0.7;
-            text-shadow: 0 0 15px var(--text-color);
-        }
-
-        .slate-caption {
-            text-align: center;
-            font-size: 0.85rem;
-            color: #888;
-            font-style: italic;
-        }
-
-        /* MAIN ELEMENTS SECTION */
-        .main-element {
-            background-color: var(--panel-bg);
-            border-radius: 8px;
-            margin-bottom: 50px;
-            border: 1px solid #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .main-element.pyro { border-top: 5px solid var(--pyro); }
-        .main-element.aero { border-top: 5px solid var(--aero); }
-        .main-element.necro { border-top: 5px solid var(--necro); }
-        .main-element.geo { border-top: 5px solid var(--geo); }
-        .main-element.hydro { border-top: 5px solid var(--hydro); }
-
-        .element-title {
-            padding: 25px;
-            background: rgba(0,0,0,0.3);
-            text-align: center;
-            font-size: 2.2rem;
-            color: var(--text-light);
-            letter-spacing: 1px;
-        }
-
-        .pyro .element-title { text-shadow: 0 0 10px var(--pyro); }
-        .aero .element-title { text-shadow: 0 0 10px var(--aero); }
-        .necro .element-title { text-shadow: 0 0 10px var(--necro); }
-        .geo .element-title { text-shadow: 0 0 10px var(--geo); }
-        .hydro .element-title { text-shadow: 0 0 10px var(--hydro); }
-
-        .subs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 25px;
-            padding: 30px;
-        }
-
-        .sub-element {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid #2a3545;
-            border-radius: 6px;
-            padding: 20px;
-        }
-
-        .sub-element h3 {
-            font-size: 1.4rem;
-            color: var(--text-light);
-            margin-bottom: 15px;
-            border-bottom: 1px solid #444;
-            padding-bottom: 5px;
-        }
-
-        .micro-grid {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .micro-grid li {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 12px;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            border-left: 3px solid #666;
-        }
-
-        .pyro .micro-grid li { border-left-color: var(--pyro); }
-        .aero .micro-grid li { border-left-color: var(--aero); }
-        .necro .micro-grid li { border-left-color: var(--necro); }
-        .geo .micro-grid li { border-left-color: var(--geo); }
-        .hydro .micro-grid li { border-left-color: var(--hydro); }
-
-        .micro-grid strong {
-            color: var(--text-light);
-            display: block;
-            margin-bottom: 2px;
-            font-family: sans-serif;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px;
-            color: #555;
-            font-size: 0.9rem;
-            border-top: 1px solid #222;
-            margin-top: 60px;
-        }
+        .law-list { list-style-type: none; }
+        .law-list li { margin-bottom: 12px; padding-left: 20px; position: relative; }
+        .law-list li::before { content: "⚡"; position: absolute; left: 0; color: var(--accent-color); }
+        
+        .forbidden { border-left-color: var(--danger-color); }
+        .forbidden h3 { color: var(--danger-color); }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>The Five Great Mancies</h1>
-        <p>A Structured Codex of Core, Sub, and Micro-Sub Elements</p>
-    </header>
-
     <div class="container">
+        <a href="index.html" class="back-btn">← Return to Council Board</a>
 
-        <!-- NEW LAWS OF CASTING SECTION -->
-        <div class="catalyst-section">
-            <h2>The Law of the Focus Slate</h2>
-            <p style="text-align: center; max-width: 800px; margin: 0 auto 20px auto; color: #888;">
-                Magic cannot be conjured from nothing. To manifest the energies of the Great Mancies, a caster must possess a physically prepared conduit known as a Focus Slate. Without the stone and its inscription, the magic remains locked.
-            </p>
+        <header>
+            <h1>The Grand Arcane Codex</h1>
+            <p>Authorized compilation of leyline elements, laws, and forbidden practices.</p>
+        </header>
+
+        <!-- SECTION 1: THE MAGIC SYSTEM -->
+        <div class="section-card">
+            <h2>The Four Core Elements</h2>
+            <p>Every Mage signs into the registry to harness one of the natural planetary flows. Each element channels differently through a user's Magic Power (MP):</p>
             
-            <div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 40px;">
-                <div style="flex: 1; min-width: 300px;">
-                    <div class="catalyst-grid">
-                        <div class="catalyst-card">
-                            <h3>Dimensions & Material</h3>
-                            <p>Every Slate must be meticulously cut from natural, magically conductive rock. The standard legal dimension for a slate is exactly <strong>2.5 inches by 3.5 inches (6.3 cm by 8.8 cm)</strong> with a thickness of roughly a quarter-inch, allowing it to easily fit in the palm or a caster's pouch.</p>
-                        </div>
-                        <div class="catalyst-card">
-                            <h3>The Sacred Inscription</h3>
-                            <p>To pull from a specific branch of magic, the slate must be deeply carved with the <strong>exact, mathematically correct symbol</strong> representing that sub or micro-element. An error as small as a hairline fracture in the carving will cause the spell to misfire or fail entirely.</p>
-                        </div>
-                    </div>
+            <div class="magic-types">
+                <div class="type-box">
+                    <h3>🔥 Pyromancy (Plasma Flow)</h3>
+                    <p>Destructive, high-energy output. Pyromancers often post volatile MP fluctuations on the leaderboard, trading stability for raw speed.</p>
                 </div>
-                
-                <div style="text-align: center;">
-                    <div class="slate-mockup"></div>
-                    <p class="slate-caption">A standard 2.5" x 3.5" Focus Slate<br>etched with an elemental sigil.</p>
+                <div class="type-box">
+                    <h3>⚡ Chronomancy (Time Distortion)</h3>
+                    <p>The art of slowing down intervals. High-ranking Chronomancers are rumor-bound to freeze their trial parameters to secure consistent rolls.</p>
                 </div>
-            </div>
-        </div>
-
-
-        <!-- 1. PYROMANCY -->
-        <div class="main-element pyro">
-            <h2 class="element-title">1. Pyromancy</h2>
-            <div class="subs-grid">
-                <div class="sub-element">
-                    <h3>Thermomancy (Heat Control)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Combustion:</strong> Forcing objects or air pockets to instantly hit ignition point.</li>
-                        <li><strong>Cryo-Extraction:</strong> Stealing heat rapidly from an object to drop it to absolute zero.</li>
-                        <li><strong>Plasma-weaving:</strong> Superheating gas until it turns into a glowing blade or orb of pure energy.</li>
-                    </ul>
+                <div class="type-box">
+                    <h3>🌌 Void Attunement</h3>
+                    <p>Manipulating dark matter. Void users focus on gravity wells, allowing them to anchor their scores so their hierarchy standing rarely drops.</p>
                 </div>
-                <div class="sub-element">
-                    <h3>Electromancy (Lightning)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Arc-Striking:</strong> Summoning and redirecting raw bolts of lightning from atmospheric friction.</li>
-                        <li><strong>Galvanism:</strong> Manipulating the internal electrical signals within a target's nervous system.</li>
-                        <li><strong>Magnetism:</strong> Utilizing electrical currents to generate fields that pull or repel metallic structures.</li>
-                    </ul>
-                </div>
-                <div class="sub-element">
-                    <h3>Radiamancy (Light & Radiation)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Solar Flares:</strong> Creating blinding bursts of light capable of searing skin and burning vision.</li>
-                        <li><strong>Hard-Light:</strong> Solidifying light waves into temporary, transparent shields or platforms.</li>
-                        <li><strong>Gamma Decay:</strong> Projecting invisible waves of radioactive heat that slowly dissolve material structures.</li>
-                    </ul>
+                <div class="type-box">
+                    <h3>🌿 Aether Healing</h3>
+                    <p>Channelling planetary rejuvenation. This magic allows council members to grant licenses and stabilize corrupt profile matrices.</p>
                 </div>
             </div>
         </div>
 
-        <!-- 2. AEROMANCY -->
-        <div class="main-element aero">
-            <h2 class="element-title">2. Aeromancy</h2>
-            <div class="subs-grid">
-                <div class="sub-element">
-                    <h3>Baromancy (Pressure)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Vacuum Folds:</strong> Ripping air away from an area to choke out flames or suffocate a foe.</li>
-                        <li><strong>Shockwave:</strong> Compressing air heavily and releasing it in a massive kinetic explosion.</li>
-                        <li><strong>Buoyancy:</strong> Decreasing air resistance around oneself to achieve effortless flight or high speed.</li>
-                    </ul>
-                </div>
-                <div class="sub-element">
-                    <h3>Phonomancy (Sound)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Acoustic Resonance:</strong> Projecting targeted frequencies that shatter glass, stone, and bone.</li>
-                        <li><strong>Dead Zone:</strong> Vibrating air molecules to cancel out sound entirely for absolute stealth.</li>
-                        <li><strong>Echolocation:</strong> Bouncing undetectable sound waves through an environment to map it completely.</li>
-                    </ul>
-                </div>
-                <div class="sub-element">
-                    <h3>Atmospherics (Weather Chaos)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Cyclonogenics:</strong> Spinning local currents to build localized tornadoes and gale-force wind walls.</li>
-                        <li><strong>Mist-Weaving:</strong> Condensing moisture in the air into thick, blinding cloaks of fog.</li>
-                        <li><strong>Tempest Call:</strong> Forcing low and high pressures to collide, instantly turning clear skies into storms.</li>
-                    </ul>
-                </div>
-            </div>
+        <!-- SECTION 2: LAWS OF THE SERVER -->
+        <div class="section-card">
+            <h2>The Three Golden Decrees</h2>
+            <p>All registered initiates must respect the server environment parameters. Failure to comply results in exile by a Grandmaster Overseer.</p>
+            <ul class="law-list">
+                <li><strong>The Decree of Identity:</strong> No user may duplicate a signature string belonging to another active caster in the registry.</li>
+                <li><strong>The Decree of Power:</strong> Channeling rituals must only use authorized server ticks. Overclocking local calculations is tracking-punishable.</li>
+                <li><strong>The Decree of Hierarchy:</strong> Lower tiers must respect the rank commands issued by licensed council members holding active Seals (📜).</li>
+            </ul>
         </div>
 
-        <!-- 3. NECROMANCY -->
-        <div class="main-element necro">
-            <h2 class="element-title">3. Necromancy</h2>
-            <div class="subs-grid">
-                <div class="sub-element">
-                    <h3>Osteomancy (Bone & Structure)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Marrow Shards:</strong> Extracting and hardening skeletal structures into razor-sharp projectiles.</li>
-                        <li><strong>Calcification:</strong> Over-growing or solidifying bones to act as external armor plating.</li>
-                        <li><strong>Skeletal Animation:</strong> Forcing dead skeletal structures to obey commands through raw kinetic magic.</li>
-                    </ul>
-                </div>
-                <div class="sub-element">
-                    <h3>Spiritism (Soul Bending)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Wraith Summoning:</strong> Ripping violent, lingering echoes of the deceased back into the material realm.</li>
-                        <li><strong>Astral Tethering:</strong> Forcibly parting a living soul from its body for short durations.</li>
-                        <li><strong>Possession:</strong> Shoving a stray spirit into an object or living thrall to take control.</li>
-                    </ul>
-                </div>
-                <div class="sub-element">
-                    <h3>Miasmamancy (Decay & Plagues)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Putrefaction:</strong> Accelerating the natural decomposition process of organic matters instantly.</li>
-                        <li><strong>Virulence:</strong> Sprouting toxic spores and airborne contagions that drain physical stamina.</li>
-                        <li><strong>Parasitic Siphon:</strong> Leeching vital life-force from a dying target to repair the caster's injuries.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. GEOMANCY -->
-        <div class="main-element geo">
-            <h2 class="element-title">4. Geomancy</h2>
-            <div class="subs-grid">
-                <div class="sub-element">
-                    <h3>Terramancy (Stone & Earth)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Seismic Shifting:</strong> Generating powerful vibrations through the ground to create tremors.</li>
-                        <li><strong>Psammomancy:</strong> Reducing solid rock into shifting swarms of sand to choke or blind targets.</li>
-                        <li><strong>Litho-shaping:</strong> Pulling pillars, walls, or spikes directly out of any stone terrain.</li>
-                    </ul>
-                </div>
-                <div class="sub-element">
-                    <h3>Ferromancy (Metal)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Metallurgy:</strong> Liquefying, reshaping, and sharpening raw or refined metals at will.</li>
-                        <li><strong>Mercury Fluidity:</strong> Controlling liquid metal alloys for versatile, shape-shifting combat gear.</li>
-                        <li><strong>Magnetoreception:</strong> Sensing buried veins of metal deep underground like a radar.</li>
-                    </ul>
-                </div>
-                <div class="sub-element">
-                    <h3>Crystallomancy (Gems)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Prism Spikes:</strong> Growing dense, diamond-hard crystal spears rapidly out of any surface.</li>
-                        <li><strong>Refraction Shell:</strong> Generating a crystal barrier that reflects magical beams back at attackers.</li>
-                        <li><strong>Resonance Storage:</strong> Charging crystals with elemental magic to act as explosive or glowing traps.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- 5. HYDROMANCY -->
-        <div class="main-element hydro">
-            <h2 class="element-title">5. Hydromancy</h2>
-            <div class="subs-grid">
-                <div class="sub-element">
-                    <h3>Aquamancy (Pure Liquid)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Tidal Kinetics:</strong> Controlling massive volumes of water to create crashing waves and whirlpools.</li>
-                        <li><strong>Pressure Jet:</strong> Condensing a stream of water so fine and pressurized it cuts through solid steel.</li>
-                        <li><strong>Aquatic Shaping:</strong> Creating physical tools, bubbles, or ropes out of surface water.</li>
-                    </ul>
-                </div>
-                <div class="sub-element">
-                    <h3>Hemomancy (Blood)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Puppetry:</strong> Taking control of the blood currents within a living body to force physical movement.</li>
-                        <li><strong>Coagulation:</strong> Drawing blood out of wounds and instant-hardening it into razor-sharp blades.</li>
-                        <li><strong>Anemia:</strong> Drawing blood away from a target's brain to cause instant blackout or disorientation.</li>
-                    </ul>
-                </div>
-                <div class="sub-element">
-                    <h3>Acidmancy (Toxins & Corrosion)</h3>
-                    <ul class="micro-grid">
-                        <li><strong>Caustic Spray:</strong> Exuding highly acidic, fizzing liquids that melt through shields and armor.</li>
-                        <li><strong>Neurotoxin:</strong> Transmuting clean liquid into precise poisons that target the nervous system.</li>
-                        <li><strong>Alchemical Solvents:</strong> Creating liquids designed to safely dissolve specific magical enchantments.</li>
-                    </ul>
-                </div>
+        <!-- SECTION 3: FORBIDDEN MAGIC -->
+        <div class="section-card forbidden">
+            <h2>⚠️ Forbidden Arts Block</h2>
+            <p style="margin-bottom: 15px;">Channelling these specific frequencies forces immediate script failure or profile wiping by the AdminOwner.</p>
+            <div class="type-box forbidden" style="background:#1c1216;">
+                <h3>💀 Script-Inversion (Database Spoofing)</h3>
+                <p>Attempting to bypass the login pipeline to manually override MP capacity scores will result in an automatic network disconnect.</p>
             </div>
         </div>
 
     </div>
-
-    <footer>
-        <p>Master Codex Arcana &bull; Constructed for Worldbuilding Systems</p>
-    </footer>
 
 </body>
 </html>
