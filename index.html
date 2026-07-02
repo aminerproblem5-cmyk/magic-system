@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcane Hub - The Five Great Mancies</title>
-    <!-- Include Supabase CDN to handle database communication -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Arcane Hub - Mage Leaderboard</title>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -78,19 +76,11 @@
             border-radius: 8px;
             padding: 30px;
             text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .intro-box h2 {
             color: var(--text-light);
-            font-size: 1.8rem;
             margin-bottom: 15px;
-        }
-
-        .intro-box p {
-            font-size: 1.1rem;
-            margin-bottom: 25px;
-            color: #a4b0be;
         }
 
         .portal-btn {
@@ -99,29 +89,25 @@
             color: var(--text-light);
             text-decoration: none;
             font-size: 1.1rem;
-            font-family: sans-serif;
             text-transform: uppercase;
             letter-spacing: 2px;
             padding: 12px 35px;
             border: 2px solid var(--text-color);
             border-radius: 4px;
             transition: all 0.4s ease;
+            margin-top: 15px;
         }
 
         .portal-btn:hover {
             background: var(--text-color);
             color: var(--bg-color);
-            box-shadow: 0 0 25px rgba(197, 168, 128, 0.4);
-            transform: translateY(-2px);
         }
 
-        /* LEADERBOARD & REGISTRATION PANELS */
         .panel {
             background: #151922;
             border: 1px solid #2d3748;
             border-radius: 8px;
             padding: 25px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
         }
 
         .panel h2 {
@@ -130,10 +116,8 @@
             margin-bottom: 20px;
             border-bottom: 1px solid #333;
             padding-bottom: 10px;
-            letter-spacing: 1px;
         }
 
-        /* FORM STYLES */
         .form-group {
             margin-bottom: 15px;
         }
@@ -144,7 +128,6 @@
             margin-bottom: 5px;
             color: #888;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .form-group input, .form-group select {
@@ -155,12 +138,6 @@
             border-radius: 4px;
             color: #fff;
             font-size: 1rem;
-            font-family: 'Georgia', serif;
-        }
-
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: var(--accent-color);
         }
 
         .submit-btn {
@@ -170,34 +147,27 @@
             color: var(--success-color);
             padding: 12px;
             font-size: 1.1rem;
-            font-family: sans-serif;
             text-transform: uppercase;
-            letter-spacing: 1px;
             border-radius: 4px;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 10px;
         }
 
         .submit-btn:hover {
             background: var(--success-color);
             color: #000;
-            box-shadow: 0 0 15px rgba(46, 213, 115, 0.3);
         }
 
-        /* LEADERBOARD TABLE */
         .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 0.95rem;
         }
 
         .leaderboard-table th {
             color: #888;
             text-transform: uppercase;
             font-size: 0.8rem;
-            letter-spacing: 1px;
             padding: 10px;
             border-bottom: 2px solid #333;
         }
@@ -206,10 +176,6 @@
             padding: 12px 10px;
             border-bottom: 1px solid #222;
             color: #e2e8f0;
-        }
-
-        .leaderboard-table tr:hover td {
-            background: rgba(255,255,255,0.02);
         }
 
         .rank-num {
@@ -222,7 +188,6 @@
             padding: 2px 8px;
             border-radius: 4px;
             font-size: 0.8rem;
-            font-family: sans-serif;
             font-weight: bold;
             color: #000;
         }
@@ -238,44 +203,32 @@
             font-weight: bold;
             color: var(--text-light);
         }
-
-        footer {
-            text-align: center;
-            padding: 30px;
-            color: #555;
-            font-size: 0.9rem;
-            border-top: 1px solid #222;
-            margin-top: auto;
-        }
     </style>
 </head>
 <body>
 
     <header class="hero">
         <h1>The Grand Arcanum</h1>
-        <p>Enter the world of the five fundamental forces and register your magical signature.</p>
+        <p>Register your magical signature and claim your rank instantly.</p>
     </header>
 
     <div class="main-content">
-        <!-- Main Intro -->
         <div class="intro-box">
             <h2>Welcome, Initiate</h2>
-            <p>
-                Reality is divided into five absolute pillars. Without a proper conduit, these cosmic forces are completely unreachable to human hands. Only by utilizing precisely carved Focus Slates can a mage open the gateway to the elements.
-            </p>
+            <p>Reality is governed by the elements. Create a Focus Slate below to test your power capacity.</p>
             <a href="codex.html" class="portal-btn">Open the Element Codex</a>
         </div>
 
-        <!-- Left Column: Registration -->
+        <!-- Left: Form -->
         <div class="panel">
-            <h2>Register Mage Signature</h2>
+            <h2>Forge Your Slate</h2>
             <form id="mageForm">
                 <div class="form-group">
                     <label for="mageName">Mage Name / Alias</label>
-                    <input type="text" id="mageName" placeholder="e.g., Ignis the Bold" required maxlength="25">
+                    <input type="text" id="mageName" placeholder="e.g., Ignis the Bold" required>
                 </div>
                 <div class="form-group">
-                    <label for="chosenMancy">Primary Mancy Alignment</label>
+                    <label for="chosenMancy">Primary Alignment</label>
                     <select id="chosenMancy" required>
                         <option value="Pyromancy">Pyromancy</option>
                         <option value="Aeromancy">Aeromancy</option>
@@ -285,7 +238,7 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="slateQuality">Focus Slate Composition</label>
+                    <label for="slateQuality">Slate Composition</label>
                     <select id="slateQuality" required>
                         <option value="10">Crude Obsidian Stone (Basic)</option>
                         <option value="25">Refined Granite Slab (Adeptic)</option>
@@ -293,11 +246,11 @@
                         <option value="100">Prismatic Meteorite Core (Legendary)</option>
                     </select>
                 </div>
-                <button type="submit" class="submit-btn">Channel Energy & Submit</button>
+                <button type="submit" class="submit-btn">Calculate Power & Rank</button>
             </form>
         </div>
 
-        <!-- Right Column: The Leaderboard -->
+        <!-- Right: Board -->
         <div class="panel">
             <h2>Global Order of Mages</h2>
             <table class="leaderboard-table">
@@ -309,32 +262,29 @@
                         <th>Power</th>
                     </tr>
                 </thead>
-                <tbody id="leaderboardBody">
-                    <tr>
-                        <td colspan="4" style="text-align: center; color: #666;">Channelling database link...</td>
-                    </tr>
-                </tbody>
+                <tbody id="leaderboardBody"></tbody>
             </table>
         </div>
     </div>
 
-    <footer>
-        <p>Master Codex Arcana &bull; Constructed for Worldbuilding Systems</p>
-    </footer>
-
-    <!-- INTERACTIVE SCRIPT CONNECTING frontend TO DATABASE -->
     <script>
-        // REPLACE THESE WRAPPERS WITH YOUR REAL SUPABASE CREDENTIALS AFTER CREATING YOUR ACCOUNT
-        const SUPABASE_URL = "YOUR_SUPABASE_URL_HERE";
-        const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
+        // Set up pre-loaded mythical figures so the leaderboard looks awesome immediately
+        const defaultMages = [
+            {mage_name: "Archmage Malakor", chosen_mancy: "Necromancy", power_score: 850},
+            {mage_name: "Zephyr Storm", chosen_mancy: "Aeromancy", power_score: 620},
+            {mage_name: "Ember Flint", chosen_mancy: "Pyromancy", power_score: 210}
+        ];
 
-        // Initialize Supabase Client
-        let supabase = null;
-        if (SUPABASE_URL !== "YOUR_SUPABASE_URL_HERE") {
-            supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        // Load existing scoreboard array or install the defaults
+        function getLeaderboard() {
+            const stored = localStorage.getItem('mage_scores');
+            if (!stored) {
+                localStorage.setItem('mage_scores', JSON.stringify(defaultMages));
+                return defaultMages;
+            }
+            return JSON.parse(stored);
         }
 
-        // Helper function to render badges visually
         function getBadgeClass(mancy) {
             if(mancy === "Pyromancy") return "badge-pyro";
             if(mancy === "Aeromancy") return "badge-aero";
@@ -344,44 +294,15 @@
             return "";
         }
 
-        // Fetch Leaderboard entries from Supabase server
-        async function fetchLeaderboard() {
-            const tbody = document.getElementById('leaderboardBody');
+        function updateBoardDisplay() {
+            const mages = getLeaderboard();
+            // Sort from highest power level down to lowest
+            mages.sort((a, b) => b.power_score - a.power_score);
             
-            if (!supabase) {
-                // Local Fallback Mock Data if database isn't fully configured yet
-                const mockData = [
-                    {mage_name: "Archmage Malakor", chosen_mancy: "Necromancy", power_score: 950},
-                    {mage_name: "Zephyr Storm", chosen_mancy: "Aeromancy", power_score: 720},
-                    {mage_name: "Ember Flint", chosen_mancy: "Pyromancy", power_score: 410}
-                ];
-                renderTable(mockData);
-                return;
-            }
-
-            let { data: mage_leaderboard, error } = await supabase
-                .from('mage_leaderboard')
-                .select('*')
-                .order('power_score', { ascending: false })
-                .limit(10);
-
-            if (error) {
-                console.error("Error fetching leaderboard:", error);
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ff4d4d;">Failed to read arcane energies.</td></tr>`;
-            } else {
-                renderTable(mage_leaderboard);
-            }
-        }
-
-        function renderTable(data) {
             const tbody = document.getElementById('leaderboardBody');
-            if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#666;">No mages registered yet. Be the first!</td></tr>`;
-                return;
-            }
-            
             tbody.innerHTML = '';
-            data.forEach((row, index) => {
+            
+            mages.forEach((row, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td class="rank-num">#${index + 1}</td>
@@ -393,47 +314,32 @@
             });
         }
 
-        // Handle Form Submission
-        document.getElementById('mageForm').addEventListener('submit', async (e) => {
+        document.getElementById('mageForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
             const name = document.getElementById('mageName').value.trim();
             const mancy = document.getElementById('chosenMancy').value;
             const multiplier = parseInt(document.getElementById('slateQuality').value);
             
-            // Generate a random fun base power stat, multiplied by slate tier quality
-            const basePower = Math.floor(Math.random() * 8) + 3;
+            // Generate a random power factor based on their selections
+            const basePower = Math.floor(Math.random() * 8) + 4;
             const totalPower = basePower * multiplier;
 
-            if (!supabase) {
-                alert(`[Offline Mode] ${name} calculated a power level of ${totalPower} MP! Connect Supabase to save it live globally!`);
-                return;
-            }
-
-            const { data, error } = await supabase
-                .from('mage_leaderboard')
-                .insert([
-                    { mage_name: name, chosen_mancy: mancy, power_score: totalPower }
-                ]);
-
-            if (error) {
-                alert("The ritual failed. Could not write signature to the cloud script.");
-                console.error(error);
-            } else {
-                document.getElementById('mageName').value = '';
-                fetchLeaderboard(); // Automatically refresh entries layout
-            }
+            const currentScores = getLeaderboard();
+            currentScores.push({ mage_name: name, chosen_mancy: mancy, power_score: totalPower });
+            
+            localStorage.setItem('mage_scores', JSON.stringify(currentScores));
+            
+            document.getElementById('mageName').value = '';
+            updateBoardDisplay();
         });
 
-        // Basic security escape utility
         function escapeHTML(str) {
-            return str.replace(/[&<>'"]/g, 
-                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
-            );
+            return str.replace(/[&<>'"]/g, t => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[t] || t));
         }
 
-        // Run automatically when screen initialises
-        fetchLeaderboard();
+        // Boot display up instantly
+        updateBoardDisplay();
     </script>
 </body>
 </html>
