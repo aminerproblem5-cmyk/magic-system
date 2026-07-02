@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arcane Hub - The Five Great Mancies</title>
+    <!-- Include Supabase CDN to handle database communication -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -11,6 +13,7 @@
             --text-color: #c5a880;
             --text-light: #fff;
             --accent-color: #45f3ff;
+            --success-color: #2ed573;
         }
 
         * {
@@ -31,7 +34,7 @@
 
         .hero {
             text-align: center;
-            padding: 80px 20px;
+            padding: 60px 20px;
             background: radial-gradient(circle, #1a233a 0%, #0b0c10 100%);
             border-bottom: 2px solid #222;
         }
@@ -45,7 +48,7 @@
         }
 
         .hero p {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-style: italic;
             color: #888;
             max-width: 700px;
@@ -53,49 +56,56 @@
         }
 
         .main-content {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 40px auto;
             padding: 0 20px;
             flex: 1;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+
+        @media (min-width: 850px) {
+            .main-content {
+                grid-template-columns: 1.2fr 1fr;
+            }
+            .intro-box { grid-column: span 2; }
         }
 
         .intro-box {
             background-color: var(--panel-bg);
             border: 1px solid #333;
             border-radius: 8px;
-            padding: 40px;
+            padding: 30px;
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            margin-bottom: 40px;
         }
 
         .intro-box h2 {
             color: var(--text-light);
             font-size: 1.8rem;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .intro-box p {
             font-size: 1.1rem;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             color: #a4b0be;
         }
 
-        /* Portal Button to Codex */
         .portal-btn {
             display: inline-block;
             background: transparent;
             color: var(--text-light);
             text-decoration: none;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-family: sans-serif;
             text-transform: uppercase;
             letter-spacing: 2px;
-            padding: 15px 40px;
+            padding: 12px 35px;
             border: 2px solid var(--text-color);
             border-radius: 4px;
             transition: all 0.4s ease;
-            box-shadow: 0 0 10px rgba(197, 168, 128, 0.1);
         }
 
         .portal-btn:hover {
@@ -105,29 +115,128 @@
             transform: translateY(-2px);
         }
 
-        .quick-lore {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
+        /* LEADERBOARD & REGISTRATION PANELS */
+        .panel {
+            background: #151922;
+            border: 1px solid #2d3748;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
         }
 
-        @media (max-width: 600px) {
-            .quick-lore { grid-template-columns: 1fr; }
-            .hero h1 { font-size: 2.5rem; }
-        }
-
-        .lore-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid #222;
-            padding: 20px;
-            border-radius: 6px;
-        }
-
-        .lore-card h3 {
+        .panel h2 {
             color: var(--text-light);
-            margin-bottom: 10px;
-            font-size: 1.2rem;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        /* FORM STYLES */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            background: #0b0c10;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 1rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+            padding: 12px;
+            font-size: 1.1rem;
+            font-family: sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background: var(--success-color);
+            color: #000;
+            box-shadow: 0 0 15px rgba(46, 213, 115, 0.3);
+        }
+
+        /* LEADERBOARD TABLE */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        .leaderboard-table th {
+            color: #888;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            padding: 10px;
+            border-bottom: 2px solid #333;
+        }
+
+        .leaderboard-table td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #222;
+            color: #e2e8f0;
+        }
+
+        .leaderboard-table tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .rank-num {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .mancy-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-family: sans-serif;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .badge-pyro { background-color: #ff4d4d; }
+        .badge-aero { background-color: #4da6ff; }
+        .badge-necro { background-color: #9933ff; color: #fff; }
+        .badge-geo { background-color: #ffaa00; }
+        .badge-hydro { background-color: #00ffcc; }
+
+        .score-val {
+            font-family: monospace;
+            font-weight: bold;
+            color: var(--text-light);
         }
 
         footer {
@@ -136,6 +245,7 @@
             color: #555;
             font-size: 0.9rem;
             border-top: 1px solid #222;
+            margin-top: auto;
         }
     </style>
 </head>
@@ -143,27 +253,68 @@
 
     <header class="hero">
         <h1>The Grand Arcanum</h1>
-        <p>Enter the world of the five fundamental forces and the stones that bind them.</p>
+        <p>Enter the world of the five fundamental forces and register your magical signature.</p>
     </header>
 
     <div class="main-content">
+        <!-- Main Intro -->
         <div class="intro-box">
             <h2>Welcome, Initiate</h2>
             <p>
-                Reality is divided into five absolute pillars: Pyromancy, Aeromancy, Necromancy, Geomancy, and Hydromancy. Without a proper conduit, these cosmic forces are completely unreachable to human hands. Only by utilizing precisely carved Focus Slates can a mage open the gateway to the elements.
+                Reality is divided into five absolute pillars. Without a proper conduit, these cosmic forces are completely unreachable to human hands. Only by utilizing precisely carved Focus Slates can a mage open the gateway to the elements.
             </p>
             <a href="codex.html" class="portal-btn">Open the Element Codex</a>
         </div>
 
-        <div class="quick-lore">
-            <div class="lore-card">
-                <h3>The Focus Slates</h3>
-                <p>Every spell requires a stone precisely 2.5" x 3.5". These slates anchor elemental energy. Lose your stone, and you lose your magic.</p>
-            </div>
-            <div class="lore-card">
-                <h3>The 45 Branches</h3>
-                <p>Each of the 5 Great Mancies cascades downwards into a complex tree of sub-elements and hyper-specific micro-sub arts.</p>
-            </div>
+        <!-- Left Column: Registration -->
+        <div class="panel">
+            <h2>Register Mage Signature</h2>
+            <form id="mageForm">
+                <div class="form-group">
+                    <label for="mageName">Mage Name / Alias</label>
+                    <input type="text" id="mageName" placeholder="e.g., Ignis the Bold" required maxlength="25">
+                </div>
+                <div class="form-group">
+                    <label for="chosenMancy">Primary Mancy Alignment</label>
+                    <select id="chosenMancy" required>
+                        <option value="Pyromancy">Pyromancy</option>
+                        <option value="Aeromancy">Aeromancy</option>
+                        <option value="Necromancy">Necromancy</option>
+                        <option value="Geomancy">Geomancy</option>
+                        <option value="Hydromancy">Hydromancy</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="slateQuality">Focus Slate Composition</label>
+                    <select id="slateQuality" required>
+                        <option value="10">Crude Obsidian Stone (Basic)</option>
+                        <option value="25">Refined Granite Slab (Adeptic)</option>
+                        <option value="50">Flawless Quartz Crystal (Masterpiece)</option>
+                        <option value="100">Prismatic Meteorite Core (Legendary)</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-btn">Channel Energy & Submit</button>
+            </form>
+        </div>
+
+        <!-- Right Column: The Leaderboard -->
+        <div class="panel">
+            <h2>Global Order of Mages</h2>
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Alignment</th>
+                        <th>Power</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #666;">Channelling database link...</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -171,5 +322,118 @@
         <p>Master Codex Arcana &bull; Constructed for Worldbuilding Systems</p>
     </footer>
 
+    <!-- INTERACTIVE SCRIPT CONNECTING frontend TO DATABASE -->
+    <script>
+        // REPLACE THESE WRAPPERS WITH YOUR REAL SUPABASE CREDENTIALS AFTER CREATING YOUR ACCOUNT
+        const SUPABASE_URL = "YOUR_SUPABASE_URL_HERE";
+        const SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY_HERE";
+
+        // Initialize Supabase Client
+        let supabase = null;
+        if (SUPABASE_URL !== "YOUR_SUPABASE_URL_HERE") {
+            supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+
+        // Helper function to render badges visually
+        function getBadgeClass(mancy) {
+            if(mancy === "Pyromancy") return "badge-pyro";
+            if(mancy === "Aeromancy") return "badge-aero";
+            if(mancy === "Necromancy") return "badge-necro";
+            if(mancy === "Geomancy") return "badge-geo";
+            if(mancy === "Hydromancy") return "badge-hydro";
+            return "";
+        }
+
+        // Fetch Leaderboard entries from Supabase server
+        async function fetchLeaderboard() {
+            const tbody = document.getElementById('leaderboardBody');
+            
+            if (!supabase) {
+                // Local Fallback Mock Data if database isn't fully configured yet
+                const mockData = [
+                    {mage_name: "Archmage Malakor", chosen_mancy: "Necromancy", power_score: 950},
+                    {mage_name: "Zephyr Storm", chosen_mancy: "Aeromancy", power_score: 720},
+                    {mage_name: "Ember Flint", chosen_mancy: "Pyromancy", power_score: 410}
+                ];
+                renderTable(mockData);
+                return;
+            }
+
+            let { data: mage_leaderboard, error } = await supabase
+                .from('mage_leaderboard')
+                .select('*')
+                .order('power_score', { ascending: false })
+                .limit(10);
+
+            if (error) {
+                console.error("Error fetching leaderboard:", error);
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ff4d4d;">Failed to read arcane energies.</td></tr>`;
+            } else {
+                renderTable(mage_leaderboard);
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('leaderboardBody');
+            if(data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#666;">No mages registered yet. Be the first!</td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = '';
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="rank-num">#${index + 1}</td>
+                    <td>${escapeHTML(row.mage_name)}</td>
+                    <td><span class="mancy-badge ${getBadgeClass(row.chosen_mancy)}">${row.chosen_mancy}</span></td>
+                    <td class="score-val">${row.power_score} MP</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Handle Form Submission
+        document.getElementById('mageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('mageName').value.trim();
+            const mancy = document.getElementById('chosenMancy').value;
+            const multiplier = parseInt(document.getElementById('slateQuality').value);
+            
+            // Generate a random fun base power stat, multiplied by slate tier quality
+            const basePower = Math.floor(Math.random() * 8) + 3;
+            const totalPower = basePower * multiplier;
+
+            if (!supabase) {
+                alert(`[Offline Mode] ${name} calculated a power level of ${totalPower} MP! Connect Supabase to save it live globally!`);
+                return;
+            }
+
+            const { data, error } = await supabase
+                .from('mage_leaderboard')
+                .insert([
+                    { mage_name: name, chosen_mancy: mancy, power_score: totalPower }
+                ]);
+
+            if (error) {
+                alert("The ritual failed. Could not write signature to the cloud script.");
+                console.error(error);
+            } else {
+                document.getElementById('mageName').value = '';
+                fetchLeaderboard(); // Automatically refresh entries layout
+            }
+        });
+
+        // Basic security escape utility
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        // Run automatically when screen initialises
+        fetchLeaderboard();
+    </script>
 </body>
 </html>
