@@ -62,7 +62,7 @@
         .codex-item span { font-size: 0.85rem; font-family: monospace; color: #888; }
         
         .console-box { background: #07080c; border: 1px solid #1f2430; font-family: monospace; padding: 15px; border-radius: 4px; text-align: left; }
-        .console-log { height: 220px; overflow-y: auto; color: #a4b0be; font-size: 0.85rem; margin-bottom: 10px; border-bottom: 1px solid #1a202c; padding-bottom: 5px; }
+        .console-log { height: 240px; overflow-y: auto; color: #a4b0be; font-size: 0.85rem; margin-bottom: 10px; border-bottom: 1px solid #1a202c; padding-bottom: 5px; }
         .console-input-row { display: flex; gap: 10px; }
         .console-input { flex: 1; background: #11141a; border: 1px solid #333; color: #fff; padding: 8px; font-family: monospace; border-radius: 3px; }
         .console-btn { background: #233a42; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 0 15px; cursor: pointer; border-radius: 3px; }
@@ -164,6 +164,7 @@
         let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
         let isEditingPromotion = false;
         let globalMagesCache = {}; 
+        let globalBounties = {};
 
         const MAX_MP_LIMIT = 1000000000; 
 
@@ -370,7 +371,8 @@
                 const userRank = userProfile.rank;
 
                 if (commandName === "/help") {
-                    writeToConsole("Mage Spells: /channel, /meditate, /absorb, /fuse, /gamble [amt], /transfer [name] [amt], /drain [name] [amt], /diagnose, /clear");
+                    writeToConsole("Standard Spells: /channel, /meditate, /absorb, /scavenge, /overclock, /gamble [amt], /leaderboard, /cooldown, /clear");
+                    writeToConsole("Tactical Spells: /transfer [name] [amt], /drain [name] [amt], /smuggle [name] [amt], /bounty [name] [amt], /diagnose");
                     if (userRank === "Grandfather" || userRank === "Overseer" || isOwner) {
                         writeToConsole("Grandfather: /syncpool, /auracast, /bless [name]");
                     }
@@ -390,6 +392,22 @@
 
                 if (commandName === "/diagnose") {
                     writeToConsole(`Identity Core: ${session.username} | Order Clearance Rank: ${userRank}`);
+                    return;
+                }
+
+                if (commandName === "/cooldown") {
+                    writeToConsole("Analyzing Leyline connectivity structures...");
+                    writeToConsole(`Node Latency: ${Math.floor(Math.random() * 40) + 10}ms | Core Stability: 98.7%`, "var(--accent-color)");
+                    return;
+                }
+
+                if (commandName === "/leaderboard") {
+                    let entries = Object.keys(globalMagesCache).map(k => ({ name: k, ...globalMagesCache[k] }));
+                    entries.sort((a,b) => (b.rawEnergy || 0) - (a.rawEnergy || 0));
+                    writeToConsole("🏆 CURRENT MATRIX TOP STANDINGS:");
+                    entries.slice(0, 3).forEach((e, idx) => {
+                        writeToConsole(`  ${idx+1}. ${e.name} — ${e.rank} (${formatArcaneMP(calculateDiminishingMP(e.rawEnergy || 0))} MP)`);
+                    });
                     return;
                 }
 
@@ -439,6 +457,41 @@
                     return;
                 }
 
+                if (commandName === "/scavenge") {
+                    if (isOwner) return;
+                    let currentRawEnergy = userProfile.rawEnergy || 0;
+                    if (Math.random() > 0.4) {
+                        let gain = Math.floor(Math.random() * 400) + 100;
+                        let newRaw = currentRawEnergy + gain;
+                        await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRaw) });
+                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newRaw)) });
+                        writeToConsole(`🗑️ Found discarded data remnants! Recovered +${gain} Sparks.`, "var(--success-color)");
+                    } else {
+                        writeToConsole("🗑️ Scavenged the digital fringe but came up empty-handed.", "var(--text-color)");
+                    }
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/overclock") {
+                    if (isOwner) return;
+                    let currentRawEnergy = userProfile.rawEnergy || 0;
+                    if(currentRawEnergy <= 0) { writeToConsole("Cannot overclock a cold, dead core matrix.", "var(--danger-color)"); return; }
+                    
+                    if (Math.random() < 0.20) { // 20% Success rate for critical output
+                        let multi = Math.floor(currentRawEnergy * 2.5);
+                        await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(multi) });
+                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(multi)) });
+                        writeToConsole(`⚙️ CORE OVERCLOCK IMMENSE SUCCESS! Power multiplied to ${multi} Sparks!`, "var(--success-color)");
+                    } else {
+                        await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: 0 });
+                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: 0 });
+                        writeToConsole("💥 OVERHEATED! The overclock ruptured your system. Sparks reset to 0.", "var(--danger-color)");
+                    }
+                    await syncNetworkData();
+                    return;
+                }
+
                 if (commandName === "/gamble") {
                     if (isOwner) return;
                     const amount = parseInt(targetArg);
@@ -460,34 +513,106 @@
                 }
 
                 if (commandName === "/drain") {
-                    if (isOwner) return;
+                    if (isOwner) { writeToConsole("Root administrators do not need to drain power.", "var(--danger-color)"); return; }
                     const targetUser = targetArg;
                     const amount = parseInt(valueArg);
 
-                    if (!targetUser || isNaN(amount) || amount <= 0) { writeToConsole("Usage: /drain [username] [amount]", "var(--danger-color)"); return; }
-                    if (!globalMagesCache[targetUser]) { writeToConsole("Target not detected.", "var(--danger-color)"); return; }
-                    if (targetUser === "AdminOwner" || globalMagesCache[targetUser].rank === "Overseer") { writeToConsole("Fatal Error: Target immune to standard drains.", "var(--danger-color)"); return; }
+                    if (!targetUser || isNaN(amount) || amount <= 0) { 
+                        writeToConsole("Usage Syntax Error. Format: /drain [Target Name] 50", "var(--danger-color)"); 
+                        return; 
+                    }
+                    
+                    const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetUser.trim().toLowerCase());
+                    if (!realTargetKey) { 
+                        writeToConsole(`Target node "${targetUser}" not found in matrix cache.`, "var(--danger-color)"); 
+                        return; 
+                    }
+                    if (realTargetKey === "AdminOwner" || globalMagesCache[realTargetKey].rank === "Overseer" || realTargetKey === session.username) { 
+                        writeToConsole("Action Aborted: Target immune or invalid extraction loop.", "var(--danger-color)"); 
+                        return; 
+                    }
 
-                    let targetRaw = globalMagesCache[targetUser].rawEnergy || 0;
+                    let targetRaw = globalMagesCache[realTargetKey].rawEnergy || 0;
                     if (targetRaw < amount) { writeToConsole("Target lacks that much power to harvest.", "var(--danger-color)"); return; }
 
                     let myRaw = userProfile.rawEnergy || 0;
 
                     if (Math.random() < 0.40) {
-                        let newMyRaw = myRaw + amount;
+                        let bountyBonus = 0;
+                        if(globalBounties[realTargetKey.toLowerCase()]) {
+                            bountyBonus = globalBounties[realTargetKey.toLowerCase()];
+                            delete globalBounties[realTargetKey.toLowerCase()];
+                            writeToConsole(`🎯 BOUNTY CLAIMED! Acquired an extra +${bountyBonus} stored pool units!`, "var(--accent-color)");
+                        }
+
+                        let newMyRaw = myRaw + amount + bountyBonus;
                         let newTargRaw = targetRaw - amount;
                         await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newMyRaw) });
                         await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newMyRaw)) });
-                        await fetch(`${dbURL}/${targetUser}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newTargRaw) });
-                        await fetch(`${dbURL}/${targetUser}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newTargRaw)) });
-                        writeToConsole(`🩸 Leech Success! Siphoned ${amount} Sparks away from ${targetUser}.`, "var(--success-color)");
+                        await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newTargRaw) });
+                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newTargRaw)) });
+                        writeToConsole(`🩸 Leech Success! Harvested ${amount} Sparks away from ${realTargetKey}.`, "var(--success-color)");
                     } else {
                         let backlash = Math.floor(amount * 0.5);
                         let newMyRaw = Math.max(0, myRaw - backlash);
                         await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newMyRaw) });
                         await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newMyRaw)) });
-                        writeToConsole(`💥 Backfired! You leaked -${backlash} Sparks.`, "var(--danger-color)");
+                        writeToConsole(`💥 Backfire! Matrix collapsed during extraction. You lost -${backlash} Sparks.`, "var(--danger-color)");
                     }
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/smuggle") {
+                    if (isOwner) return;
+                    const targetUser = targetArg;
+                    const amount = parseInt(valueArg);
+                    if (!targetUser || isNaN(amount) || amount <= 0) { writeToConsole("Usage: /smuggle [name] [amount]", "var(--danger-color)"); return; }
+
+                    const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetUser.trim().toLowerCase());
+                    if(!realTargetKey) { writeToConsole("Target unseen.", "var(--danger-color)"); return; }
+
+                    let myRaw = userProfile.rawEnergy || 0;
+                    if(myRaw < amount) { writeToConsole("Insufficient assets.", "var(--danger-color)"); return; }
+
+                    if(Math.random() > 0.3) { // 70% success bypass transfer taxes
+                        let donorRaw = myRaw - amount;
+                        let receiverRaw = (globalMagesCache[realTargetKey].rawEnergy || 0) + amount;
+                        await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(donorRaw) });
+                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
+                        await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(receiverRaw) });
+                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(receiverRaw)) });
+                        writeToConsole(`🕵️ Smuggled ${amount} Sparks directly into ${realTargetKey}'s cache grid.`, "var(--success-color)");
+                    } else {
+                        let fine = Math.floor(amount * 0.3);
+                        let donorRaw = Math.max(0, myRaw - fine);
+                        await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(donorRaw) });
+                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
+                        writeToConsole(`⚠️ Intercepted! Council firewalls seized a penalty of -${fine} sparks.`, "var(--danger-color)");
+                    }
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/bounty") {
+                    if (isOwner) return;
+                    const targetUser = targetArg;
+                    const amount = parseInt(valueArg);
+                    if (!targetUser || isNaN(amount) || amount <= 0) { writeToConsole("Usage: /bounty [name] [amount]", "var(--danger-color)"); return; }
+
+                    const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetUser.trim().toLowerCase());
+                    if(!realTargetKey) { writeToConsole("Target node unknown.", "var(--danger-color)"); return; }
+
+                    let myRaw = userProfile.rawEnergy || 0;
+                    if(myRaw < amount) { writeToConsole("You cannot manifest a bounty higher than your current reservoir.", "var(--danger-color)"); return; }
+
+                    let updatedMyRaw = myRaw - amount;
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedMyRaw) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedMyRaw)) });
+
+                    let lower = realTargetKey.toLowerCase();
+                    globalBounties[lower] = (globalBounties[lower] || 0) + amount;
+                    writeToConsole(`🎯 Contract Broadcasted! Staked ${amount} Sparks bounty on [${realTargetKey}].`, "var(--accent-color)");
                     await syncNetworkData();
                     return;
                 }
@@ -496,16 +621,19 @@
                     if (isOwner) return;
                     const targetUser = targetArg;
                     const amount = parseInt(valueArg);
-                    if (!targetUser || isNaN(amount) || amount <= 0 || (userProfile.rawEnergy || 0) < amount || !globalMagesCache[targetUser]) { writeToConsole("Invalid transfer arguments.", "var(--danger-color)"); return; }
+                    if (!targetUser || isNaN(amount) || amount <= 0 || (userProfile.rawEnergy || 0) < amount) { writeToConsole("Invalid transfer parameters.", "var(--danger-color)"); return; }
+
+                    const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetUser.trim().toLowerCase());
+                    if (!realTargetKey) { writeToConsole("Target could not be established.", "var(--danger-color)"); return; }
 
                     let donorRaw = (userProfile.rawEnergy || 0) - amount;
-                    let receiverRaw = (globalMagesCache[targetUser].rawEnergy || 0) + amount;
+                    let receiverRaw = (globalMagesCache[realTargetKey].rawEnergy || 0) + amount;
 
                     await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(donorRaw) });
                     await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
-                    await fetch(`${dbURL}/${targetUser}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(receiverRaw) });
-                    await fetch(`${dbURL}/${targetUser}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(receiverRaw)) });
-                    writeToConsole(`🤝 Channeled ${amount} Raw Sparks safely over to ${targetUser}!`, "var(--success-color)");
+                    await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(receiverRaw) });
+                    await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(receiverRaw)) });
+                    writeToConsole(`🤝 Channeled ${amount} Raw Sparks safely over to ${realTargetKey}!`, "var(--success-color)");
                     await syncNetworkData();
                     return;
                 }
@@ -516,12 +644,14 @@
                     if (commandName === "/auracast") { writeToConsole("🌌 Ambient aura fields standardized.", "var(--accent-color)"); return; }
                     if (commandName === "/syncpool") { writeToConsole("Sub-networks synchronized.", "var(--success-color)"); return; }
                     if (commandName === "/bless") {
-                        const targetData = globalMagesCache[targetArg];
-                        if (!targetArg || !targetData) { writeToConsole("Specify target username."); return; }
-                        let updatedRaw = (targetData.rawEnergy || 0) + 2500;
-                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
-                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
-                        writeToConsole(`🌌 Bestowed Elder Blessing upon ${targetArg}! (+2,500 Sparks)`, "var(--accent-color)");
+                        if(!targetArg) { writeToConsole("Specify target username."); return; }
+                        const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetArg.trim().toLowerCase());
+                        if (!realTargetKey) { writeToConsole("Target offline."); return; }
+                        
+                        let updatedRaw = (globalMagesCache[realTargetKey].rawEnergy || 0) + 2500;
+                        await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
+                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
+                        writeToConsole(`🌌 Bestowed Elder Blessing upon ${realTargetKey}! (+2,500 Sparks)`, "var(--accent-color)");
                         await syncNetworkData();
                         return;
                     }
@@ -532,25 +662,26 @@
                     if (!targetArg) { writeToConsole("Specify target profile argument.", "var(--danger-color)"); return; }
                     if (targetArg === "AdminOwner") { writeToConsole("Root core immune.", "var(--danger-color)"); return; }
                     
-                    const targetData = globalMagesCache[targetArg];
-                    if (!targetData && commandName !== "/strip") { writeToConsole("Target node offline.", "var(--danger-color)"); return; }
+                    const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetArg.trim().toLowerCase());
+                    if (!realTargetKey) { writeToConsole("Target node offline.", "var(--danger-color)"); return; }
+                    const targetData = globalMagesCache[realTargetKey];
 
                     if (commandName === "/siphon") {
                         const amount = parseInt(valueArg);
                         if (isNaN(amount) || amount <= 0) return;
                         let targRaw = targetData.rawEnergy || 0;
                         let updatedTargRaw = Math.max(0, targRaw - amount);
-                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedTargRaw) });
-                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedTargRaw)) });
-                        writeToConsole(`⚡ OVERSEER SIPHON: Extracted ${amount} Sparks from ${targetArg}.`, "var(--accent-color)");
+                        await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedTargRaw) });
+                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedTargRaw)) });
+                        writeToConsole(`⚡ OVERSEER SIPHON: Extracted ${amount} Sparks from ${realTargetKey}.`, "var(--accent-color)");
                     }
                     else if (commandName === "/strip") {
-                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: 0 });
-                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: 0 });
-                        writeToConsole(`⚡ COMMAND STRIP: Wiped ${targetArg} to 0 MP.`, "var(--danger-color)");
+                        await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: 0 });
+                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: 0 });
+                        writeToConsole(`⚡ COMMAND STRIP: Wiped ${realTargetKey} to 0 MP.`, "var(--danger-color)");
                     }
-                    else if (commandName === "/freeze") { writeToConsole(`🧊 LOCK PROTOCOL applied to [${targetArg}].`, "var(--danger-color)"); }
-                    else if (commandName === "/scan") { writeToConsole(`[Scan] ${targetArg}: Rank=${targetData.rank} | Sparks=${targetData.rawEnergy || 0}`); }
+                    else if (commandName === "/freeze") { writeToConsole(`🧊 LOCK PROTOCOL applied to [${realTargetKey}].`, "var(--danger-color)"); }
+                    else if (commandName === "/scan") { writeToConsole(`[Scan] ${realTargetKey}: Rank=${targetData.rank} | Sparks=${targetData.rawEnergy || 0}`); }
                     await syncNetworkData();
                     return;
                 }
@@ -560,40 +691,42 @@
                     if (!isOwner) { writeToConsole("Fatal Error: Grandmaster root restriction.", "var(--danger-color)"); return; }
                     if (!targetArg || targetArg === "AdminOwner") return;
                     
-                    const targetData = globalMagesCache[targetArg];
+                    const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetArg.trim().toLowerCase());
+                    if(!realTargetKey) { writeToConsole("Target missing from matrix mapping.", "var(--danger-color)"); return; }
+                    const targetData = globalMagesCache[realTargetKey];
 
                     if (commandName === "/take") {
                         const amount = parseInt(valueArg);
                         if (isNaN(amount) || amount <= 0) { writeToConsole("Usage: /take [username] [amount]", "var(--danger-color)"); return; }
                         let currentRaw = targetData ? (targetData.rawEnergy || 0) : 0;
                         let updatedRaw = Math.max(0, currentRaw - amount);
-                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
-                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
-                        writeToConsole(`👑 ROOT TAKE: Forcefully took ${amount} sparks from data layer of [${targetArg}].`, "var(--danger-color)");
+                        await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
+                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
+                        writeToConsole(`👑 ROOT TAKE: Forcefully took ${amount} sparks from data layer of [${realTargetKey}].`, "var(--danger-color)");
                         await syncNetworkData();
                         return;
                     }
 
                     if (commandName === "/overload") {
-                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: 0 });
-                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: 0 });
-                        writeToConsole(`⚡ Core Collapse Transmitted onto ${targetArg}.`, "var(--danger-color)");
+                        await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: 0 });
+                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: 0 });
+                        writeToConsole(`⚡ Core Collapse Transmitted onto ${realTargetKey}.`, "var(--danger-color)");
                     } 
                     else if (commandName === "/smite") {
-                        await fetch(`${dbURL}/${targetArg}/rank.json`, { method: 'PUT', body: JSON.stringify("Novice") });
-                        await fetch(`${dbURL}/${targetArg}/hasLicense.json`, { method: 'PUT', body: false });
-                        writeToConsole(`⚡ Smote privileges of ${targetArg} to Novice.`, "var(--danger-color)");
+                        await fetch(`${dbURL}/${realTargetKey}/rank.json`, { method: 'PUT', body: JSON.stringify("Novice") });
+                        await fetch(`${dbURL}/${realTargetKey}/hasLicense.json`, { method: 'PUT', body: false });
+                        writeToConsole(`⚡ Smote privileges of ${realTargetKey} to Novice.`, "var(--danger-color)");
                     } 
                     else if (commandName === "/ascend") {
-                        await fetch(`${dbURL}/${targetArg}/rank.json`, { method: 'PUT', body: JSON.stringify("Overseer") });
-                        writeToConsole(`⚡ Ascended ${targetArg} to Overseer.`, "var(--success-color)");
+                        await fetch(`${dbURL}/${realTargetKey}/rank.json`, { method: 'PUT', body: JSON.stringify("Overseer") });
+                        writeToConsole(`⚡ Ascended ${realTargetKey} to Overseer.`, "var(--success-color)");
                     }
                     else if (commandName === "/inject") {
                         const amount = parseInt(valueArg); if (isNaN(amount)) return;
                         let updatedRaw = (targetData ? (targetData.rawEnergy || 0) : 0) + amount;
-                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
-                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
-                        writeToConsole(`💉 Injected +${amount} Raw Sparks into ${targetArg}.`, "var(--success-color)");
+                        await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
+                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
+                        writeToConsole(`💉 Injected +${amount} Raw Sparks into ${realTargetKey}.`, "var(--success-color)");
                     }
                     await syncNetworkData();
                     return;
