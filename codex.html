@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Grand Library - Arcane Lore & Laws</title>
+    <title>The Grand Library - Arcane Elements & Alchemy</title>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -15,31 +15,23 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; padding: 20px; }
-        
         .container { max-width: 900px; margin: 0 auto; }
-        
         header { text-align: center; padding: 40px 0; border-bottom: 1px solid #222; margin-bottom: 30px; }
-        header h1 { color: #fff; font-size: 2.5rem; letter-spacing: 2px; text-transform: uppercase; }
-        header p { color: #888; font-style: italic; margin-top: 5px; }
-
-        .back-btn { display: inline-block; text-decoration: none; color: var(--accent-color); border: 1px solid var(--accent-color); padding: 8px 16px; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 20px; transition: all 0.2s; }
-        .back-btn:hover { background: rgba(69, 243, 255, 0.1); }
-
+        header h1 { color: #fff; font-size: 2.3rem; letter-spacing: 2px; text-transform: uppercase; }
+        .back-btn { display: inline-block; text-decoration: none; color: var(--accent-color); border: 1px solid var(--accent-color); padding: 8px 16px; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 20px; }
         .section-card { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 30px; margin-bottom: 25px; }
         h2 { color: var(--text-light); border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; font-size: 1.3rem; }
         
-        .magic-types { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 15px; }
-        @media(min-width: 600px) { .magic-types { grid-template-columns: 1fr 1fr; } }
+        .magic-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 15px; }
+        @media(min-width: 600px) { .magic-grid { grid-template-columns: 1fr 1fr; } }
         
-        .type-box { background: #0b0c10; padding: 15px; border-radius: 4px; border-left: 3px solid var(--accent-color); }
-        .type-box h3 { color: #fff; margin-bottom: 5px; font-size: 1.1rem; }
-
-        .law-list { list-style-type: none; }
-        .law-list li { margin-bottom: 12px; padding-left: 20px; position: relative; }
-        .law-list li::before { content: "⚡"; position: absolute; left: 0; color: var(--accent-color); }
+        .element-box { background: #0b0c10; padding: 15px; border-radius: 4px; border-left: 3px solid var(--accent-color); }
+        .element-box h3 { color: #fff; margin-bottom: 5px; font-size: 1.1rem; }
+        .primary { border-left-color: #ff9f43; }
+        .composite { border-left-color: #a55eea; }
+        .mastery { border-left-color: #2ed573; }
         
-        .forbidden { border-left-color: var(--danger-color); }
-        .forbidden h3 { color: var(--danger-color); }
+        .formula-badge { background: #1b263b; color: #54a0ff; padding: 2px 6px; font-size: 0.8rem; font-family: monospace; border-radius: 3px; display: inline-block; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -48,53 +40,80 @@
         <a href="index.html" class="back-btn">← Return to Council Board</a>
 
         <header>
-            <h1>The Grand Arcane Codex</h1>
-            <p>Authorized compilation of leyline elements, laws, and forbidden practices.</p>
+            <h1>The Arcanum Codex Manifest</h1>
+            <p>Official 11-Element Matrix & Advanced Fusion Manifestos</p>
         </header>
 
-        <!-- SECTION 1: THE MAGIC SYSTEM -->
+        <!-- PRIMARY CORES -->
         <div class="section-card">
-            <h2>The Four Core Elements</h2>
-            <p>Every Mage signs into the registry to harness one of the natural planetary flows. Each element channels differently through a user's Magic Power (MP):</p>
-            
-            <div class="magic-types">
-                <div class="type-box">
-                    <h3>🔥 Pyromancy (Plasma Flow)</h3>
-                    <p>Destructive, high-energy output. Pyromancers often post volatile MP fluctuations on the leaderboard, trading stability for raw speed.</p>
+            <h2 style="color: #ff9f43;">The 4 Primary Elements</h2>
+            <p>The fundamental building blocks of planetary essence. All external spell lines stream directly from these four elemental cores:</p>
+            <div class="magic-grid">
+                <div class="element-box primary">
+                    <h3>🔥 Fire Magic</h3>
+                    <p>Raw kinetic combustion. High thermal acceleration vectors.</p>
                 </div>
-                <div class="type-box">
-                    <h3>⚡ Chronomancy (Time Distortion)</h3>
-                    <p>The art of slowing down intervals. High-ranking Chronomancers are rumor-bound to freeze their trial parameters to secure consistent rolls.</p>
+                <div class="element-box primary">
+                    <h3>💧 Water Magic</h3>
+                    <p>Fluidic structural resonance. Controls cohesive liquid states.</p>
                 </div>
-                <div class="type-box">
-                    <h3>🌌 Void Attunement</h3>
-                    <p>Manipulating dark matter. Void users focus on gravity wells, allowing them to anchor their scores so their hierarchy standing rarely drops.</p>
+                <div class="element-box primary">
+                    <h3>💨 Air Magic</h3>
+                    <p>Gaseous pressure mechanics and atmospheric flow parameters.</p>
                 </div>
-                <div class="type-box">
-                    <h3>🌿 Aether Healing</h3>
-                    <p>Channelling planetary rejuvenation. This magic allows council members to grant licenses and stabilize corrupt profile matrices.</p>
+                <div class="element-box primary">
+                    <h3>🪨 Earth Magic</h3>
+                    <p>Dense molecular stabilization. Controls mineral and tectonic formations.</p>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 2: LAWS OF THE SERVER -->
+        <!-- COMPOSITE ALCHEMY FUSIONS -->
         <div class="section-card">
-            <h2>The Three Golden Decrees</h2>
-            <p>All registered initiates must respect the server environment parameters. Failure to comply results in exile by a Grandmaster Overseer.</p>
-            <ul class="law-list">
-                <li><strong>The Decree of Identity:</strong> No user may duplicate a signature string belonging to another active caster in the registry.</li>
-                <li><strong>The Decree of Power:</strong> Channeling rituals must only use authorized server ticks. Overclocking local calculations is tracking-punishable.</li>
-                <li><strong>The Decree of Hierarchy:</strong> Lower tiers must respect the rank commands issued by licensed council members holding active Seals (📜).</li>
-            </ul>
+            <h2 style="color: #a55eea;">The 6 Composite Fusion Elements</h2>
+            <p>Forged when a master caster successfully binds and interlocks the stream of two primary element layers simultaneously:</p>
+            <div class="magic-grid">
+                <div class="element-box composite">
+                    <span class="formula-badge">🪨 Earth + 💧 Water</span>
+                    <h3>🔮 Matter Control</h3>
+                    <p>Manipulates atomic density structures and alters baseline physical states.</p>
+                </div>
+                <div class="element-box composite">
+                    <span class="formula-badge">💧 Water + 🔥 Fire</span>
+                    <h3>⚡ Energy</h3>
+                    <p>Pure thermal excitation waves. Pure displacement power calculations.</p>
+                </div>
+                <div class="element-box composite">
+                    <span class="formula-badge">🪨 Earth + 🔥 Fire</span>
+                    <h3>🌋 Magma Magic</h3>
+                    <p>Superheated liquefaction. High-destructive subterranean slag flow.</p>
+                </div>
+                <div class="element-box composite">
+                    <span class="formula-badge">💨 Air + 💧 Water</span>
+                    <h3>🌪️ Weather Magic</h3>
+                    <p>Macro environmental storm systems, air pressure cells, and precipitation manipulation.</p>
+                </div>
+                <div class="element-box composite">
+                    <span class="formula-badge">💧 Water + 🪨 Earth</span>
+                    <h3>🧪 Viscosity Magic</h3>
+                    <p>Friction modification. Controls adhesive states, density drag ratios, and fluid resistance.</p>
+                </div>
+                <div class="element-box composite">
+                    <span class="formula-badge">🔥 Fire + 💨 Air</span>
+                    <h3>⚡ Lightning Magic</h3>
+                    <p>High-voltage ionized arcs tracking along thermal pressure differentials.</p>
+                </div>
+            </div>
         </div>
 
-        <!-- SECTION 3: FORBIDDEN MAGIC -->
-        <div class="section-card forbidden">
-            <h2>⚠️ Forbidden Arts Block</h2>
-            <p style="margin-bottom: 15px;">Channelling these specific frequencies forces immediate script failure or profile wiping by the AdminOwner.</p>
-            <div class="type-box forbidden" style="background:#1c1216;">
-                <h3>💀 Script-Inversion (Database Spoofing)</h3>
-                <p>Attempting to bypass the login pipeline to manually override MP capacity scores will result in an automatic network disconnect.</p>
+        <!-- SUPREME ELEMENT -->
+        <div class="section-card" style="border-color: #2ed573;">
+            <h2 style="color: #2ed573;">The Supreme Arcane Zenith</h2>
+            <p>Achieved only when all primary element leylines unify flawlessly into a living cycle:</p>
+            <div class="element-box mastery" style="margin-top:15px; background: rgba(46, 213, 115, 0.02);">
+                <span class="formula-badge" style="color: #2ed573; background: #0c2316;">🔥 + 💧 + 💨 + 🪨 All Cores Unified</span>
+                <h3 style="font-size: 1.3rem;">🌿 Nature Magic</h3>
+                <p>The apex form of magic. Absolute sovereignty over organic life cycle structures, ecosystem generation, and natural evolutionary timelines.</p>
             </div>
         </div>
 
