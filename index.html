@@ -60,6 +60,9 @@
         .codex-list { list-style: none; }
         .codex-item { padding: 10px; border-bottom: 1px dashed #222; display: flex; justify-content: space-between; align-items: center; }
         .codex-item span { font-size: 0.85rem; font-family: monospace; color: #888; }
+        
+        /* Dynamic Feedback Text */
+        #ritualFeedback { font-size: 0.9rem; font-style: italic; margin-top: 8px; font-family: sans-serif; min-height: 20px; }
     </style>
 </head>
 <body>
@@ -85,7 +88,7 @@
             <div id="promotionRoster"></div>
         </div>
 
-        <!-- INSCRIPTION TERMINAL WITH MATHEMATICAL MP PROGRESSION -->
+        <!-- INSCRIPTION TERMINAL WITH CHAOTIC RISK & DIMINISHING RETURNS -->
         <div class="panel">
             <h2>Arcane Inscription Terminal</h2>
             <div id="trialArena">
@@ -97,6 +100,7 @@
                     <div id="ownerNotice" style="display:none; color:var(--accent-color); font-weight:bold;">👑 Owner Grandmaster Core Active</div>
                 </div>
                 <button id="actionBtn" class="btn-action">Run Channeling Ritual</button>
+                <div id="ritualFeedback"></div>
             </div>
         </div>
 
@@ -143,7 +147,7 @@
         const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
         let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
         let isEditingPromotion = false;
-        let globalMagesCache = {}; // Cache to keep track of true raw points
+        let globalMagesCache = {}; 
 
         // --- PROGRESSIVE ENERGY MATH ENGINE ---
         const MAX_MP_LIMIT = 1000000000; // 1 Billion Absolute Hard Cap
@@ -151,7 +155,6 @@
         // Scales raw values into diminishing returns using an exponential log curve
         function calculateDiminishingMP(rawEnergy) {
             if (!rawEnergy || rawEnergy <= 0) return 0;
-            // The higher the raw energy, the harder it is to push the curve toward 1 Billion
             let calculatedMP = MAX_MP_LIMIT * (1 - Math.exp(-rawEnergy / (MAX_MP_LIMIT * 0.45)));
             return Math.min(Math.round(calculatedMP), MAX_MP_LIMIT);
         }
@@ -252,7 +255,6 @@
 
             let sorted = Object.keys(networkUsers).map(k => ({ username: k, ...networkUsers[k] }));
             
-            // Sort by Rank priority first, then by calculated structural power
             sorted.sort((a,b) => {
                 const weightB = rankWeights[b.rank] || 0;
                 const weightA = rankWeights[a.rank] || 0;
@@ -270,8 +272,7 @@
                 if (isInf) {
                     scoreField = `<span class="infinite-text">∞ MP</span>`;
                 } else {
-                    // Pull pre-calculated MP or calculate dynamically from raw energy backup tracking
-                    const processedMP = u.power || calculateDiminishingMP(u.rawEnergy || 0);
+                    const processedMP = u.power !== undefined ? u.power : calculateDiminishingMP(u.rawEnergy || 0);
                     scoreField = `${formatArcaneMP(processedMP)} MP`;
                 }
 
@@ -281,14 +282,13 @@
             });
         }
 
-        // Updates Terminal display box continuously 
         function updateLocalDisplay(networkUsers) {
             if (!session || session.username === "AdminOwner") return;
             const pDisplay = document.getElementById('powerDisplay');
             if (!pDisplay) return;
 
             const myUser = networkUsers[session.username] || { power: 0, rawEnergy: 0 };
-            const currentMP = myUser.power || calculateDiminishingMP(myUser.rawEnergy || 0);
+            const currentMP = myUser.power !== undefined ? myUser.power : calculateDiminishingMP(myUser.rawEnergy || 0);
             pDisplay.innerText = `${formatArcaneMP(currentMP)} MP`;
         }
 
@@ -299,6 +299,7 @@
 
             const pDisplay = document.getElementById('powerDisplay');
             const actionBtn = document.getElementById('actionBtn');
+            const feedback = document.getElementById('ritualFeedback');
 
             if (session.username === "AdminOwner") {
                 pDisplay.innerHTML = `<span class="infinite-text">∞ MP</span>`;
@@ -309,18 +310,31 @@
                 actionBtn.onclick = async function() {
                     actionBtn.disabled = true;
 
-                    // Get current points from the live database snapshot cache
                     const profile = globalMagesCache[session.username] || { power: 0, rawEnergy: 0 };
                     let currentRawEnergy = profile.rawEnergy || profile.power || 0;
 
-                    // Generate a random burst of raw energy to add to their total pool
-                    const energyBurst = Math.floor(Math.random() * 850) + 150;
-                    let newRawEnergy = currentRawEnergy + energyBurst;
+                    // --- VOLATILITY ENGINE ---
+                    // 75% Chance of success, 25% Chance of a devastating magic backfire
+                    const rollChaos = Math.random();
+                    let newRawEnergy = currentRawEnergy;
 
-                    // Process the new raw total through the diminishing log-curve formula
+                    if (rollChaos > 0.25) {
+                        // SUCCESS: Gain a substantial raw energy burst
+                        const energyBurst = Math.floor(Math.random() * 850) + 150;
+                        newRawEnergy = currentRawEnergy + energyBurst;
+                        feedback.style.color = "var(--success-color)";
+                        feedback.innerText = `✨ Ritual Stable! Absorbed +${energyBurst} Raw Sparks.`;
+                    } else {
+                        // BACKFIRE: Lose 15% of your total stored raw pool (hurts much worse at higher amounts!)
+                        const energyDrain = Math.floor(currentRawEnergy * 0.15) + 100;
+                        newRawEnergy = Math.max(0, currentRawEnergy - energyDrain);
+                        feedback.style.color = "var(--danger-color)";
+                        feedback.innerText = `💥 Matrix Backfire! Leaked -${energyDrain} Arcane Sparks!`;
+                    }
+
+                    // Map through the progressive 1,000,000,000 ceiling formula
                     let finalCalculatedMP = calculateDiminishingMP(newRawEnergy);
 
-                    // Update both fields simultaneously inside the firebase object tree
                     await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRawEnergy) });
                     await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(finalCalculatedMP) });
                     
@@ -343,7 +357,6 @@
             syncNetworkData();
         }
 
-        // Start initialization sequence
         syncNetworkData().then(() => {
             buildActionTerminal();
         });
