@@ -75,27 +75,24 @@
         <div class="user-panel" id="userPanel">Syncing lines...</div>
     </header>
 
-    <!-- MAIN SINGLE GRID FRAME -->
     <div class="main-grid">
         
-        <!-- Navigation Gateway -->
         <div class="navigation-box full-span">
             <h2>Council Nexus Gate</h2>
             <p style="color: #a4b0be; margin-bottom: 15px;">Planetary Server Sync Status Active. Access your core modules below.</p>
-            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; max-width: 800px; margin: 0 auto;">
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; max-width: 900px; margin: 0 auto;">
                 <a href="login.html" class="btn-action" style="border-color: var(--text-color); color: var(--text-color); flex: 1; min-width: 180px; margin: 0; padding: 10px;">Login Vault</a>
                 <a href="chat.html" class="btn-action" style="border-color: var(--accent-color); color: var(--accent-color); flex: 1; min-width: 180px; margin: 0; padding: 10px;">Live Chat Crypt</a>
                 <a href="codex.html" class="btn-action" style="border-color: #9b59b6; color: #9b59b6; flex: 1; min-width: 180px; margin: 0; padding: 10px;">Library Codex</a>
+                <a href="vault.html" class="btn-action" style="border-color: #2ed573; color: #2ed573; flex: 1; min-width: 180px; margin: 0; padding: 10px;">🎬 Video Vault</a>
             </div>
         </div>
         
-        <!-- Admin Console Panel -->
         <div class="panel admin-zone full-span" id="adminZone">
             <h2 style="color: var(--accent-color);">Licensed Terminal Decree Panel</h2>
             <div id="promotionRoster"></div>
         </div>
 
-        <!-- Arcane Inscription Interactive Terminal -->
         <div class="panel">
             <h2>Arcane Inscription Terminal</h2>
             <div id="trialArena">
@@ -117,7 +114,6 @@
             </div>
         </div>
 
-        <!-- Global Live Registry Board -->
         <div class="panel">
             <h2>Global Live Registry Board</h2>
             <table>
@@ -128,12 +124,11 @@
             </table>
         </div>
 
-        <!-- Grand Hierarchy Matrix Information -->
         <div class="panel full-span">
             <h2>The Grand Order Hierarchy Matrix</h2>
             <ul class="codex-list">
                 <li class="codex-item"><strong>Grandmaster [Owner Level]</strong> <span style="color:var(--danger-color)">Absolute Authority (👑 AdminOwner ONLY)</span></li>
-                <li class="codex-item"><strong>Overseer [Supreme Commander]</strong> <span style="color:#00ffff">Tier 14 &bull; Ultimate Domain over sub-ranks.</span></li>
+                <li class="codex-item"><strong>Overseer [Supreme Commander]</strong> <span style="color:#00ffff">Tier 14 &bull; Domain control.</span></li>
                 <li class="codex-item"><strong>Grandfather [Divine Elder]</strong> <span style="color:#ff00ff">Tier 13 &bull; Stately regional support tier.</span></li>
                 <li class="codex-item"><strong>Demigod [Council Sub-Rank II]</strong> <span>Tier 12 &bull; Grants standard licenses</span></li>
                 <li class="codex-item"><strong>Paragon [Council Sub-Rank I]</strong> <span>Tier 11 &bull; Grants standard licenses</span></li>
@@ -374,7 +369,7 @@
                     writeToConsole("Standard Spells: /channel, /meditate, /absorb, /scavenge, /overclock, /gamble [amt], /leaderboard, /cooldown, /clear");
                     writeToConsole("Tactical Spells: /transfer [name] [amt], /drain [name] [amt], /smuggle [name] [amt], /bounty [name] [amt], /diagnose");
                     if (userRank === "Grandfather" || userRank === "Overseer" || isOwner) {
-                        writeToConsole("Grandfather: /syncpool, /auracast, /bless [name]");
+                        writeToConsole("Grandfather: /syncpool, /auracast, /bless [name], /announce [text]");
                     }
                     if (userRank === "Overseer" || isOwner) {
                         writeToConsole("🔥 OVERSEER: /siphon [name] [amt], /strip [name], /freeze [name], /scan [name]");
@@ -478,7 +473,7 @@
                     let currentRawEnergy = userProfile.rawEnergy || 0;
                     if(currentRawEnergy <= 0) { writeToConsole("Cannot overclock a cold, dead core matrix.", "var(--danger-color)"); return; }
                     
-                    if (Math.random() < 0.20) { // 20% Success rate for critical output
+                    if (Math.random() < 0.20) {
                         let multi = Math.floor(currentRawEnergy * 2.5);
                         await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(multi) });
                         await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(multi)) });
@@ -513,7 +508,6 @@
                 }
 
                 if (commandName === "/drain") {
-                    if (isOwner) { writeToConsole("Root administrators do not need to drain power.", "var(--danger-color)"); return; }
                     const targetUser = targetArg;
                     const amount = parseInt(valueArg);
 
@@ -527,8 +521,8 @@
                         writeToConsole(`Target node "${targetUser}" not found in matrix cache.`, "var(--danger-color)"); 
                         return; 
                     }
-                    if (realTargetKey === "AdminOwner" || globalMagesCache[realTargetKey].rank === "Overseer" || realTargetKey === session.username) { 
-                        writeToConsole("Action Aborted: Target immune or invalid extraction loop.", "var(--danger-color)"); 
+                    if (realTargetKey === session.username) { 
+                        writeToConsole("Action Aborted: Cannot extract from your own core loop.", "var(--danger-color)"); 
                         return; 
                     }
 
@@ -536,8 +530,10 @@
                     if (targetRaw < amount) { writeToConsole("Target lacks that much power to harvest.", "var(--danger-color)"); return; }
 
                     let myRaw = userProfile.rawEnergy || 0;
+                    const isGrandmaster = (session.username === "AdminOwner");
 
-                    if (Math.random() < 0.40) {
+                    // 100% success verification for Grandmaster
+                    if (isGrandmaster || Math.random() < 0.40) {
                         let bountyBonus = 0;
                         if(globalBounties[realTargetKey.toLowerCase()]) {
                             bountyBonus = globalBounties[realTargetKey.toLowerCase()];
@@ -547,11 +543,12 @@
 
                         let newMyRaw = myRaw + amount + bountyBonus;
                         let newTargRaw = targetRaw - amount;
+                        
                         await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newMyRaw) });
                         await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newMyRaw)) });
                         await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newTargRaw) });
                         await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newTargRaw)) });
-                        writeToConsole(`🩸 Leech Success! Harvested ${amount} Sparks away from ${realTargetKey}.`, "var(--success-color)");
+                        writeToConsole(`🩸 Leech Success! ${isGrandmaster ? 'Grandmaster ' : ''}harvested ${amount} Sparks away from ${realTargetKey}.`, "var(--success-color)");
                     } else {
                         let backlash = Math.floor(amount * 0.5);
                         let newMyRaw = Math.max(0, myRaw - backlash);
@@ -560,6 +557,40 @@
                         writeToConsole(`💥 Backfire! Matrix collapsed during extraction. You lost -${backlash} Sparks.`, "var(--danger-color)");
                     }
                     await syncNetworkData();
+                    return;
+                }
+
+                // --- NEW GLOBAL ANNOUNCEMENT SYSTEM ---
+                if (commandName === "/announce") {
+                    if (userRank !== "Overseer" && userRank !== "Grandfather" && !isOwner) { 
+                        writeToConsole("Fatal Error: Requires High Command access.", "var(--danger-color)"); 
+                        return; 
+                    }
+                    const announcementText = fullCmd.substring(fullCmd.indexOf(" ") + 1).trim();
+                    if (!announcementText || commandName === announcementText.toLowerCase()) {
+                        writeToConsole("Format Error: Use /announce [message]", "var(--danger-color)");
+                        return;
+                    }
+                    writeToConsole("📡 Broadcasting synchronized alert blocks to targets...", "var(--accent-color)");
+                    try {
+                        const allUsers = Object.keys(globalMagesCache);
+                        const broadcastPayload = {
+                            sender: session.username,
+                            content: `[ANNOUNCEMENT] ${announcementText}`,
+                            timestamp: Date.now(),
+                            unread: true
+                        };
+                        const dispatchPromises = allUsers.map(targetMage => {
+                            return fetch(`${dbURL}/${targetMage}/inboundAlerts.json`, {
+                                method: 'POST',
+                                body: JSON.stringify(broadcastPayload)
+                            });
+                        });
+                        await Promise.all(dispatchPromises);
+                        writeToConsole(`📡 Transmission Complete! Distributed to [${allUsers.length}] targets.`, "var(--success-color)");
+                    } catch (err) {
+                        writeToConsole("❌ Interruption during batch broadcast delivery loop.", "var(--danger-color)");
+                    }
                     return;
                 }
 
@@ -575,20 +606,19 @@
                     let myRaw = userProfile.rawEnergy || 0;
                     if(myRaw < amount) { writeToConsole("Insufficient assets.", "var(--danger-color)"); return; }
 
-                    if(Math.random() > 0.3) { // 70% success bypass transfer taxes
+                    if(Math.random() > 0.3) {
                         let donorRaw = myRaw - amount;
                         let receiverRaw = (globalMagesCache[realTargetKey].rawEnergy || 0) + amount;
                         await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(donorRaw) });
-                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
+                        await fetch(`${dbURL}/.../power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
                         await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(receiverRaw) });
                         await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(receiverRaw)) });
-                        writeToConsole(`🕵️ Smuggled ${amount} Sparks directly into ${realTargetKey}'s cache grid.`, "var(--success-color)");
+                        writeToConsole(`🕵️ Smuggled ${amount} Sparks into ${realTargetKey}'s cache grid.`, "var(--success-color)");
                     } else {
                         let fine = Math.floor(amount * 0.3);
                         let donorRaw = Math.max(0, myRaw - fine);
                         await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(donorRaw) });
-                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
-                        writeToConsole(`⚠️ Intercepted! Council firewalls seized a penalty of -${fine} sparks.`, "var(--danger-color)");
+                        writeToConsole(`⚠️ Intercepted! Firewalls seized -${fine} sparks.`, "var(--danger-color)");
                     }
                     await syncNetworkData();
                     return;
@@ -601,18 +631,17 @@
                     if (!targetUser || isNaN(amount) || amount <= 0) { writeToConsole("Usage: /bounty [name] [amount]", "var(--danger-color)"); return; }
 
                     const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetUser.trim().toLowerCase());
-                    if(!realTargetKey) { writeToConsole("Target node unknown.", "var(--danger-color)"); return; }
+                    if(!realTargetKey) { writeToConsole("Target unknown.", "var(--danger-color)"); return; }
 
                     let myRaw = userProfile.rawEnergy || 0;
-                    if(myRaw < amount) { writeToConsole("You cannot manifest a bounty higher than your current reservoir.", "var(--danger-color)"); return; }
+                    if(myRaw < amount) { writeToConsole("Insufficient reservoir.", "var(--danger-color)"); return; }
 
                     let updatedMyRaw = myRaw - amount;
                     await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedMyRaw) });
-                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedMyRaw)) });
 
                     let lower = realTargetKey.toLowerCase();
                     globalBounties[lower] = (globalBounties[lower] || 0) + amount;
-                    writeToConsole(`🎯 Contract Broadcasted! Staked ${amount} Sparks bounty on [${realTargetKey}].`, "var(--accent-color)");
+                    writeToConsole(`🎯 Broadcast Complete! Staked ${amount} Sparks bounty on [${realTargetKey}].`, "var(--accent-color)");
                     await syncNetworkData();
                     return;
                 }
@@ -621,36 +650,31 @@
                     if (isOwner) return;
                     const targetUser = targetArg;
                     const amount = parseInt(valueArg);
-                    if (!targetUser || isNaN(amount) || amount <= 0 || (userProfile.rawEnergy || 0) < amount) { writeToConsole("Invalid transfer parameters.", "var(--danger-color)"); return; }
+                    if (!targetUser || isNaN(amount) || amount <= 0 || (userProfile.rawEnergy || 0) < amount) { writeToConsole("Invalid parameters.", "var(--danger-color)"); return; }
 
                     const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetUser.trim().toLowerCase());
-                    if (!realTargetKey) { writeToConsole("Target could not be established.", "var(--danger-color)"); return; }
+                    if (!realTargetKey) { writeToConsole("Target unfound.", "var(--danger-color)"); return; }
 
                     let donorRaw = (userProfile.rawEnergy || 0) - amount;
                     let receiverRaw = (globalMagesCache[realTargetKey].rawEnergy || 0) + amount;
 
                     await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(donorRaw) });
-                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
                     await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(receiverRaw) });
-                    await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(receiverRaw)) });
-                    writeToConsole(`🤝 Channeled ${amount} Raw Sparks safely over to ${realTargetKey}!`, "var(--success-color)");
+                    writeToConsole(`🤝 Channeled ${amount} Sparks safely to ${realTargetKey}!`, "var(--success-color)");
                     await syncNetworkData();
                     return;
                 }
 
-                // --- ELDER & OVERSEER COMMANDS ---
                 if (commandName === "/syncpool" || commandName === "/auracast" || commandName === "/bless") {
-                    if (userRank !== "Grandfather" && userRank !== "Overseer" && !isOwner) { writeToConsole("Error: Requester identity lack Elder keys.", "var(--danger-color)"); return; }
+                    if (userRank !== "Grandfather" && userRank !== "Overseer" && !isOwner) { writeToConsole("Error: Missing Elder keys.", "var(--danger-color)"); return; }
                     if (commandName === "/auracast") { writeToConsole("🌌 Ambient aura fields standardized.", "var(--accent-color)"); return; }
                     if (commandName === "/syncpool") { writeToConsole("Sub-networks synchronized.", "var(--success-color)"); return; }
                     if (commandName === "/bless") {
-                        if(!targetArg) { writeToConsole("Specify target username."); return; }
+                        if(!targetArg) return;
                         const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetArg.trim().toLowerCase());
-                        if (!realTargetKey) { writeToConsole("Target offline."); return; }
-                        
+                        if (!realTargetKey) return;
                         let updatedRaw = (globalMagesCache[realTargetKey].rawEnergy || 0) + 2500;
                         await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
-                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
                         writeToConsole(`🌌 Bestowed Elder Blessing upon ${realTargetKey}! (+2,500 Sparks)`, "var(--accent-color)");
                         await syncNetworkData();
                         return;
@@ -659,25 +683,20 @@
 
                 if (commandName === "/siphon" || commandName === "/strip" || commandName === "/freeze" || commandName === "/scan") {
                     if (userRank !== "Overseer" && !isOwner) { writeToConsole("Fatal Error: Domain restricted.", "var(--danger-color)"); return; }
-                    if (!targetArg) { writeToConsole("Specify target profile argument.", "var(--danger-color)"); return; }
-                    if (targetArg === "AdminOwner") { writeToConsole("Root core immune.", "var(--danger-color)"); return; }
+                    if (!targetArg || targetArg === "AdminOwner") return;
                     
                     const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetArg.trim().toLowerCase());
-                    if (!realTargetKey) { writeToConsole("Target node offline.", "var(--danger-color)"); return; }
+                    if (!realTargetKey) return;
                     const targetData = globalMagesCache[realTargetKey];
 
                     if (commandName === "/siphon") {
-                        const amount = parseInt(valueArg);
-                        if (isNaN(amount) || amount <= 0) return;
-                        let targRaw = targetData.rawEnergy || 0;
-                        let updatedTargRaw = Math.max(0, targRaw - amount);
+                        const amount = parseInt(valueArg); if (isNaN(amount)) return;
+                        let updatedTargRaw = Math.max(0, (targetData.rawEnergy || 0) - amount);
                         await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedTargRaw) });
-                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedTargRaw)) });
                         writeToConsole(`⚡ OVERSEER SIPHON: Extracted ${amount} Sparks from ${realTargetKey}.`, "var(--accent-color)");
                     }
                     else if (commandName === "/strip") {
                         await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: 0 });
-                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: 0 });
                         writeToConsole(`⚡ COMMAND STRIP: Wiped ${realTargetKey} to 0 MP.`, "var(--danger-color)");
                     }
                     else if (commandName === "/freeze") { writeToConsole(`🧊 LOCK PROTOCOL applied to [${realTargetKey}].`, "var(--danger-color)"); }
@@ -686,30 +705,22 @@
                     return;
                 }
 
-                // --- ROOT ADM OWNER INTERFACES ---
                 if (commandName === "/take" || commandName === "/overload" || commandName === "/smite" || commandName === "/ascend" || commandName === "/inject") {
-                    if (!isOwner) { writeToConsole("Fatal Error: Grandmaster root restriction.", "var(--danger-color)"); return; }
+                    if (!isOwner) { writeToConsole("Fatal Error: Root restriction.", "var(--danger-color)"); return; }
                     if (!targetArg || targetArg === "AdminOwner") return;
                     
                     const realTargetKey = Object.keys(globalMagesCache).find(k => k.trim().toLowerCase() === targetArg.trim().toLowerCase());
-                    if(!realTargetKey) { writeToConsole("Target missing from matrix mapping.", "var(--danger-color)"); return; }
+                    if(!realTargetKey) return;
                     const targetData = globalMagesCache[realTargetKey];
 
                     if (commandName === "/take") {
-                        const amount = parseInt(valueArg);
-                        if (isNaN(amount) || amount <= 0) { writeToConsole("Usage: /take [username] [amount]", "var(--danger-color)"); return; }
-                        let currentRaw = targetData ? (targetData.rawEnergy || 0) : 0;
-                        let updatedRaw = Math.max(0, currentRaw - amount);
+                        const amount = parseInt(valueArg); if (isNaN(amount)) return;
+                        let updatedRaw = Math.max(0, (targetData.rawEnergy || 0) - amount);
                         await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
-                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
-                        writeToConsole(`👑 ROOT TAKE: Forcefully took ${amount} sparks from data layer of [${realTargetKey}].`, "var(--danger-color)");
-                        await syncNetworkData();
-                        return;
+                        writeToConsole(`👑 ROOT TAKE: Took ${amount} sparks from [${realTargetKey}].`, "var(--danger-color)");
                     }
-
-                    if (commandName === "/overload") {
+                    else if (commandName === "/overload") {
                         await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: 0 });
-                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: 0 });
                         writeToConsole(`⚡ Core Collapse Transmitted onto ${realTargetKey}.`, "var(--danger-color)");
                     } 
                     else if (commandName === "/smite") {
@@ -723,10 +734,8 @@
                     }
                     else if (commandName === "/inject") {
                         const amount = parseInt(valueArg); if (isNaN(amount)) return;
-                        let updatedRaw = (targetData ? (targetData.rawEnergy || 0) : 0) + amount;
+                        let updatedRaw = (targetData.rawEnergy || 0) + amount;
                         await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
-                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
-                        writeToConsole(`💉 Injected +${amount} Raw Sparks into ${realTargetKey}.`, "var(--success-color)");
                     }
                     await syncNetworkData();
                     return;
