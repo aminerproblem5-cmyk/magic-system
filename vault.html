@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcanum Data Repository & Vault</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --panel-bg: #151922;
+            --text-color: #c5a880;
+            --text-light: #fff;
+            --accent-color: #45f3ff;
+            --danger-color: #ff4d4d;
+            --success-color: #2ed573;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid #2d3748; padding-bottom: 15px; }
+        .panel { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 25px; margin-bottom: 25px; }
+        h2 { color: var(--text-light); font-size: 1.3rem; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        input, select { background: #11141a; border: 1px solid #333; color: #fff; padding: 12px; font-family: monospace; border-radius: 4px; }
+        button { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 12px; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase; }
+        button:hover { background: rgba(69, 243, 255, 0.05); }
+        .video-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media(min-width: 600px) { .video-grid { grid-template-columns: 1fr 1fr; } }
+        .video-card { background: #0b0c10; border: 1px solid #222; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        video { width: 100%; border-radius: 4px; background: #000; max-height: 200px; }
+        .meta { font-family: monospace; font-size: 0.8rem; color: #888; }
+        .back-link { color: var(--accent-color); text-decoration: none; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Shared Data Vault</h1>
+            <a href="index.html" class="back-link">&larr; Return to Council Nexus</a>
+        </header>
+
+        <!-- Video Submission Interface -->
+        <div class="panel">
+            <h2>Index New Transmission Stream</h2>
+            <div class="input-group">
+                <input type="text" id="videoTitle" placeholder="Video Title Reference (e.g., Core Energy Flux Analysis)">
+                <input type="text" id="videoUrl" placeholder="Direct Video URL (mp4, webm, or external link)">
+                <button onclick="publishStream()">Upload to Matrix</button>
+            </div>
+            <div id="statusLog" style="font-family: monospace; font-size: 0.85rem;"></div>
+        </div>
+
+        <!-- Shared Catalog -->
+        <div class="panel">
+            <h2>Active Broadcast Streams</h2>
+            <div class="video-grid" id="catalogGrid">
+                <!-- Dynamically injected feeds will populate here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/vault_videos";
+        let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
+
+        // Guard logic checking for systemic validation session
+        if (!session) {
+            alert("Security Error: Identity matrix invalid. Access Denied.");
+            window.location.href = "login.html";
+        }
+
+        async function fetchVaultCatalog() {
+            try {
+                const res = await fetch(`${dbURL}.json`);
+                const data = await res.json() || {};
+                const grid = document.getElementById('catalogGrid');
+                grid.innerHTML = '';
+
+                Object.keys(data).reverse().forEach(key => {
+                    const item = data[key];
+                    const card = document.createElement('div');
+                    card.className = 'video-card';
+                    
+                    card.innerHTML = `
+                        <h3 style="color:#fff; font-size:1rem;">${escapeHtml(item.title)}</h3>
+                        <video controls preload="metadata">
+                            <source src="${escapeHtml(item.url)}" type="video/mp4">
+                            Your environment lacks decoding capabilities for this wrapper format.
+                        </video>
+                        <div class="meta">
+                            Indexed By: <strong>${escapeHtml(item.sender)}</strong><br>
+                            Stamp: ${new Date(item.timestamp).toLocaleString()}
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error("Transmission interruption while updating visual database feeds.", err);
+            }
+        }
+
+        async function publishStream() {
+            const titleInput = document.getElementById('videoTitle');
+            const urlInput = document.getElementById('videoUrl');
+            const log = document.getElementById('statusLog');
+
+            const title = titleInput.value.trim();
+            const url = urlInput.value.trim();
+
+            if (!title || !url) {
+                log.innerHTML = `<span style="color:var(--danger-color)">Error: Complete all validation metrics before initializing write commands.</span>`;
+                return;
+            }
+
+            const payload = {
+                title: title,
+                url: url,
+                sender: session.username,
+                timestamp: Date.now()
+            };
+
+            log.innerHTML = `<span style="color:var(--accent-color)">Pushing data block to Firebase cluster...</span>`;
+
+            try {
+                await fetch(`${dbURL}.json`, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                
+                titleInput.value = '';
+                urlInput.value = '';
+                log.innerHTML = `<span style="color:var(--success-color)">Success: Stream verified and merged with the master catalog tree.</span>`;
+                fetchVaultCatalog();
+            } catch (err) {
+                log.innerHTML = `<span style="color:var(--danger-color)">Fatal failure during cloud delivery.</span>`;
+            }
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Initial launch and auto loop refresh
+        fetchVaultCatalog();
+        setInterval(fetchVaultCatalog, 8000);
+    </script>
+</body>
+</html>
