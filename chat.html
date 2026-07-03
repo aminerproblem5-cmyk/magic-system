@@ -15,18 +15,38 @@
             --tier3-color: #ff9f43;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; height: 100vh; overflow-x: hidden; }
+        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; height: 100vh; }
         
         header { background: #11141a; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
         .back-btn { text-decoration: none; color: var(--accent-color); border: 1px solid var(--accent-color); padding: 6px 12px; border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; }
         
-        .layout-wrapper { display: flex; flex-direction: column; max-width: 900px; width: 100%; margin: 20px auto; gap: 20px; flex: 1; min-height: 0; padding: 0 10px; }
+        /* Tab Controllers */
+        .crypt-tabs { display: flex; max-width: 900px; width: 100%; margin: 15px auto 0 auto; gap: 5px; padding: 0 10px; }
+        .tab-btn { background: #11141a; border: 1px solid #2d3748; color: #777; padding: 10px 20px; border-radius: 6px 6px 0 0; cursor: pointer; font-family: 'Georgia', serif; font-weight: bold; font-size: 0.9rem; transition: all 0.2s; border-bottom: none; }
+        .tab-btn.active { background: var(--panel-bg); color: #fff; border-color: #2d3748; }
+        .tab-btn#tabGlobal.active { border-top: 2px solid var(--accent-color); }
+        .tab-btn#tabPrivate.active { border-top: 2px solid var(--nature-color); }
 
-        .chat-container { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 8px; display: flex; flex-direction: column; height: 45vh; overflow: hidden; }
-        .private-container { background: var(--panel-bg); border: 1px solid var(--nature-color); border-radius: 8px; display: flex; flex-direction: column; height: 35vh; overflow: hidden; }
+        .chat-container { max-width: 900px; width: 100%; margin: 0 auto 20px auto; background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 0 0 8px 8px; display: flex; flex-direction: column; flex: 1; overflow: hidden; padding: 0; }
         
-        .chat-messages, .private-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+        /* Master Screens */
+        .crypt-screen { display: none; flex: 1; flex-direction: column; min-height: 0; }
+        .crypt-screen.active { display: flex; }
+
+        /* Global View Area */
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+
+        /* Private View Grid Layout */
+        .private-split { display: grid; grid-template-columns: 200px 1fr; flex: 1; min-height: 0; background: #0c0f16; }
+        .private-channels { background: #11141c; border-right: 1px solid #222; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; padding: 10px; }
+        .chan-user-btn { background: #1a222d; border: 1px solid #2d3748; color: #aaa; text-align: left; padding: 10px; border-radius: 4px; cursor: pointer; font-family: sans-serif; font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .chan-user-btn:hover { background: #232f3e; color: #fff; }
+        .chan-user-btn.active { border-color: var(--nature-color); color: #fff; background: var(--panel-bg); }
         
+        .private-chat-window { display: flex; flex-direction: column; flex: 1; min-height: 0; background: var(--panel-bg); }
+        .private-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+
+        /* Message Component Cards */
         .message-row { background: #0b0c10; padding: 12px; border-radius: 6px; border-left: 3px solid #333; line-height: 1.4; }
         .msg-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; font-size: 0.85rem; }
         .msg-user { font-weight: bold; color: #fff; }
@@ -46,18 +66,14 @@
         .rank-Demigod { background: #e67e22; color: #fff; box-shadow: 0 0 6px #e67e22; }
         .rank-Grandmaster { background: #ff4757; color: #fff; box-shadow: 0 0 8px #ff4757; }
 
-        .chat-input-area { padding: 12px; background: #11141a; border-top: 1px solid #222; display: flex; gap: 10px; align-items: center; }
-        input[type="text"], select { background: #0b0c10; border: 1px solid #333; padding: 10px; border-radius: 4px; color: #fff; font-size: 0.95rem; }
-        input[type="text"] { flex: 1; }
-        select { width: 160px; outline: none; cursor: pointer; border-color: var(--nature-color); color: var(--nature-color); font-family: 'Georgia', serif; }
+        /* Inputs Area */
+        .chat-input-area { padding: 15px; background: #11141a; border-top: 1px solid #222; display: flex; gap: 10px; }
+        input[type="text"] { flex: 1; background: #0b0c10; border: 1px solid #333; padding: 12px; border-radius: 4px; color: #fff; font-size: 1rem; }
         input[type="text"]:focus { outline: none; border-color: var(--accent-color); }
-        .send-btn { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 0 20px; height: 38px; font-weight: bold; text-transform: uppercase; border-radius: 4px; cursor: pointer; }
+        .send-btn { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 0 20px; font-weight: bold; text-transform: uppercase; border-radius: 4px; cursor: pointer; }
         .send-btn:hover { background: var(--accent-color); color: #000; }
-        .priv-send-btn { border-color: var(--nature-color); color: var(--nature-color); }
-        .priv-send-btn:hover { background: var(--nature-color); color: #000; }
         
         .locked-notice { padding: 15px; text-align: center; color: #ff4d4d; font-style: italic; background: rgba(255,77,77,0.05); }
-        .section-header { background: #11141a; padding: 8px 15px; font-size: 0.9rem; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -67,12 +83,16 @@
         <a href="index.html" class="back-btn">← Main Board</a>
     </header>
 
-    <div class="layout-wrapper">
+    <!-- Navigation Tabs -->
+    <div class="crypt-tabs">
+        <button class="tab-btn active" id="tabGlobal" onclick="switchTab('global')">🌐 Global Leyline</button>
+        <button class="tab-btn" id="tabPrivate" onclick="switchTab('private')">🔒 Private Whispers</button>
+    </div>
+
+    <div class="chat-container">
         
-        <div class="chat-container">
-            <div class="section-header" style="color: var(--accent-color); border-bottom-color: #2d3748;">
-                <span>🌐 Global Leyline Transmission Stream</span>
-            </div>
+        <!-- SCREEN 1: GLOBAL LEYLINE -->
+        <div id="screenGlobal" class="crypt-screen active">
             <div class="chat-messages" id="chatBox">
                 <p style="text-align:center; color:#555; font-style:italic; margin-top:20px;">Decrypting server communications...</p>
             </div>
@@ -81,16 +101,22 @@
             </div>
         </div>
 
-        <div class="private-container">
-            <div class="section-header" style="color: var(--nature-color); border-bottom-color: var(--nature-color);">
-                <span>🔒 Secure Target Whispers</span>
-                <span style="font-size: 0.75rem; font-style: italic; color: #777;">Encrypted Peer-to-Peer Mirror</span>
-            </div>
-            <div class="private-messages" id="privateChatBox">
-                <p style="text-align:center; color:#555; font-style:italic; margin-top:20px;">Awakening cryptographic mirror channels...</p>
-            </div>
-            <div id="privateInputSection">
-                <div class="locked-notice">Authentication required to anchor private mirror nodes.</div>
+        <!-- SCREEN 2: PRIVATE WHISPERS -->
+        <div id="screenPrivate" class="crypt-screen">
+            <div class="private-split">
+                <!-- Direct Message Target Sidebar List -->
+                <div class="private-channels" id="privateContactList">
+                    <p style="font-size:0.75rem; color:#555; text-align:center; font-style:italic;">No online nodes found...</p>
+                </div>
+                <!-- Independent Thread Window -->
+                <div class="private-chat-window">
+                    <div class="private-messages" id="privateChatBox">
+                        <p style="text-align:center; color:#555; font-style:italic; margin-top:20px;">Select an active channel node from the mirror left panel to decode a secure line.</p>
+                    </div>
+                    <div id="privateInputSection">
+                        <div class="locked-notice">Select a recipient to establish target matrix connection.</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -100,14 +126,35 @@
         const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com";
         const session = JSON.parse(sessionStorage.getItem('current_mage_session'));
         let userDatabaseCache = {};
+        let activePrivateTarget = null;
+        let globalChatsCache = {};
+        let privateChatsCache = {};
 
-        // Initialize layouts for both Global and Private chats
+        // 1. Tab Switching Controller Logic
+        function switchTab(targetTab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.crypt-screen').forEach(s => s.classList.remove('active'));
+            
+            if(targetTab === 'global') {
+                document.getElementById('tabGlobal').classList.add('active');
+                document.getElementById('screenGlobal').classList.add('active');
+                const box = document.getElementById('chatBox');
+                box.scrollTop = box.scrollHeight;
+            } else {
+                document.getElementById('tabPrivate').classList.add('active');
+                document.getElementById('screenPrivate').classList.add('active');
+                renderContactList();
+                if(activePrivateTarget) {
+                    const privBox = document.getElementById('privateChatBox');
+                    privBox.scrollTop = privBox.scrollHeight;
+                }
+            }
+        }
+
+        // 2. Establish interfaces based on validated mage sessions
         function initInterface() {
             const inputSection = document.getElementById('inputSection');
-            const privateInputSection = document.getElementById('privateInputSection');
-            
             if (session && session.username) {
-                // Global Input Setup
                 inputSection.innerHTML = `
                     <form id="chatForm" class="chat-input-area">
                         <input type="text" id="msgInput" placeholder="Cast message into the dynamic leyline..." required autocomplete="off" maxlength="250">
@@ -115,79 +162,47 @@
                     </form>
                 `;
                 document.getElementById('chatForm').onsubmit = sendMessage;
-
-                // Private Input Setup
-                privateInputSection.innerHTML = `
-                    <form id="privateChatForm" class="chat-input-area">
-                        <select id="targetSelect" required>
-                            <option value="" disabled selected>Select Mage Link...</option>
-                        </select>
-                        <input type="text" id="privMsgInput" placeholder="Send secure whisper to target..." required autocomplete="off" maxlength="250">
-                        <button type="submit" class="send-btn priv-send-btn">Whisper</button>
-                    </form>
-                `;
-                document.getElementById('privateChatForm').onsubmit = sendPrivateMessage;
             }
         }
 
-        // Fetch everything from DB (Mages, Global Chats, and Private Chats)
+        // 3. Main processing loops
         async function fetchMessages() {
             try {
-                // Fetch users
+                // Fetch ranks and player structures
                 const usersRes = await fetch(`${dbURL}/mages.json`);
                 userDatabaseCache = await usersRes.json() || {};
 
-                // Update targets selector dropdown if profile data changed
-                updateDropdownOptions();
-
-                // Fetch global records
+                // Fetch global communications
                 const chatRes = await fetch(`${dbURL}/chat.json`);
-                const chatData = await chatRes.json() || {};
-                renderMessages(chatData);
+                globalChatsCache = await chatRes.json() || {};
+                renderMessages(globalChatsCache);
 
-                // Fetch private records
+                // Fetch private direct whisper loops
                 const privRes = await fetch(`${dbURL}/private_chats.json`);
-                const privData = await privRes.json() || {};
-                renderPrivateMessages(privData);
-
+                privateChatsCache = await privRes.json() || {};
+                
+                if (document.getElementById('screenPrivate').classList.contains('active')) {
+                    renderContactList();
+                    renderPrivateMessages();
+                }
             } catch (err) {
                 console.error("Crypt read block:", err);
             }
         }
 
-        // Dynamically compile available mages for whispers excluding yourself
-        function updateDropdownOptions() {
-            const selector = document.getElementById('targetSelect');
-            if (!selector) return;
-            
-            const currentSelection = selector.value;
-            selector.innerHTML = '<option value="" disabled selected>Target Whisper Node...</option>';
-            
-            Object.keys(userDatabaseCache).forEach(username => {
-                if (session && username !== session.username) {
-                    const opt = document.createElement('option');
-                    opt.value = username;
-                    opt.textContent = `🔮 ${username}`;
-                    if (username === currentSelection) opt.selected = true;
-                    selector.appendChild(opt);
-                }
-            });
-        }
-
-        // Render Global Stream
+        // Render Global Message Feeds
         function renderMessages(chatData) {
             const chatBox = document.getElementById('chatBox');
             const atBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 100;
-            chatBox.innerHTML = '';
             
+            chatBox.innerHTML = '';
             const keys = Object.keys(chatData);
             if (keys.length === 0) {
-                chatBox.innerHTML = `<p style="text-align:center; color:#555; font-style:italic; margin-top:20px;">The global scroll is blank.</p>`;
+                chatBox.innerHTML = `<p style="text-align:center; color:#555; font-style:italic; margin-top:20px;">The scroll is blank.</p>`;
                 return;
             }
 
-            const boundedKeys = keys.slice(-40);
-            boundedKeys.forEach(k => {
+            keys.slice(-40).forEach(k => {
                 const msg = chatData[k];
                 const targetProfile = userDatabaseCache[msg.user] || { rank: "Novice" };
                 const currentRank = targetProfile.rank || "Novice";
@@ -210,53 +225,92 @@
             if (atBottom) chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Render Private Conversations directed to/from current account
-        function renderPrivateMessages(privData) {
+        // Render Interactive Contact List Sidebar
+        function renderContactList() {
+            const listContainer = document.getElementById('privateContactList');
+            if(!listContainer) return;
+            
+            listContainer.innerHTML = '';
+            const allUsers = Object.keys(userDatabaseCache);
+            const filteredUsers = allUsers.filter(u => !session || u !== session.username);
+
+            if(filteredUsers.length === 0) {
+                listContainer.innerHTML = `<p style="font-size:0.75rem; color:#555; text-align:center; font-style:italic;">No external mages synced.</p>`;
+                return;
+            }
+
+            filteredUsers.forEach(username => {
+                const btn = document.createElement('button');
+                btn.className = `chan-user-btn ${activePrivateTarget === username ? 'active' : ''}`;
+                btn.innerHTML = `🔮 ${username}`;
+                btn.onclick = () => selectPrivateTarget(username);
+                listContainer.appendChild(btn);
+            });
+        }
+
+        // Set Chosen Whispering Recipient Thread
+        function selectPrivateTarget(username) {
+            activePrivateTarget = username;
+            renderContactList();
+            
+            // Build direct chat input section immediately on selection click
+            const privInputSection = document.getElementById('privateInputSection');
+            if (session && session.username) {
+                privInputSection.innerHTML = `
+                    <form id="privateChatForm" class="chat-input-area">
+                        <input type="text" id="privMsgInput" placeholder="Whisper directly to ${username}..." required autocomplete="off" maxlength="250">
+                        <button type="submit" class="send-btn" style="border-color: var(--nature-color); color:var(--nature-color)">Send</button>
+                    </form>
+                `;
+                document.getElementById('privateChatForm').onsubmit = sendPrivateMessage;
+            }
+            renderPrivateMessages();
+        }
+
+        // Render Selected Recipient Message history securely
+        function renderPrivateMessages() {
             const privBox = document.getElementById('privateChatBox');
             if (!privBox) return;
+
+            if(!activePrivateTarget) {
+                privBox.innerHTML = `<p style="text-align:center; color:#555; font-style:italic; margin-top:20px;">Select an active channel node from the mirror left panel to decode a secure line.</p>`;
+                return;
+            }
 
             const atBottom = privBox.scrollHeight - privBox.scrollTop <= privBox.clientHeight + 100;
             privBox.innerHTML = '';
 
-            if (!session || !session.username) {
-                privBox.innerHTML = `<p style="text-align:center; color:#ff4d4d; font-style:italic; margin-top:20px;">Authentication loop severed.</p>`;
-                return;
-            }
-
-            const keys = Object.keys(privData);
-            // Filtering private transmissions
-            const myWhispers = keys.filter(k => {
-                const msg = privData[k];
-                return msg.sender === session.username || msg.receiver === session.username;
+            const keys = Object.keys(privateChatsCache);
+            
+            // Filter records shared between active session profile and targeted username
+            const threadKeys = keys.filter(k => {
+                const m = privateChatsCache[k];
+                return (m.sender === session.username && m.receiver === activePrivateTarget) ||
+                       (m.sender === activePrivateTarget && m.receiver === session.username);
             });
 
-            if (myWhispers.length === 0) {
-                privBox.innerHTML = `<p style="text-align:center; color:#555; font-style:italic; margin-top:20px;">No private mirror lines established yet.</p>`;
+            if(threadKeys.length === 0) {
+                privBox.innerHTML = `<p style="text-align:center; color:#555; font-style:italic; margin-top:20px;">Connection clear. Begin transmitting private data directly to ${activePrivateTarget}.</p>`;
                 return;
             }
 
-            // Only display last 30 private transmissions to balance storage speeds
-            const boundedWhispers = myWhispers.slice(-30);
-
-            boundedWhispers.forEach(k => {
-                const msg = privData[k];
-                const isSentByMe = msg.sender === session.username;
-                const talker = isSentByMe ? msg.sender : msg.sender;
-                const peerProfile = userDatabaseCache[talker] || { rank: "Novice" };
-                const currentRank = peerProfile.rank || "Novice";
+            threadKeys.forEach(k => {
+                const msg = privateChatsCache[k];
+                const isMe = msg.sender === session.username;
+                const author = msg.sender;
+                const authorProfile = userDatabaseCache[author] || { rank: "Novice" };
+                const rank = authorProfile.rank || "Novice";
 
                 const row = document.createElement('div');
                 row.className = 'message-row';
-                row.style.borderLeftColor = isSentByMe ? 'var(--nature-color)' : 'var(--tier3-color)';
+                row.style.borderLeftColor = isMe ? 'var(--nature-color)' : 'var(--tier3-color)';
 
                 row.innerHTML = `
                     <div class="msg-meta">
-                        <span class="msg-user" style="color: ${isSentByMe ? 'var(--nature-color)' : 'var(--tier3-color)'};">
-                            ${isSentByMe ? `To [${msg.receiver}]` : `From [${msg.sender}]`}
-                        </span>
-                        <span class="badge rank-${currentRank}" style="font-size:0.65rem;">${currentRank}</span>
+                        <span class="msg-user" style="color:${isMe ? 'var(--nature-color)' : 'var(--tier3-color)'};">${author}</span>
+                        <span class="badge rank-${rank}">${rank}</span>
                     </div>
-                    <div class="msg-text" style="color: #cbd5e1;"></div>
+                    <div class="msg-text"></div>
                 `;
                 row.querySelector('.msg-text').innerText = msg.text;
                 privBox.appendChild(row);
@@ -265,7 +319,7 @@
             if (atBottom) privBox.scrollTop = privBox.scrollHeight;
         }
 
-        // Transmit Global Message
+        // Handle Global Dispatch Action
         async function sendMessage(e) {
             e.preventDefault();
             const input = document.getElementById('msgInput');
@@ -279,42 +333,31 @@
             };
 
             input.value = '';
-            await fetch(`${dbURL}/chat.json`, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-
+            await fetch(`${dbURL}/chat.json`, { method: 'POST', body: JSON.stringify(payload) });
             fetchMessages();
         }
 
-        // Transmit Private Whisper Message
+        // Handle Private Dispatch Action
         async function sendPrivateMessage(e) {
             e.preventDefault();
-            const targetSel = document.getElementById('targetSelect');
+            if(!activePrivateTarget) return;
+
             const input = document.getElementById('privMsgInput');
-            
-            const targetUser = targetSel.value;
             const text = input.value.trim();
-            
-            if (!targetUser || !text) return;
+            if (!text) return;
 
             const payload = {
                 sender: session.username,
-                receiver: targetUser,
+                receiver: activePrivateTarget,
                 text: text,
                 timestamp: Date.now()
             };
 
             input.value = '';
-            await fetch(`${dbURL}/private_chats.json`, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-
+            await fetch(`${dbURL}/private_chats.json`, { method: 'POST', body: JSON.stringify(payload) });
             fetchMessages();
         }
 
-        // Run Engine Loops
         initInterface();
         fetchMessages();
         setInterval(fetchMessages, 3000);
