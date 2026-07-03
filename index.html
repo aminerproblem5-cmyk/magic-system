@@ -85,6 +85,7 @@
             <div id="promotionRoster"></div>
         </div>
 
+        <!-- INSCRIPTION TERMINAL WITH MATHEMATICAL MP PROGRESSION -->
         <div class="panel">
             <h2>Arcane Inscription Terminal</h2>
             <div id="trialArena">
@@ -142,16 +143,36 @@
         const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
         let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
         let isEditingPromotion = false;
+        let globalMagesCache = {}; // Cache to keep track of true raw points
+
+        // --- PROGRESSIVE ENERGY MATH ENGINE ---
+        const MAX_MP_LIMIT = 1000000000; // 1 Billion Absolute Hard Cap
+
+        // Scales raw values into diminishing returns using an exponential log curve
+        function calculateDiminishingMP(rawEnergy) {
+            if (!rawEnergy || rawEnergy <= 0) return 0;
+            // The higher the raw energy, the harder it is to push the curve toward 1 Billion
+            let calculatedMP = MAX_MP_LIMIT * (1 - Math.exp(-rawEnergy / (MAX_MP_LIMIT * 0.45)));
+            return Math.min(Math.round(calculatedMP), MAX_MP_LIMIT);
+        }
+
+        // Formats large calculated numbers into scannable runic strings
+        function formatArcaneMP(mpValue) {
+            if (mpValue >= 1000000) return (mpValue / 1000000).toFixed(1) + 'M';
+            if (mpValue >= 1000) return (mpValue / 1000).toFixed(1) + 'K';
+            return mpValue;
+        }
 
         async function syncNetworkData() {
             try {
                 const res = await fetch(`${dbURL}.json`);
-                const networkUsers = await res.json() || {};
+                globalMagesCache = await res.json() || {};
                 
-                buildRegistryMatrix(networkUsers);
+                buildRegistryMatrix(globalMagesCache);
                 if (!isEditingPromotion) {
-                    buildHeaderAndAdmin(networkUsers);
+                    buildHeaderAndAdmin(globalMagesCache);
                 }
+                updateLocalDisplay(globalMagesCache);
             } catch (e) {
                 console.error("Sync line hold...", e);
             }
@@ -192,7 +213,6 @@
                         Object.keys(rankWeights).forEach(rName => {
                             let rankWeight = rankWeights[rName];
                             
-                            // RULE PROTECTION CHECK: Lock Overseer and Grandfather strictly to AdminOwner actions
                             if (rName === "Overseer" || rName === "Grandfather") {
                                 if (isActualOwner) {
                                     optionStrings += `<option value="${rName}" ${targetUser.rank === rName ? 'selected' : ''}>${rName}</option>`;
@@ -231,15 +251,45 @@
             tbody.innerHTML = '';
 
             let sorted = Object.keys(networkUsers).map(k => ({ username: k, ...networkUsers[k] }));
-            sorted.sort((a,b) => (rankWeights[b.rank] || 0) - (rankWeights[a.rank] || 0) || b.power - a.power);
+            
+            // Sort by Rank priority first, then by calculated structural power
+            sorted.sort((a,b) => {
+                const weightB = rankWeights[b.rank] || 0;
+                const weightA = rankWeights[a.rank] || 0;
+                if (weightB !== weightA) return weightB - weightA;
+                
+                const scoreB = b.rank === "Grandmaster" ? Infinity : (b.power || 0);
+                const scoreA = a.rank === "Grandmaster" ? Infinity : (a.power || 0);
+                return scoreB - scoreA;
+            });
 
             sorted.forEach(u => {
                 const isInf = u.rank === "Grandmaster";
-                const scoreField = isInf ? `<span class="infinite-text">∞ MP</span>` : `${u.power || 0} MP`;
+                let scoreField;
+                
+                if (isInf) {
+                    scoreField = `<span class="infinite-text">∞ MP</span>`;
+                } else {
+                    // Pull pre-calculated MP or calculate dynamically from raw energy backup tracking
+                    const processedMP = u.power || calculateDiminishingMP(u.rawEnergy || 0);
+                    scoreField = `${formatArcaneMP(processedMP)} MP`;
+                }
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td><strong>${u.username}</strong> ${isInf?'👑':''}</td><td><span class="badge rank-${u.rank}">${u.rank}</span></td><td>${scoreField}</td><td>${u.hasLicense ? '📜' : '❌'}</td>`;
                 tbody.appendChild(tr);
             });
+        }
+
+        // Updates Terminal display box continuously 
+        function updateLocalDisplay(networkUsers) {
+            if (!session || session.username === "AdminOwner") return;
+            const pDisplay = document.getElementById('powerDisplay');
+            if (!pDisplay) return;
+
+            const myUser = networkUsers[session.username] || { power: 0, rawEnergy: 0 };
+            const currentMP = myUser.power || calculateDiminishingMP(myUser.rawEnergy || 0);
+            pDisplay.innerText = `${formatArcaneMP(currentMP)} MP`;
         }
 
         function buildActionTerminal() {
@@ -257,10 +307,25 @@
                 actionBtn.innerText = "Absolute Authority Sealed";
             } else {
                 actionBtn.onclick = async function() {
-                    const roll = Math.floor(Math.random() * 850) + 150;
-                    pDisplay.innerText = `${roll} MP`;
-                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(roll) });
-                    syncNetworkData();
+                    actionBtn.disabled = true;
+
+                    // Get current points from the live database snapshot cache
+                    const profile = globalMagesCache[session.username] || { power: 0, rawEnergy: 0 };
+                    let currentRawEnergy = profile.rawEnergy || profile.power || 0;
+
+                    // Generate a random burst of raw energy to add to their total pool
+                    const energyBurst = Math.floor(Math.random() * 850) + 150;
+                    let newRawEnergy = currentRawEnergy + energyBurst;
+
+                    // Process the new raw total through the diminishing log-curve formula
+                    let finalCalculatedMP = calculateDiminishingMP(newRawEnergy);
+
+                    // Update both fields simultaneously inside the firebase object tree
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRawEnergy) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(finalCalculatedMP) });
+                    
+                    await syncNetworkData();
+                    actionBtn.disabled = false;
                 };
             }
         }
@@ -278,8 +343,10 @@
             syncNetworkData();
         }
 
-        syncNetworkData();
-        buildActionTerminal();
+        // Start initialization sequence
+        syncNetworkData().then(() => {
+            buildActionTerminal();
+        });
         setInterval(syncNetworkData, 4000); 
     </script>
 </body>
