@@ -51,9 +51,9 @@
         .rank-Archmage { background: #9b59b6; color: #fff; }
         .rank-Paragon { background: #f1c40f; }
         .rank-Demigod { background: #e67e22; color: #fff; }
-        .rank-Overseer { background: #00ffff; font-weight: bold; box-shadow: 0 0 8px #00ffff; }
         .rank-Grandfather { background: #ff00ff; color: #fff; font-weight: bold; box-shadow: 0 0 10px #ff00ff; }
-        .rank-Grandmaster { background: #ff4757; color: #fff; box-shadow: 0 0 12px #ff4757; font-weight: 900; }
+        .rank-Overseer { background: #00ffff; font-weight: bold; box-shadow: 0 0 12px #00ffff; }
+        .rank-Grandmaster { background: #ff4757; color: #fff; box-shadow: 0 0 15px #ff4757; font-weight: 900; }
         
         .infinite-text { font-weight: bold; color: #ff4500; text-shadow: 0 0 8px rgba(255,69,0,0.6); }
 
@@ -63,7 +63,7 @@
         
         /* Command Console Elements */
         .console-box { background: #07080c; border: 1px solid #1f2430; font-family: monospace; padding: 15px; border-radius: 4px; text-align: left; }
-        .console-log { height: 140px; overflow-y: auto; color: #a4b0be; font-size: 0.85rem; margin-bottom: 10px; border-bottom: 1px solid #1a202c; padding-bottom: 5px; }
+        .console-log { height: 220px; overflow-y: auto; color: #a4b0be; font-size: 0.85rem; margin-bottom: 10px; border-bottom: 1px solid #1a202c; padding-bottom: 5px; }
         .console-input-row { display: flex; gap: 10px; }
         .console-input { flex: 1; background: #11141a; border: 1px solid #333; color: #fff; padding: 8px; font-family: monospace; border-radius: 3px; }
         .console-btn { background: #233a42; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 0 15px; cursor: pointer; border-radius: 3px; }
@@ -88,11 +88,11 @@
         </div>
         
         <div class="panel admin-zone full-span" id="adminZone">
-            <h2 style="color: var(--accent-color);">Licensed Overseer Decree Panel</h2>
+            <h2 style="color: var(--accent-color);">Licensed Terminal Decree Panel</h2>
             <div id="promotionRoster"></div>
         </div>
 
-        <!-- ARCANE TERMINAL FEATURING TRADITIONAL TEXT EXECUTION PATHS -->
+        <!-- ARCANE TERMINAL -->
         <div class="panel">
             <h2>Arcane Inscription Terminal</h2>
             <div id="trialArena">
@@ -128,8 +128,8 @@
             <h2>The Grand Order Hierarchy Matrix</h2>
             <ul class="codex-list">
                 <li class="codex-item"><strong>Grandmaster [Owner Level]</strong> <span style="color:var(--danger-color)">Absolute Authority (👑 AdminOwner ONLY)</span></li>
-                <li class="codex-item"><strong>Grandfather [Divine Tier]</strong> <span style="color:#ff00ff">Tier 14 &bull; Can invoke planetary standardizing algorithms.</span></li>
-                <li class="codex-item"><strong>Overseer [Elite Commander]</strong> <span style="color:#00ffff">Tier 13 &bull; Access to metrics tracking and target validation tools.</span></li>
+                <li class="codex-item"><strong>Overseer [Supreme Commander]</strong> <span style="color:#00ffff">Tier 14 &bull; Ultimate executive enforcer. Holds absolute domain over sub-rank scripts.</span></li>
+                <li class="codex-item"><strong>Grandfather [Divine Elder]</strong> <span style="color:#ff00ff">Tier 13 &bull; Stately regional support tier. Focuses on blessings and atmospheric balance.</span></li>
                 <li class="codex-item"><strong>Demigod [Council Sub-Rank II]</strong> <span>Tier 12 &bull; Grants standard licenses</span></li>
                 <li class="codex-item"><strong>Paragon [Council Sub-Rank I]</strong> <span>Tier 11 &bull; Grants standard licenses</span></li>
                 <li class="codex-item"><strong>Archmage [Mastery Sub-Rank III]</strong> <span>Tier 10</span></li>
@@ -140,19 +140,20 @@
                 <li class="codex-item"><strong>Elementalist [Adept Sub-Rank I]</strong> <span>Tier 5</span></li>
                 <li class="codex-item"><strong>Disciple [Initiate Sub-Rank III]</strong> <span>Tier 4</span></li>
                 <li class="codex-item"><strong>Apprentice [Initiate Sub-Rank II]</strong> <span>Tier 3</span></li>
-                <li class="codex-item"><strong>Novice [Initiate Sub-Rank I]</strong> <span>Tier 2 &bull; Starting Base Line</span></li>
+                <li class="codex-item"><strong>Novice [Initiate Sub-Rank I]</strong> <span>Tier 2 &bull; Base Tier</span></li>
             </ul>
         </div>
     </div>
 
     <script>
-        const rankWeights = { 
-            "Novice": 1, "Apprentice": 2, "Disciple": 3,
-            "Elementalist": 4, "Evoker": 5, "Arcanist": 6,
-            "Sorcerer": 7, "Battlemage": 8, "Archmage": 9,
-            "Paragon": 10, "Demigod": 11, 
-            "Overseer": 12, "Grandfather": 13, "Grandmaster": 14 
-        };
+        const rankList = [
+            "Novice", "Apprentice", "Disciple", "Elementalist", "Evoker", 
+            "Arcanist", "Sorcerer", "Battlemage", "Archmage", "Paragon", 
+            "Demigod", "Grandfather", "Overseer", "Grandmaster"
+        ];
+
+        const rankWeights = {};
+        rankList.forEach((r, idx) => { rankWeights[r] = idx + 1; });
         
         const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
         let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
@@ -223,7 +224,7 @@
                         Object.keys(rankWeights).forEach(rName => {
                             let rankWeight = rankWeights[rName];
                             
-                            if (rName === "Overseer" || rName === "Grandfather") {
+                            if (rName === "Grandfather" || rName === "Overseer") {
                                 if (isActualOwner) {
                                     optionStrings += `<option value="${rName}" ${targetUser.rank === rName ? 'selected' : ''}>${rName}</option>`;
                                 }
@@ -246,7 +247,7 @@
                 });
 
                 if (!targetsAvailable) {
-                    rosterContainer.innerHTML = `<p style="font-style:italic; color:#555; text-align:center;">No subordinate mages are configured beneath your current authorization level.</p>`;
+                    rosterContainer.innerHTML = `<p style="font-style:italic; color:#555; text-align:center;">No subordinate mages configured beneath your authorization matrix.</p>`;
                 }
             }
         }
@@ -294,7 +295,6 @@
             pDisplay.innerText = `${formatArcaneMP(currentMP)} MP`;
         }
 
-        // --- COMMAND SYSTEM CONTROLLER ENGINE ---
         function writeToConsole(text, color = "#a4b0be") {
             const logBox = document.getElementById('consoleLog');
             logBox.innerHTML += `<div style="color:${color}; margin-top:2px;">&gt; ${text}</div>`;
@@ -327,44 +327,39 @@
                 const parts = fullCmd.split(" ");
                 const commandName = parts[0].toLowerCase();
                 const targetArg = parts[1];
+                const valueArg = parts[2];
 
-                // Fetch identity clearance data
-                const userProfile = globalMagesCache[session.username] || { rank: "Novice" };
+                const userProfile = globalMagesCache[session.username] || { rank: "Novice", rawEnergy: 0 };
                 const userRank = userProfile.rank;
 
-                // --- 1. GENERAL LEVEL MANDATES ---
+                // --- 1. BASIC USER COMMANDS ---
                 if (commandName === "/help") {
-                    writeToConsole("General Spells: /channel, /diagnose, /compress");
-                    if (userRank === "Overseer" || userRank === "Grandfather" || isOwner) {
-                        writeToConsole("Overseer Tier: /scan [username], /metrics");
+                    writeToConsole("Mage Spells: /channel, /meditate, /absorb, /fuse, /gamble [amt], /transfer [name] [amt], /drain [name] [amt], /diagnose, /clear");
+                    if (userRank === "Grandfather" || userRank === "Overseer" || isOwner) {
+                        writeToConsole("Grandfather: /syncpool, /auracast, /bless [name]");
                     }
-                    if (userRank === "Grandfather" || isOwner) {
-                        writeToConsole("Grandfather Tier: /syncpool, /auracast");
+                    if (userRank === "Overseer" || isOwner) {
+                        writeToConsole("🔥 OVERSEER ENFORCER: /siphon [name] [amt], /strip [name], /freeze [name], /scan [name], /trace [name], /warn [name], /metrics");
                     }
                     if (isOwner) {
-                        writeToConsole("Grandmaster Core: /overload [username], /wipedb");
+                        writeToConsole("Grandmaster Root: /overload [name], /smite [name], /ascend [name], /descend [name], /inject [name] [amt], /multinject [amt]");
                     }
+                    return;
+                }
+
+                if (commandName === "/clear") {
+                    document.getElementById('consoleLog').innerHTML = `<div style="color:#555;">Terminal display buffer reset completely.</div>`;
                     return;
                 }
 
                 if (commandName === "/diagnose") {
                     writeToConsole(`Identity Core: ${session.username} | Order Clearance Rank: ${userRank}`);
-                    writeToConsole("Network line connection interface running normally.");
-                    return;
-                }
-
-                if (commandName === "/compress") {
-                    const rEnergy = userProfile.rawEnergy || 0;
-                    writeToConsole(`Raw Arcane Sparks in Pool: ${rEnergy}. Target Threshold to next Tier scaling remains stable.`);
                     return;
                 }
 
                 if (commandName === "/channel") {
-                    if (isOwner) {
-                        writeToConsole("Absolute cores maintain static infinite power vectors.", "var(--danger-color)");
-                        return;
-                    }
-                    let currentRawEnergy = userProfile.rawEnergy || userProfile.power || 0;
+                    if (isOwner) { writeToConsole("Static infinity overrides system channel matrices.", "var(--danger-color)"); return; }
+                    let currentRawEnergy = userProfile.rawEnergy || 0;
                     const rollChaos = Math.random();
                     let newRawEnergy = currentRawEnergy;
 
@@ -378,94 +373,242 @@
                         writeToConsole(`💥 Channel Backfire! Leaked -${energyDrain} Arcane Sparks.`, "var(--danger-color)");
                     }
 
-                    let finalCalculatedMP = calculateDiminishingMP(newRawEnergy);
                     await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRawEnergy) });
-                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(finalCalculatedMP) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newRawEnergy)) });
                     await syncNetworkData();
                     return;
                 }
 
-                // --- 2. OVERSEER COMMAND SET ---
-                if (commandName === "/scan" || commandName === "/metrics") {
-                    if (userRank !== "Overseer" && userRank !== "Grandfather" && !isOwner) {
-                        writeToConsole("Error: Insufficient clearance keys detected.", "var(--danger-color)");
+                if (commandName === "/absorb") {
+                    if (isOwner) return;
+                    let currentRawEnergy = userProfile.rawEnergy || 0;
+                    const safeGains = Math.floor(Math.random() * 40) + 10;
+                    let newRawEnergy = currentRawEnergy + safeGains;
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRawEnergy) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newRawEnergy)) });
+                    writeToConsole(`🍃 Absorbed +${safeGains} sparks cleanly.`, "var(--success-color)");
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/meditate") {
+                    if (isOwner) return;
+                    let currentRawEnergy = userProfile.rawEnergy || 0;
+                    const safeGains = Math.floor(Math.random() * 80) + 20;
+                    let newRawEnergy = currentRawEnergy + safeGains;
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRawEnergy) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newRawEnergy)) });
+                    writeToConsole(`🧘 Matrix stabilized. Gained +${safeGains} Sparks.`, "var(--success-color)");
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/gamble") {
+                    if (isOwner) return;
+                    const amount = parseInt(targetArg);
+                    let currentRawEnergy = userProfile.rawEnergy || 0;
+                    if (isNaN(amount) || amount <= 0 || amount > currentRawEnergy) { writeToConsole("Invalid wager amount.", "var(--danger-color)"); return; }
+
+                    let newRawEnergy = currentRawEnergy;
+                    if (Math.random() >= 0.50) {
+                        newRawEnergy += amount;
+                        writeToConsole(`🎲 Won! Gained +${amount} Sparks.`, "var(--success-color)");
+                    } else {
+                        newRawEnergy -= amount;
+                        writeToConsole(`🎲 Lost! Vaporized -${amount} Sparks.`, "var(--danger-color)");
+                    }
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRawEnergy) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newRawEnergy)) });
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/drain") {
+                    if (isOwner) return;
+                    const targetUser = targetArg;
+                    const amount = parseInt(valueArg);
+
+                    if (!targetUser || isNaN(amount) || amount <= 0) { writeToConsole("Usage: /drain [username] [amount]", "var(--danger-color)"); return; }
+                    if (!globalMagesCache[targetUser]) { writeToConsole("Target not detected.", "var(--danger-color)"); return; }
+                    if (targetUser === "AdminOwner" || globalMagesCache[targetUser].rank === "Overseer") { writeToConsole("Fatal Error: Caster target immune to standard drains.", "var(--danger-color)"); return; }
+
+                    let targetRaw = globalMagesCache[targetUser].rawEnergy || 0;
+                    if (targetRaw < amount) { writeToConsole("Target lacks that much power to harvest.", "var(--danger-color)"); return; }
+
+                    let myRaw = userProfile.rawEnergy || 0;
+
+                    // 40% Success chance for standard steal
+                    if (Math.random() < 0.40) {
+                        let newMyRaw = myRaw + amount;
+                        let newTargRaw = targetRaw - amount;
+                        await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newMyRaw) });
+                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newMyRaw)) });
+                        await fetch(`${dbURL}/${targetUser}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newTargRaw) });
+                        await fetch(`${dbURL}/${targetUser}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newTargRaw)) });
+                        writeToConsole(`🩸 Leech Success! Siphoned ${amount} Sparks away from ${targetUser}.`, "var(--success-color)");
+                    } else {
+                        let backlash = Math.floor(amount * 0.5);
+                        let newMyRaw = Math.max(0, myRaw - backlash);
+                        await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newMyRaw) });
+                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newMyRaw)) });
+                        writeToConsole(`💥 Leech Resistance Backfired! You leaked -${backlash} Sparks onto the void floor.`, "var(--danger-color)");
+                    }
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/transfer") {
+                    if (isOwner) return;
+                    const targetUser = targetArg;
+                    const amount = parseInt(valueArg);
+                    if (!targetUser || isNaN(amount) || amount <= 0 || (userProfile.rawEnergy || 0) < amount || !globalMagesCache[targetUser]) { writeToConsole("Invalid transfer arguments.", "var(--danger-color)"); return; }
+
+                    let donorRaw = (userProfile.rawEnergy || 0) - amount;
+                    let receiverRaw = (globalMagesCache[targetUser].rawEnergy || 0) + amount;
+
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(donorRaw) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
+                    await fetch(`${dbURL}/${targetUser}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(receiverRaw) });
+                    await fetch(`${dbURL}/${targetUser}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(receiverRaw)) });
+                    writeToConsole(`🤝 Channeled ${amount} Raw Sparks safely over to ${targetUser}!`, "var(--success-color)");
+                    await syncNetworkData();
+                    return;
+                }
+
+                // --- 2. GRANDFATHER TIER COMMANDS ---
+                if (commandName === "/syncpool" || commandName === "/auracast" || commandName === "/bless") {
+                    if (userRank !== "Grandfather" && userRank !== "Overseer" && !isOwner) { writeToConsole("Error: Requester identity lack Elder keys.", "var(--danger-color)"); return; }
+                    
+                    if (commandName === "/auracast") { writeToConsole("🌌 Ambient aura fields standardized.", "var(--accent-color)"); return; }
+                    if (commandName === "/syncpool") { writeToConsole("Sub-networks synchronized.", "var(--success-color)"); return; }
+                    if (commandName === "/bless") {
+                        const targetData = globalMagesCache[targetArg];
+                        if (!targetArg || !targetData) { writeToConsole("Specify target username."); return; }
+                        let updatedRaw = (targetData.rawEnergy || 0) + 2500;
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
+                        writeToConsole(`🌌 Bestowed Elder Blessing upon ${targetArg}! (+2,500 Sparks)`, "var(--accent-color)");
+                        await syncNetworkData();
+                        return;
+                    }
+                }
+
+                // --- 3. HIGH-POWERED SUPREME OVERSEER COMMAND SET ---
+                if (commandName === "/siphon" || commandName === "/strip" || commandName === "/freeze" || commandName === "/scan" || commandName === "/trace" || commandName === "/warn" || commandName === "/metrics") {
+                    if (userRank !== "Overseer" && !isOwner) {
+                        writeToConsole("Fatal Error: Absolute domain commands restricted exclusively to high-clearance Overseers.", "var(--danger-color)");
                         return;
                     }
 
                     if (commandName === "/metrics") {
-                        const count = Object.keys(globalMagesCache).length;
-                        writeToConsole(`System Diagnostics: ${count} Active matrix lines monitored across the planetary node.`);
+                        writeToConsole(`Active nodes registered: ${Object.keys(globalMagesCache).length}`);
                         return;
                     }
 
-                    if (!targetArg) {
-                        writeToConsole("Usage Directive: /scan [username]");
-                        return;
-                    }
-                    const targetData = globalMagesCache[targetArg];
-                    if (!targetData) {
-                        writeToConsole(`Scan failed: Profile target [${targetArg}] not found in database registry.`, "var(--danger-color)");
-                    } else {
-                        writeToConsole(`Target Verification [${targetArg}]: Rank=${targetData.rank} | RawPool=${targetData.rawEnergy || 0}`);
-                    }
-                    return;
-                }
-
-                // --- 3. GRANDFATHER COMMAND SET ---
-                if (commandName === "/syncpool" || commandName === "/auracast") {
-                    if (userRank !== "Grandfather" && !isOwner) {
-                        writeToConsole("Error: Requester identity ranks below Grandfather requirement matrix.", "var(--danger-color)");
-                        return;
-                    }
-
-                    if (commandName === "/auracast") {
-                        writeToConsole("🌌 Broad-spectrum global aura cast deployed successfully. Matrix frequencies normalized.", "var(--accent-color)");
-                        return;
-                    }
-
-                    writeToConsole("Initiating server-wide energy sync events across subordinate cells...");
-                    setTimeout(() => writeToConsole("Pool consolidation sequence verified across all active branches.", "var(--success-color)"), 800);
-                    return;
-                }
-
-                // --- 4. EXCLUSIVE ADMINOWNER GRANDMASTER CORE MANDATES ---
-                if (commandName === "/overload" || commandName === "/wipedb") {
-                    if (!isOwner) {
-                        writeToConsole("Fatal Error: Grandmaster root override command restricted to AdminOwner.", "var(--danger-color)");
-                        return;
-                    }
-
-                    if (commandName === "/wipedb") {
-                        writeToConsole("Database wipe payload intercepted. Safety lock engaged.", "var(--danger-color)");
-                        return;
-                    }
-
-                    if (!targetArg) {
-                        writeToConsole("Usage Directive: /overload [username]");
-                        return;
-                    }
+                    if (!targetArg) { writeToConsole("Specify target profile argument.", "var(--danger-color)"); return; }
+                    if (targetArg === "AdminOwner") { writeToConsole("Root core is immune to Overseer enforcement protocols.", "var(--danger-color)"); return; }
                     
-                    if (targetArg === "AdminOwner") {
-                        writeToConsole("Cannot feedback source terminal core.", "var(--danger-color)");
-                        return;
+                    const targetData = globalMagesCache[targetArg];
+                    if (!targetData) { writeToConsole("Target node is completely offline.", "var(--danger-color)"); return; }
+
+                    if (commandName === "/siphon") {
+                        const amount = parseInt(valueArg);
+                        if (isNaN(amount) || amount <= 0) { writeToConsole("Usage: /siphon [username] [amount]"); return; }
+                        let targRaw = targetData.rawEnergy || 0;
+                        if (targRaw < amount) { writeToConsole("Target has insufficient fuel to extract."); return; }
+
+                        let updatedTargRaw = targRaw - amount;
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedTargRaw) });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedTargRaw)) });
+
+                        if (!isOwner) {
+                            let myNewRaw = (userProfile.rawEnergy || 0) + amount;
+                            await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(myNewRaw) });
+                            await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(myNewRaw)) });
+                        }
+
+                        writeToConsole(`⚡ OVERSEER SIPHON COMPLETE: Extracted ${amount} Sparks from ${targetArg} into enforcer node pool.`, "var(--accent-color)");
+                    }
+                    else if (commandName === "/strip") {
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: 0 });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: 0 });
+                        writeToConsole(`⚡ COMMAND STRIP: Wiped power parameters of ${targetArg} down to absolute 0 MP.`, "var(--danger-color)");
+                    }
+                    else if (commandName === "/freeze") {
+                        writeToConsole(`🧊 LOCK PROTOCOL: Terminal pipeline of [${targetArg}] has been forcefully frozen. Input channels suppressed.`, "var(--danger-color)");
+                    }
+                    else if (commandName === "/scan") {
+                        writeToConsole(`[Overseer Scan Output] ${targetArg}: Rank=${targetData.rank} | RawSparks=${targetData.rawEnergy || 0}`);
+                    }
+                    else if (commandName === "/trace") {
+                        writeToConsole(`[Ley-line Trace Output]: Latency nominal. Profile verification verified for ${targetArg}.`);
+                    }
+                    else if (commandName === "/warn") {
+                        writeToConsole(`⚠️ OVERSEER WRIT ISSUED FOR [${targetArg}]: Misbehavior detected. Terminal lock flagged.`, "var(--danger-color)");
                     }
 
-                    // Explode a user's matrix down to absolute zero energy
-                    await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: 0 });
-                    await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: 0 });
-                    writeToConsole(`⚡ Core Collapse Transmitted! Target ${targetArg} raw power reserves drained to 0.`, "var(--danger-color)");
                     await syncNetworkData();
                     return;
                 }
 
-                // Catch-all fallthrough error response
-                writeToConsole(`Spell format unrecognized: "${commandName}". Query /help for directory listings.`, "var(--danger-color)");
+                // --- 4. EXCLUSIVE ADMINOWNER ROOT COMMANDS ---
+                if (commandName === "/overload" || commandName === "/smite" || commandName === "/ascend" || commandName === "/descend" || commandName === "/inject" || commandName === "/multinject") {
+                    if (!isOwner) { writeToConsole("Fatal Error: Grandmaster root restriction.", "var(--danger-color)"); return; }
+
+                    if (commandName === "/multinject") {
+                        const amount = parseInt(targetArg);
+                        if (isNaN(amount) || amount <= 0) return;
+                        for (let key of Object.keys(globalMagesCache)) {
+                            if (key === "AdminOwner") continue;
+                            let newR = (globalMagesCache[key].rawEnergy || 0) + amount;
+                            await fetch(`${dbURL}/${key}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newR) });
+                            await fetch(`${dbURL}/${key}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newR)) });
+                        }
+                        writeToConsole(` Mass Forced Injection complete across all channels.`, "var(--success-color)");
+                        await syncNetworkData();
+                        return;
+                    }
+
+                    if (!targetArg || targetArg === "AdminOwner" || !globalMagesCache[targetArg]) return;
+                    const targetData = globalMagesCache[targetArg];
+
+                    if (commandName === "/overload") {
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: 0 });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: 0 });
+                        writeToConsole(`⚡ Core Collapse Transmitted! Target ${targetArg} drained to 0.`, "var(--danger-color)");
+                    } 
+                    else if (commandName === "/smite") {
+                        await fetch(`${dbURL}/${targetArg}/rank.json`, { method: 'PUT', body: JSON.stringify("Novice") });
+                        await fetch(`${dbURL}/${targetArg}/hasLicense.json`, { method: 'PUT', body: false });
+                        writeToConsole(`⚡ Smote privileges and status of ${targetArg} down to Novice!`, "var(--danger-color)");
+                    } 
+                    else if (commandName === "/ascend") {
+                        await fetch(`${dbURL}/${targetArg}/rank.json`, { method: 'PUT', body: JSON.stringify("Overseer") });
+                        writeToConsole(`⚡ Ascended ${targetArg} directly into the supreme Overseer Enforcer tier.`, "var(--success-color)");
+                    }
+                    else if (commandName === "/descend") {
+                        let currentIdx = rankList.indexOf(targetData.rank);
+                        let nextIdx = Math.max(0, currentIdx - 1);
+                        await fetch(`${dbURL}/${targetArg}/rank.json`, { method: 'PUT', body: JSON.stringify(rankList[nextIdx]) });
+                        writeToConsole(`⚡ Demoted ${targetArg} safely down one rank index step.`);
+                    }
+                    else if (commandName === "/inject") {
+                        const amount = parseInt(valueArg); if (isNaN(amount)) return;
+                        let updatedRaw = (targetData.rawEnergy || 0) + amount;
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
+                        writeToConsole(`💉 Injected +${amount} Raw Sparks into ${targetArg}.`, "var(--success-color)");
+                    }
+
+                    await syncNetworkData();
+                    return;
+                }
+
+                writeToConsole(`Spell format unrecognized: "${commandName}". Query /help for options.`, "var(--danger-color)");
             }
 
             consoleSubmit.onclick = processCommand;
-            consoleInput.onkeydown = function(e) {
-                if (e.key === "Enter") processCommand();
-            };
+            consoleInput.onkeydown = function(e) { if (e.key === "Enter") processCommand(); };
         }
 
         async function executePromotion(target) {
@@ -481,9 +624,7 @@
             syncNetworkData();
         }
 
-        syncNetworkData().then(() => {
-            buildActionTerminal();
-        });
+        syncNetworkData().then(() => { buildActionTerminal(); });
         setInterval(syncNetworkData, 4000); 
     </script>
 </body>
