@@ -49,8 +49,10 @@
         .rank-Sorcerer { background: #2ed573; }
         .rank-Battlemage { background: #1e90ff; color: #fff; }
         .rank-Archmage { background: #9b59b6; color: #fff; }
-        .rank-Paragon { background: #f1c40f; box-shadow: 0 0 6px #f1c40f; }
-        .rank-Demigod { background: #e67e22; color: #fff; box-shadow: 0 0 10px #e67e22; }
+        .rank-Paragon { background: #f1c40f; }
+        .rank-Demigod { background: #e67e22; color: #fff; }
+        .rank-Overseer { background: #00ffff; font-weight: bold; box-shadow: 0 0 8px #00ffff; }
+        .rank-Grandfather { background: #ff00ff; color: #fff; font-weight: bold; box-shadow: 0 0 10px #ff00ff; }
         .rank-Grandmaster { background: #ff4757; color: #fff; box-shadow: 0 0 12px #ff4757; font-weight: 900; }
         
         .infinite-text { font-weight: bold; color: #ff4500; text-shadow: 0 0 8px rgba(255,69,0,0.6); }
@@ -68,7 +70,6 @@
     </header>
 
     <div class="main-grid">
-        <!-- FIXED NAVIGATION PORTAL PANEL -->
         <div class="navigation-box full-span">
             <h2>Council Nexus Gate</h2>
             <p style="color: #a4b0be; margin-bottom: 15px;">Planetary Server Sync Status Active. Access your core modules below.</p>
@@ -79,13 +80,11 @@
             </div>
         </div>
         
-        <!-- PROMOTION PANEL -->
         <div class="panel admin-zone full-span" id="adminZone">
             <h2 style="color: var(--accent-color);">Licensed Overseer Decree Panel</h2>
             <div id="promotionRoster"></div>
         </div>
 
-        <!-- TRIAL ACTION CONTROLS -->
         <div class="panel">
             <h2>Arcane Inscription Terminal</h2>
             <div id="trialArena">
@@ -100,7 +99,6 @@
             </div>
         </div>
 
-        <!-- LIVE LEADERBOARD MATRIX -->
         <div class="panel">
             <h2>Global Live Registry Board</h2>
             <table>
@@ -111,23 +109,23 @@
             </table>
         </div>
 
-        <!-- THE ARCANUM CODEX MANUAL FILE -->
         <div class="panel full-span">
-            <h2 style="color: #c5a880; border-color: #333;">The Grand Order Codex Manual</h2>
-            <p style="font-size:0.9rem; color:#7f8c8d; margin-bottom:15px;">Official sequence chart outlining rank weights and regulatory promotion capacities inside the shared layout lines.</p>
+            <h2>The Grand Order Hierarchy Matrix</h2>
             <ul class="codex-list">
-                <li class="codex-item"><strong>Grandmaster [Owner Level]</strong> <span style="color:var(--danger-color)">Absolute Override Authority (∞ MP Limit)</span></li>
-                <li class="codex-item"><strong>Demigod [Council Sub-Rank II]</strong> <span>Hierarchy Value: Tier 11 &bull; Grants Licenses</span></li>
-                <li class="codex-item"><strong>Paragon [Council Sub-Rank I]</strong> <span>Hierarchy Value: Tier 10 &bull; Grants Licenses</span></li>
-                <li class="codex-item"><strong>Archmage [Mastery Sub-Rank III]</strong> <span>Hierarchy Value: Tier 9</span></li>
-                <li class="codex-item"><strong>Battlemage [Mastery Sub-Rank II]</strong> <span>Hierarchy Value: Tier 8</span></li>
-                <li class="codex-item"><strong>Sorcerer [Mastery Sub-Rank I]</strong> <span>Hierarchy Value: Tier 7</span></li>
-                <li class="codex-item"><strong>Arcanist [Adept Sub-Rank III]</strong> <span>Hierarchy Value: Tier 6</span></li>
-                <li class="codex-item"><strong>Evoker [Adept Sub-Rank II]</strong> <span>Hierarchy Value: Tier 5</span></li>
-                <li class="codex-item"><strong>Elementalist [Adept Sub-Rank I]</strong> <span>Hierarchy Value: Tier 4</span></li>
-                <li class="codex-item"><strong>Disciple [Initiate Sub-Rank III]</strong> <span>Hierarchy Value: Tier 3</span></li>
-                <li class="codex-item"><strong>Apprentice [Initiate Sub-Rank II]</strong> <span>Hierarchy Value: Tier 2</span></li>
-                <li class="codex-item"><strong>Novice [Initiate Sub-Rank I]</strong> <span>Hierarchy Value: Tier 1 &bull; Starting Base Line</span></li>
+                <li class="codex-item"><strong>Grandmaster [Owner Level]</strong> <span style="color:var(--danger-color)">Absolute Authority (👑 AdminOwner ONLY)</span></li>
+                <li class="codex-item"><strong>Grandfather [Divine Tier]</strong> <span style="color:#ff00ff">Tier 14 &bull; Can only be assigned by AdminOwner</span></li>
+                <li class="codex-item"><strong>Overseer [Elite Commander]</strong> <span style="color:#00ffff">Tier 13 &bull; Can only be assigned by AdminOwner</span></li>
+                <li class="codex-item"><strong>Demigod [Council Sub-Rank II]</strong> <span>Tier 12 &bull; Grants standard licenses</span></li>
+                <li class="codex-item"><strong>Paragon [Council Sub-Rank I]</strong> <span>Tier 11 &bull; Grants standard licenses</span></li>
+                <li class="codex-item"><strong>Archmage [Mastery Sub-Rank III]</strong> <span>Tier 10</span></li>
+                <li class="codex-item"><strong>Battlemage [Mastery Sub-Rank II]</strong> <span>Tier 9</span></li>
+                <li class="codex-item"><strong>Sorcerer [Mastery Sub-Rank I]</strong> <span>Tier 8</span></li>
+                <li class="codex-item"><strong>Arcanist [Adept Sub-Rank III]</strong> <span>Tier 7</span></li>
+                <li class="codex-item"><strong>Evoker [Adept Sub-Rank II]</strong> <span>Tier 6</span></li>
+                <li class="codex-item"><strong>Elementalist [Adept Sub-Rank I]</strong> <span>Tier 5</span></li>
+                <li class="codex-item"><strong>Disciple [Initiate Sub-Rank III]</strong> <span>Tier 4</span></li>
+                <li class="codex-item"><strong>Apprentice [Initiate Sub-Rank II]</strong> <span>Tier 3</span></li>
+                <li class="codex-item"><strong>Novice [Initiate Sub-Rank I]</strong> <span>Tier 2 &bull; Starting Base Line</span></li>
             </ul>
         </div>
     </div>
@@ -137,7 +135,8 @@
             "Novice": 1, "Apprentice": 2, "Disciple": 3,
             "Elementalist": 4, "Evoker": 5, "Arcanist": 6,
             "Sorcerer": 7, "Battlemage": 8, "Archmage": 9,
-            "Paragon": 10, "Demigod": 11, "Grandmaster": 12 
+            "Paragon": 10, "Demigod": 11, 
+            "Overseer": 12, "Grandfather": 13, "Grandmaster": 14 
         };
         
         const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
@@ -154,7 +153,7 @@
                     buildHeaderAndAdmin(networkUsers);
                 }
             } catch (e) {
-                console.error("Sync link hold...", e);
+                console.error("Sync line hold...", e);
             }
         }
 
@@ -176,6 +175,7 @@
                 rosterContainer.innerHTML = '';
 
                 const myWeight = rankWeights[myUser.rank] || 0;
+                const isActualOwner = (session.username === "AdminOwner");
                 let targetsAvailable = false;
 
                 Object.keys(networkUsers).forEach(targetName => {
@@ -190,7 +190,14 @@
                         
                         let optionStrings = "";
                         Object.keys(rankWeights).forEach(rName => {
-                            if (rankWeights[rName] < myWeight) {
+                            let rankWeight = rankWeights[rName];
+                            
+                            // RULE PROTECTION CHECK: Lock Overseer and Grandfather strictly to AdminOwner actions
+                            if (rName === "Overseer" || rName === "Grandfather") {
+                                if (isActualOwner) {
+                                    optionStrings += `<option value="${rName}" ${targetUser.rank === rName ? 'selected' : ''}>${rName}</option>`;
+                                }
+                            } else if (rankWeight < myWeight && rName !== "Grandmaster") {
                                 optionStrings += `<option value="${rName}" ${targetUser.rank === rName ? 'selected' : ''}>${rName}</option>`;
                             }
                         });
