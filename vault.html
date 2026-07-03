@@ -51,7 +51,7 @@
         .lightbox-content { max-width: 90%; max-height: 75vh; box-shadow: 0 0 30px rgba(46, 213, 115, 0.2); border: 2px solid #2d3748; border-radius: 6px; background: #000; }
         .lightbox-btn { background: transparent; border: 2px solid var(--danger-color); color: var(--danger-color); padding: 10px 24px; font-size: 1rem; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease; }
         .lightbox-btn:hover { background: var(--danger-color); color: #000; box-shadow: 0 0 15px var(--danger-color); }
-        .lightbox-title { color: #fff; font-family: monospace; font-size: 1.1rem; }
+        .lightbox-title { color: #fff; font-family: monospace; font-size: 1.1rem; text-align: center; max-width: 80%; }
     </style>
 </head>
 <body>
@@ -70,7 +70,7 @@
             <label for="fileInput" class="drop-zone" id="dropZone">
                 <p>Drag & Drop Record File Here or Click to Browse</p>
                 <span>Accepts video configurations or image footprints</span>
-                <input type="file" id="fileInput" accept="video/*,image/*">
+                <input type="file" id="fileInput" accept="video/mp4,video/webm,image/*">
             </label>
             <div class="status-msg" id="statusMessage">System Idle. Awaiting ingestion sequence...</div>
         </div>
@@ -78,25 +78,20 @@
         <div class="panel">
             <h2>Archived Matrix Files</h2>
             <div class="vault-grid" id="vaultGrid">
-                <div class="vault-card">
-                    <div class="media-preview-container" onclick="openLightbox('sample_council_record.mp4', 'video', 'https://www.w3schools.com/html/mov_bbb.mp4')">
-                        <video src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
-                    </div>
-                    <div class="file-info"><strong>sample_council_record.mp4</strong></div>
-                    <div class="file-meta"><span>Size: 4.2 MB</span><span>Uploaded: System</span></div>
                 </div>
-            </div>
         </div>
     </div>
 
     <div class="lightbox-overlay" id="lightboxOverlay">
         <div class="lightbox-title" id="lightboxTitle">File View</div>
-        <div id="lightboxMediaContainer" style="display: flex; justify-content: center; width: 100%;">
-            </div>
+        <div id="lightboxMediaContainer" style="display: flex; justify-content: center; width: 100%;"></div>
         <button class="lightbox-btn" onclick="closeLightbox()">✕ Close View</button>
     </div>
 
     <script>
+        // Connected directly to your designated Realtime Database endpoint
+        const dbVaultURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/vault";
+        
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const statusMessage = document.getElementById('statusMessage');
@@ -106,7 +101,9 @@
         const lightboxTitle = document.getElementById('lightboxTitle');
         const lightboxMediaContainer = document.getElementById('lightboxMediaContainer');
 
-        // Prevent dragging page collision faults
+        let sharedFilesCache = {};
+
+        // Prevent dragging page faults
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
             document.body.addEventListener(eventName, preventDefaults, false);
@@ -120,52 +117,89 @@
             dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
         });
 
-        dropZone.addEventListener('drop', (e) => {
-            handleUploadedFiles(e.dataTransfer.files);
-        });
-        fileInput.addEventListener('change', function() {
-            handleUploadedFiles(this.files);
-        });
+        dropZone.addEventListener('drop', (e) => handleUploadedFiles(e.dataTransfer.files));
+        fileInput.addEventListener('change', function() { handleUploadedFiles(this.files); });
+
+        // Synchronize and render database vault contents
+        async function syncVaultFromNetwork() {
+            try {
+                const res = await fetch(`${dbVaultURL}.json`);
+                const networkData = await res.json() || {};
+                
+                // Only rewrite grid on changes to avoid disrupting playing video clips
+                if (JSON.stringify(networkData) !== JSON.stringify(sharedFilesCache)) {
+                    sharedFilesCache = networkData;
+                    vaultGrid.innerHTML = '';
+                    
+                    // Render newest uploads first
+                    const sortedKeys = Object.keys(networkData).reverse();
+                    sortedKeys.forEach(id => {
+                        const file = networkData[id];
+                        renderArchiveCard(file.name, file.size, file.type, file.dataUrl, file.dateString || 'Legacy');
+                    });
+                }
+            } catch (e) {
+                console.error("Vault database connection error...", e);
+            }
+        }
 
         function handleUploadedFiles(files) {
             if (files.length === 0) return;
             const file = files[0];
             
-            statusMessage.innerText = `Ingesting: "${file.name}"... Processing bits.`;
+            statusMessage.innerText = `Ingesting: "${file.name}"... Transmitting data blocks.`;
             statusMessage.style.color = 'var(--cyan-color)';
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = async function(e) {
                 const fileDataUrl = e.target.result;
-                const isVideo = file.type.startsWith('video/');
+                const isVideo = file.type.startsWith('video/') || file.name.endsWith('.mp4');
                 const typeStr = isVideo ? 'video' : 'image';
 
-                displayNewArchiveCard(file.name, file.size, typeStr, fileDataUrl);
-                
-                statusMessage.innerText = `Success: Archive block written for "${file.name}".`;
-                statusMessage.style.color = 'var(--accent-color)';
+                const newFilePayload = {
+                    name: file.name,
+                    size: file.size,
+                    type: typeStr,
+                    dataUrl: fileDataUrl,
+                    dateString: new Date().toLocaleDateString()
+                };
+
+                try {
+                    // Send directly into your Firebase Realtime database path
+                    await fetch(`${dbVaultURL}.json`, {
+                        method: 'POST',
+                        body: JSON.stringify(newFilePayload)
+                    });
+                    
+                    statusMessage.innerText = `Success: "${file.name}" synchronized across the Arcanum network.`;
+                    statusMessage.style.color = 'var(--accent-color)';
+                    syncVaultFromNetwork();
+                } catch(err) {
+                    statusMessage.innerText = "Error: Infrastructure rejected file payload. (Check size limitations)";
+                    statusMessage.style.color = 'var(--danger-color)';
+                }
             };
+            
             reader.onerror = function() {
-                statusMessage.innerText = `Critical Core Error: Could not parse document elements.`;
+                statusMessage.innerText = `Critical Core Error: Could not parse elements.`;
                 statusMessage.style.color = 'var(--danger-color)';
             };
+
             reader.readAsDataURL(file);
         }
 
-        function displayNewArchiveCard(name, size, typeStr, dataUrl) {
+        function renderArchiveCard(name, size, typeStr, dataUrl, dateStr) {
             const card = document.createElement('div');
             card.className = 'vault-card';
             
             let elementMarkup = '';
             if (typeStr === 'video') {
-                elementMarkup = `<video src="${dataUrl}"></video>`;
+                elementMarkup = `<video src="${dataUrl}" preload="metadata"></video>`;
             } else {
                 elementMarkup = `<img src="${dataUrl}" alt="Preview Asset">`;
             }
 
             const sizeFormatted = (size / (1024 * 1024)).toFixed(2) + ' MB';
-
-            // Escaping single quotes in strings for safe execution inline
             const safeName = name.replace(/'/g, "\\'");
             const safeUrl = dataUrl.replace(/'/g, "\\'");
 
@@ -174,16 +208,15 @@
                     ${elementMarkup}
                 </div>
                 <div class="file-info"><strong>${name}</strong></div>
-                <div class="file-meta"><span>Size: ${sizeFormatted}</span><span>Uploaded: Just Now</span></div>
+                <div class="file-meta"><span>Size: ${sizeFormatted}</span><span>${dateStr}</span></div>
             `;
             
-            vaultGrid.insertBefore(card, vaultGrid.firstChild);
+            vaultGrid.appendChild(card);
         }
 
-        /* LIGHTBOX CORE MATRIX FUNCTIONS */
         function openLightbox(name, type, url) {
-            lightboxTitle.innerText = `Viewing Element Matrix Node: ${name}`;
-            lightboxMediaContainer.innerHTML = ''; // Reset container context
+            lightboxTitle.innerText = `Viewing Grid Element: ${name}`;
+            lightboxMediaContainer.innerHTML = '';
 
             if (type === 'video') {
                 const videoEl = document.createElement('video');
@@ -203,13 +236,16 @@
         }
 
         function closeLightbox() {
-            // Stop any playing audio streams on screen dismantle sequences
             const videoEl = lightboxMediaContainer.querySelector('video');
             if(videoEl) videoEl.pause();
             
             lightboxOverlay.style.display = 'none';
             lightboxMediaContainer.innerHTML = '';
         }
+
+        // Initialize vault bindings and trigger network looping sync tasks
+        syncVaultFromNetwork();
+        setInterval(syncVaultFromNetwork, 5000);
     </script>
 </body>
 </html>
