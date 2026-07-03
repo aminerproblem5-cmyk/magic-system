@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Grand Library - Arcane Elements & Alchemy</title>
+    <title>The Grand Library - Composite Alchemy Codex</title>
     <style>
         :root {
             --bg-color: #0b0c10;
@@ -11,27 +11,37 @@
             --text-color: #c5a880;
             --text-light: #fff;
             --accent-color: #45f3ff;
+            --tier3-color: #ff9f43;
             --danger-color: #ff4d4d;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; }
         header { text-align: center; padding: 40px 0; border-bottom: 1px solid #222; margin-bottom: 30px; }
         header h1 { color: #fff; font-size: 2.3rem; letter-spacing: 2px; text-transform: uppercase; }
         .back-btn { display: inline-block; text-decoration: none; color: var(--accent-color); border: 1px solid var(--accent-color); padding: 8px 16px; border-radius: 4px; font-weight: bold; text-transform: uppercase; font-size: 0.85rem; margin-bottom: 20px; }
         .section-card { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 30px; margin-bottom: 25px; }
         h2 { color: var(--text-light); border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 15px; text-transform: uppercase; font-size: 1.3rem; }
         
+        /* Forge Selector Grid */
+        .forge-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+        @media(min-width: 600px) { .forge-grid { grid-template-columns: repeat(3, 1fr); } }
+        .composite-btn { background: #1f2833; border: 1px solid #333; color: #fff; padding: 15px; border-radius: 4px; cursor: pointer; font-family: 'Georgia', serif; font-weight: bold; transition: all 0.2s ease; text-align: center; }
+        .composite-btn .elements-used { display: block; font-size: 0.75rem; color: #888; font-weight: normal; margin-top: 4px; }
+        .composite-btn.active { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(69, 243, 255, 0.4); background: #243342; }
+        
+        .alchemy-result-box { background: #0b0c10; border: 1px dashed #555; border-radius: 4px; padding: 25px; text-align: center; min-height: 120px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
         .magic-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 15px; }
         @media(min-width: 600px) { .magic-grid { grid-template-columns: 1fr 1fr; } }
         
         .element-box { background: #0b0c10; padding: 15px; border-radius: 4px; border-left: 3px solid var(--accent-color); }
         .element-box h3 { color: #fff; margin-bottom: 5px; font-size: 1.1rem; }
-        .primary { border-left-color: #ff9f43; }
-        .composite { border-left-color: #a55eea; }
-        .mastery { border-left-color: #2ed573; }
+        .comp-base { border-left-color: #a55eea; }
+        .tier3-mastery { border-left-color: var(--tier3-color); }
         
-        .formula-badge { background: #1b263b; color: #54a0ff; padding: 2px 6px; font-size: 0.8rem; font-family: monospace; border-radius: 3px; display: inline-block; margin-bottom: 5px; }
+        .formula-badge { background: #1b263b; color: #54a0ff; padding: 2px 8px; font-size: 0.8rem; font-family: monospace; border-radius: 3px; display: inline-block; margin-bottom: 5px; }
+        .clear-btn { background: none; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-family: sans-serif; float: right; margin-top: -5px; }
     </style>
 </head>
 <body>
@@ -41,83 +51,211 @@
 
         <header>
             <h1>The Arcanum Codex Manifest</h1>
-            <p>Official 11-Element Matrix & Advanced Fusion Manifestos</p>
+            <p>Advanced Transmutation Matrix & Secondary Layer Fusion Trees</p>
         </header>
 
-        <!-- PRIMARY CORES -->
-        <div class="section-card">
-            <h2 style="color: #ff9f43;">The 4 Primary Elements</h2>
-            <p>The fundamental building blocks of planetary essence. All external spell lines stream directly from these four elemental cores:</p>
-            <div class="magic-grid">
-                <div class="element-box primary">
-                    <h3>🔥 Fire Magic</h3>
-                    <p>Raw kinetic combustion. High thermal acceleration vectors.</p>
-                </div>
-                <div class="element-box primary">
-                    <h3>💧 Water Magic</h3>
-                    <p>Fluidic structural resonance. Controls cohesive liquid states.</p>
-                </div>
-                <div class="element-box primary">
-                    <h3>💨 Air Magic</h3>
-                    <p>Gaseous pressure mechanics and atmospheric flow parameters.</p>
-                </div>
-                <div class="element-box primary">
-                    <h3>🪨 Earth Magic</h3>
-                    <p>Dense molecular stabilization. Controls mineral and tectonic formations.</p>
-                </div>
+        <!-- INTERACTIVE COMPOSITE TRANSMUTATION FORGE -->
+        <div class="section-card" style="border-color: var(--accent-color);">
+            <button class="clear-btn" id="clearForge">Dampen Leylines</button>
+            <h2 style="color: var(--accent-color);">Composite Transmutation Forge</h2>
+            <p style="margin-bottom: 15px; font-style: italic; font-size: 0.95rem;">Select and weave individual Composite Elements together to unveil deeper, cataclysmic spell lines:</p>
+            
+            <div class="forge-grid">
+                <button class="composite-btn" data-element="matter">🔮 Matter <span class="elements-used">🪨 + 💧</span></button>
+                <button class="composite-btn" data-element="weather">🌪️ Weather <span class="elements-used">💨 + 💧</span></button>
+                <button class="composite-btn" data-element="viscosity">🧪 Viscosity <span class="elements-used">💧 + 🪨</span></button>
+                <button class="composite-btn" data-element="energy">⚡ Energy <span class="elements-used">💧 + 🔥</span></button>
+                <button class="composite-btn" data-element="magma">🌋 Magma <span class="elements-used">🪨 + 🔥</span></button>
+                <button class="composite-btn" data-element="lightning">⚡ Lightning <span class="elements-used">🔥 + 💨</span></button>
+            </div>
+
+            <div class="alchemy-result-box" id="forgeOutput">
+                <p style="color: #666; font-style: italic;">Weave the composites above to ignite the Advanced Hybrid Formulas...</p>
             </div>
         </div>
 
-        <!-- COMPOSITE ALCHEMY FUSIONS -->
+        <!-- COMPOSITE DICTIONARY REFERENCE -->
         <div class="section-card">
-            <h2 style="color: #a55eea;">The 6 Composite Fusion Elements</h2>
-            <p>Forged when a master caster successfully binds and interlocks the stream of two primary element layers simultaneously:</p>
+            <h2 style="color: #a55eea;">The 6 Basal Composite Elements</h2>
+            <p style="margin-bottom: 15px;">The established primary fusion baselines recognized by the Council:</p>
             <div class="magic-grid">
-                <div class="element-box composite">
-                    <span class="formula-badge">🪨 Earth + 💧 Water</span>
+                <div class="element-box comp-base">
                     <h3>🔮 Matter Control</h3>
-                    <p>Manipulates atomic density structures and alters baseline physical states.</p>
+                    <span class="formula-badge">🪨 Earth + 💧 Water</span>
+                    <p>Manipulates physical density matrices and alters base molecular frameworks.</p>
                 </div>
-                <div class="element-box composite">
-                    <span class="formula-badge">💧 Water + 🔥 Fire</span>
-                    <h3>⚡ Energy</h3>
-                    <p>Pure thermal excitation waves. Pure displacement power calculations.</p>
-                </div>
-                <div class="element-box composite">
-                    <span class="formula-badge">🪨 Earth + 🔥 Fire</span>
-                    <h3>🌋 Magma Magic</h3>
-                    <p>Superheated liquefaction. High-destructive subterranean slag flow.</p>
-                </div>
-                <div class="element-box composite">
-                    <span class="formula-badge">💨 Air + 💧 Water</span>
+                <div class="element-box comp-base">
                     <h3>🌪️ Weather Magic</h3>
-                    <p>Macro environmental storm systems, air pressure cells, and precipitation manipulation.</p>
+                    <span class="formula-badge">💨 Air + 💧 Water</span>
+                    <p>Macro environmental cell shifting, air pressure manipulation, and localized storms.</p>
                 </div>
-                <div class="element-box composite">
-                    <span class="formula-badge">💧 Water + 🪨 Earth</span>
+                <div class="element-box comp-base">
                     <h3>🧪 Viscosity Magic</h3>
-                    <p>Friction modification. Controls adhesive states, density drag ratios, and fluid resistance.</p>
+                    <span class="formula-badge">💧 Water + 🪨 Earth</span>
+                    <p>Friction modification fields. Controls adhesive parameters and momentum drag.</p>
                 </div>
-                <div class="element-box composite">
-                    <span class="formula-badge">🔥 Fire + 💨 Air</span>
+                <div class="element-box comp-base">
+                    <h3>⚡ Energy Control</h3>
+                    <span class="formula-badge">💧 Water + 🔥 Fire</span>
+                    <p>Pure thermal excitation and energetic acceleration. High displacement kinetics.</p>
+                </div>
+                <div class="element-box comp-base">
+                    <h3>🌋 Magma Magic</h3>
+                    <span class="formula-badge">🪨 Earth + 🔥 Fire</span>
+                    <p>Superheated liquefaction. Destructive subterranean molten rock manipulation.</p>
+                </div>
+                <div class="element-box comp-base">
                     <h3>⚡ Lightning Magic</h3>
-                    <p>High-voltage ionized arcs tracking along thermal pressure differentials.</p>
+                    <span class="formula-badge">🔥 Fire + 💨 Air</span>
+                    <p>High-voltage ionized paths tracking along severe atmospheric heat differentials.</p>
                 </div>
             </div>
         </div>
 
-        <!-- SUPREME ELEMENT -->
-        <div class="section-card" style="border-color: #2ed573;">
-            <h2 style="color: #2ed573;">The Supreme Arcane Zenith</h2>
-            <p>Achieved only when all primary element leylines unify flawlessly into a living cycle:</p>
-            <div class="element-box mastery" style="margin-top:15px; background: rgba(46, 213, 115, 0.02);">
-                <span class="formula-badge" style="color: #2ed573; background: #0c2316;">🔥 + 💧 + 💨 + 🪨 All Cores Unified</span>
-                <h3 style="font-size: 1.3rem;">🌿 Nature Magic</h3>
-                <p>The apex form of magic. Absolute sovereignty over organic life cycle structures, ecosystem generation, and natural evolutionary timelines.</p>
+        <!-- RARE HIGHER MASTERIES -->
+        <div class="section-card" style="border-color: var(--tier3-color);">
+            <h2 style="color: var(--tier3-color);">Discovered Secondary Layer Masteries</h2>
+            <p>Forbidden or highly restricted magical classes formed exclusively by chaining multiple composite spell arcs concurrently:</p>
+            <div class="magic-grid">
+                <div class="element-box tier3-mastery">
+                    <h3>💎 Tectonic Crystal Magic</h3>
+                    <span class="formula-badge" style="color: var(--tier3-color); background: rgba(255,159,67,0.1);">Matter + Magma</span>
+                    <p>Applies high pressure vectors to subterranean molten material. Allows rapid growth of impenetrable volcanic obsidian and solid diamond armor spikes.</p>
+                </div>
+                <div class="element-box tier3-mastery">
+                    <h3>⛈️ Cataclysm Tempest Magic</h3>
+                    <span class="formula-badge" style="color: var(--tier3-color); background: rgba(255,159,67,0.1);">Weather + Lightning</span>
+                    <p>Weaves hyperbaric climate systems directly into high-voltage generation. Commands macro hurricane corridors and devastating localized EMP grid lockouts.</p>
+                </div>
+                <div class="element-box tier3-mastery">
+                    <h3>🌀 Gravitational Vector Magic</h3>
+                    <span class="formula-badge" style="color: var(--tier3-color); background: rgba(255,159,67,0.1);">Energy + Viscosity</span>
+                    <p>Forces energy fields to manipulate the raw friction values of physical space. Can drop environmental resistance to zero for instant acceleration, or halt fast projectiles instantly.</p>
+                </div>
+                <div class="element-box tier3-mastery">
+                    <h3>🌌 Quantum Void (Reality Warp)</h3>
+                    <span class="formula-badge" style="color: var(--tier3-color); background: rgba(255,159,67,0.1);">Matter + Energy + Lightning</span>
+                    <p>An unstable paradigm collapse. Fusing physical form, raw energy expression, and high plasma frequencies breaks down the physical rules of local space.</p>
+                </div>
             </div>
         </div>
 
     </div>
 
+    <!-- TRANSMUTATION FORGE ENGINE -->
+    <script>
+        const buttons = document.querySelectorAll('.composite-btn');
+        const output = document.getElementById('forgeOutput');
+        const clearBtn = document.getElementById('clearForge');
+        let activeComposites = new Set();
+
+        buttons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const element = btn.getAttribute('data-element');
+                
+                if (activeComposites.has(element)) {
+                    activeComposites.delete(element);
+                    btn.classList.remove('active');
+                } else {
+                    activeComposites.add(element);
+                    btn.classList.add('active');
+                }
+
+                evaluateAdvancedMatrix();
+            });
+        });
+
+        clearBtn.addEventListener('click', () => {
+            activeComposites.clear();
+            buttons.forEach(b => b.classList.remove('active'));
+            evaluateAdvancedMatrix();
+        });
+
+        function evaluateAdvancedMatrix() {
+            if (activeComposites.size === 0) {
+                output.innerHTML = `<p style="color: #666; font-style: italic;">Weave the composites above to ignite the Advanced Hybrid Formulas...</p>`;
+                return;
+            }
+
+            // CRITICAL OVERLOAD RULE: Fusing 4 or more distinct composites collapsing the structural containment 
+            if (activeComposites.size >= 5) {
+                output.innerHTML = `
+                    <span class="formula-badge" style="background:#4d0000; color:#ff4d4d;">⚠️ ELEMENTAL OVERLOAD CRITICAL</span>
+                    <h3 style="color:#ff4d4d; font-size:1.4rem; margin-top:5px;">💥 Paradigm Fracture Collapse</h3>
+                    <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Too many composite channels running through one spell focus. Arcane containment grid shattered. Local area destabilization imminent.</p>
+                `;
+                return;
+            }
+
+            // DETECTING TIER 4 ALL-INCLUSIVE OVERLAP
+            if (activeComposites.size === 4) {
+                output.innerHTML = `
+                    <span class="formula-badge" style="background:#0c2316; color:#2ed573;">🔄 CHANNELS INTEGRATED</span>
+                    <h3 style="color:#2ed573; font-size:1.4rem; margin-top:5px;">🌿 Living Nature Singularity</h3>
+                    <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">By crossing massive multi-composite parameters, you loop the elemental lifecycle back to its pure state: full planetary organic control.</p>
+                `;
+                return;
+            }
+
+            // 3 COMPOSITE MIXTURES
+            if (activeComposites.size === 3) {
+                if (activeComposites.has('matter') && activeComposites.has('energy') && activeComposites.has('lightning')) {
+                    output.innerHTML = `
+                        <span class="formula-badge" style="color: #ff9f43;">🔮 Matter + ⚡ Energy + ⚡ Lightning</span>
+                        <h3 style="color:#ff9f43; margin-top:5px;">🌌 Quantum Void / Reality Warp</h3>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Fuses the frameworks of physical substance, pure energy displacement, and frequency voltage. Bends and fractures local area coordinate physics.</p>
+                    `;
+                } else if (activeComposites.has('matter') && activeComposites.has('magma') && activeComposites.has('viscosity')) {
+                    output.innerHTML = `
+                        <span class="formula-badge" style="color: #ff9f43;">🔮 Matter + 🌋 Magma + 🧪 Viscosity</span>
+                        <h3 style="color:#fff; margin-top:5px;">🏔️ Continental Tectonic Shift</h3>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Absolute master of structural ground physics. Can turn deep foundations fluid or snap fault lines instantly.</p>
+                    `;
+                } else if (activeComposites.has('weather') && activeComposites.has('lightning') && activeComposites.has('energy')) {
+                    output.innerHTML = `
+                        <span class="formula-badge" style="color: #ff9f43;">🌪️ Weather + ⚡ Lightning + ⚡ Energy</span>
+                        <h3 style="color:#ff9f43; margin-top:5px;">⛈️ Ionic Cataclysm Storm</h3>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Harnesses the complete thermal energy capacity of a full storm cell. Constantly drops lightning directly on highlighted hostile coordinates.</p>
+                    `;
+                } else {
+                    output.innerHTML = `
+                        <span class="formula-badge">Cross-Composite Hybrid</span>
+                        <h3 style="color:#fff; margin-top:5px;">🌀 Multi-Channel Nexus Arc</h3>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">An advanced combined spell matrix. Radiates multiple independent damage signatures simultaneously.</p>
+                    `;
+                }
+                return;
+            }
+
+            // 2 COMPOSITE MIXTURES (THE EXACT COMBINATIONS REQUESTED)
+            if (activeComposites.size === 2) {
+                if (activeComposites.has('matter') && activeComposites.has('magma')) {
+                    output.innerHTML = `
+                        <span class="formula-badge" style="color: #ff9f43;">🔮 Matter + 🌋 Magma</span>
+                        <h3 style="color:#ff9f43; margin-top:5px;">💎 Tectonic Crystal Mastery</h3>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Superheated molecular alignment. Drops molten density arrays down to solidify instantly into crystalline obsidian barriers or diamond piercing traps.</p>
+                    `;
+                } else if (activeComposites.has('weather') && activeComposites.has('lightning')) {
+                    output.innerHTML = `
+                        <span class="formula-badge" style="color: #ff9f43;">🌪️ Weather + ⚡ Lightning</span>
+                        <h3 style="color:#ff9f43; margin-top:5px;">⛈️ Cataclysm Tempest Magic</h3>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Locks deep barometric pressure currents down alongside raw ionized voltage loops. Floods the terrain and triggers persistent lightning arcs.</p>
+                    `;
+                } else if (activeComposites.has('energy') && activeComposites.has('viscosity')) {
+                    output.innerHTML = `
+                        <span class="formula-badge" style="color: #ff9f43;">⚡ Energy + 🧪 Viscosity</span>
+                        <h3 style="color:#ff9f43; margin-top:5px;">🌀 Gravitational Vector Magic</h3>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">Controls spatial resistance coefficients. Speeds up nearby allies to hyperspeed or locks running hostiles inside high-friction air pockets.</p>
+                    } else {
+                    output.innerHTML = `
+                        <span class="formula-badge">Dual-Composite Interaction</span>
+                        <h3 style="color:#fff; margin-top:5px;">✨ Harmonic Resonant Resonance</h3>
+                        <p style="font-size:0.9rem; color:#aaa; margin-top:5px;">The two selected composites work cleanly in parallel, strengthening base player attributes and skill cooldowns.</p>
+                    `;
+                }
+                return;
+            }
+        }
+    </script>
 </body>
 </html>
