@@ -629,3 +629,689 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Grand Arcanum Council & Codex Matrix</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --panel-bg: #151922;
+            --text-color: #c5a880;
+            --text-light: #fff;
+            --accent-color: #45f3ff;
+            --danger-color: #ff4d4d;
+            --success-color: #2ed573;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; }
+        header { background: linear-gradient(to bottom, #11141a, var(--bg-color)); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .user-panel { background: #1f2833; padding: 10px 20px; border-radius: 4px; border: 1px solid #333; color: #fff; font-size: 0.9rem; }
+        .logout-btn { background: transparent; border: 1px solid var(--danger-color); color: var(--danger-color); padding: 4px 10px; margin-left: 10px; cursor: pointer; border-radius: 3px; }
+        
+        .main-grid { max-width: 1300px; width: 100%; margin: 25px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr; gap: 25px; }
+        @media (min-width: 950px) { .main-grid { grid-template-columns: 1.2fr 1fr; } .full-span { grid-column: span 2; } }
+        
+        .panel { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 25px; height: fit-content; }
+        .navigation-box { background-color: #1f2833; border: 1px solid #333; border-radius: 6px; padding: 20px; text-align: center; }
+        h2 { color: var(--text-light); font-size: 1.3rem; margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .btn-action { width: 100%; background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 14px; font-size: 1.1rem; text-transform: uppercase; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 4px; text-decoration: none; display: inline-block; text-align: center; }
+        .btn-action:hover { background: rgba(69, 243, 255, 0.05); }
+        
+        .admin-zone { background: rgba(69, 243, 255, 0.02); border: 1px solid #233a42; display: none; }
+        .promotion-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; padding: 12px; background: #0b0c10; border-radius: 4px; margin-bottom: 10px; border-left: 3px solid var(--accent-color); gap: 10px; }
+        .rank-select { background: #151922; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 4px; margin-right: 10px; }
+        .promo-btn { background: var(--success-color); color: #000; border: none; padding: 8px 14px; font-weight: bold; border-radius: 3px; cursor: pointer; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; color: #666; font-size: 0.8rem; text-transform: uppercase; padding: 10px; border-bottom: 2px solid #222; }
+        td { padding: 12px 10px; border-bottom: 1px solid #1a202c; color: #e2e8f0; font-size: 0.95rem; }
+        
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; color: #000; text-transform: uppercase; }
+        .rank-Novice { background: #747d8c; color: #fff; }
+        .rank-Apprentice { background: #a4b0be; }
+        .rank-Disciple { background: #ced6e0; }
+        .rank-Elementalist { background: #ffa502; }
+        .rank-Evoker { background: #ff7f50; color: #fff; }
+        .rank-Arcanist { background: #ff6b81; color: #fff; }
+        .rank-Sorcerer { background: #2ed573; }
+        .rank-Battlemage { background: #1e90ff; color: #fff; }
+        .rank-Archmage { background: #9b59b6; color: #fff; }
+        .rank-Paragon { background: #f1c40f; }
+        .rank-Demigod { background: #e67e22; color: #fff; }
+        .rank-Grandfather { background: #ff00ff; color: #fff; font-weight: bold; box-shadow: 0 0 10px #ff00ff; }
+        .rank-Overseer { background: #00ffff; font-weight: bold; box-shadow: 0 0 12px #00ffff; }
+        .rank-Grandmaster { background: #ff4757; color: #fff; box-shadow: 0 0 15px #ff4757; font-weight: 900; }
+        
+        .infinite-text { font-weight: bold; color: #ff4500; text-shadow: 0 0 8px rgba(255,69,0,0.6); }
+
+        .codex-list { list-style: none; }
+        .codex-item { padding: 10px; border-bottom: 1px dashed #222; display: flex; justify-content: space-between; align-items: center; }
+        .codex-item span { font-size: 0.85rem; font-family: monospace; color: #888; }
+        
+        /* Command Console Elements */
+        .console-box { background: #07080c; border: 1px solid #1f2430; font-family: monospace; padding: 15px; border-radius: 4px; text-align: left; }
+        .console-log { height: 220px; overflow-y: auto; color: #a4b0be; font-size: 0.85rem; margin-bottom: 10px; border-bottom: 1px solid #1a202c; padding-bottom: 5px; }
+        .console-input-row { display: flex; gap: 10px; }
+        .console-input { flex: 1; background: #11141a; border: 1px solid #333; color: #fff; padding: 8px; font-family: monospace; border-radius: 3px; }
+        .console-btn { background: #233a42; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 0 15px; cursor: pointer; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 style="color: #fff; font-size: 1.4rem; letter-spacing: 1px;">The Shared Arcanum Council</h1>
+        <div class="user-panel" id="userPanel">Syncing lines...</div>
+    </header>
+
+    <div class="main-grid">
+        <div class="navigation-box full-span">
+            <h2>Council Nexus Gate</h2>
+            <p style="color: #a4b0be; margin-bottom: 15px;">Planetary Server Sync Status Active. Access your core modules below.</p>
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; max-width: 800px; margin: 0 auto;">
+                <a href="login.html" class="btn-action" style="border-color: var(--text-color); color: var(--text-color); flex: 1; min-width: 180px; margin: 0; padding: 10px;">Login Vault</a>
+                <a href="chat.html" class="btn-action" style="border-color: var(--accent-color); color: var(--accent-color); flex: 1; min-width: 180px; margin: 0; padding: 10px;">Live Chat Crypt</a>
+                <a href="codex.html" class="btn-action" style="border-color: #9b59b6; color: #9b59b6; flex: 1; min-width: 180px; margin: 0; padding: 10px;">Library Codex</a>
+            </div>
+        </div>
+        
+        <div class="panel admin-zone full-span" id="adminZone">
+            <h2 style="color: var(--accent-color);">Licensed Terminal Decree Panel</h2>
+            <div id="promotionRoster"></div>
+        </div>
+
+        <!-- ARCANE TERMINAL -->
+        <div class="panel">
+            <h2>Arcane Inscription Terminal</h2>
+            <div id="trialArena">
+                <p>Verify your core sequence within the Login Vault to upload power configurations.</p>
+            </div>
+            <div id="activeTrialControls" style="display: none; text-align: center;">
+                <div style="background:#0b0c10; padding:20px; border-radius:6px; margin-bottom:15px; border:1px dashed #333;">
+                    <div id="powerDisplay" style="font-size:2.5rem; font-weight:bold; color:#fff;">0 MP</div>
+                    <div id="ownerNotice" style="display:none; color:var(--accent-color); font-weight:bold;">👑 Owner Grandmaster Core Active</div>
+                </div>
+                
+                <div class="console-box">
+                    <div class="console-log" id="consoleLog">Type /help to query available programmatic incantations...</div>
+                    <div class="console-input-row">
+                        <input type="text" id="consoleInput" class="console-input" placeholder="Use brackets for spaces, e.g. /drain [Lord Vader] 50">
+                        <button id="consoleSubmit" class="console-btn">Invoke</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Global Live Registry Board</h2>
+            <table>
+                <thead>
+                    <tr><th>Mage Identity</th><th>Order Status Rank</th><th>Power Capacity</th><th>Lic.</th></tr>
+                </thead>
+                <tbody id="matrixBody"></tbody>
+            </table>
+        </div>
+
+        <div class="panel full-span">
+            <h2>The Grand Order Hierarchy Matrix</h2>
+            <ul class="codex-list">
+                <li class="codex-item"><strong>Grandmaster [Owner Level]</strong> <span style="color:var(--danger-color)">Absolute Authority (👑 AdminOwner ONLY)</span></li>
+                <li class="codex-item"><strong>Overseer [Supreme Commander]</strong> <span style="color:#00ffff">Tier 14 &bull; Ultimate executive enforcer. Holds absolute domain over sub-rank scripts.</span></li>
+                <li class="codex-item"><strong>Grandfather [Divine Elder]</strong> <span style="color:#ff00ff">Tier 13 &bull; Stately regional support tier. Focuses on blessings and atmospheric balance.</span></li>
+                <li class="codex-item"><strong>Demigod [Council Sub-Rank II]</strong> <span>Tier 12 &bull; Grants standard licenses</span></li>
+                <li class="codex-item"><strong>Paragon [Council Sub-Rank I]</strong> <span>Tier 11 &bull; Grants standard licenses</span></li>
+                <li class="codex-item"><strong>Archmage [Mastery Sub-Rank III]</strong> <span>Tier 10</span></li>
+                <li class="codex-item"><strong>Battlemage [Mastery Sub-Rank II]</strong> <span>Tier 9</span></li>
+                <li class="codex-item"><strong>Sorcerer [Mastery Sub-Rank I]</strong> <span>Tier 8</span></li>
+                <li class="codex-item"><strong>Arcanist [Adept Sub-Rank III]</strong> <span>Tier 7</span></li>
+                <li class="codex-item"><strong>Evoker [Adept Sub-Rank II]</strong> <span>Tier 6</span></li>
+                <li class="codex-item"><strong>Elementalist [Adept Sub-Rank I]</strong> <span>Tier 5</span></li>
+                <li class="codex-item"><strong>Disciple [Initiate Sub-Rank III]</strong> <span>Tier 4</span></li>
+                <li class="codex-item"><strong>Apprentice [Initiate Sub-Rank II]</strong> <span>Tier 3</span></li>
+                <li class="codex-item"><strong>Novice [Initiate Sub-Rank I]</strong> <span>Tier 2 &bull; Base Tier</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const rankList = [
+            "Novice", "Apprentice", "Disciple", "Elementalist", "Evoker", 
+            "Arcanist", "Sorcerer", "Battlemage", "Archmage", "Paragon", 
+            "Demigod", "Grandfather", "Overseer", "Grandmaster"
+        ];
+
+        const rankWeights = {};
+        rankList.forEach((r, idx) => { rankWeights[r] = idx + 1; });
+        
+        const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
+        let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
+        let isEditingPromotion = false;
+        let globalMagesCache = {}; 
+
+        const MAX_MP_LIMIT = 1000000000; 
+
+        function calculateDiminishingMP(rawEnergy) {
+            if (!rawEnergy || rawEnergy <= 0) return 0;
+            let calculatedMP = MAX_MP_LIMIT * (1 - Math.exp(-rawEnergy / (MAX_MP_LIMIT * 0.45)));
+            return Math.min(Math.round(calculatedMP), MAX_MP_LIMIT);
+        }
+
+        function formatArcaneMP(mpValue) {
+            if (mpValue >= 1000000) return (mpValue / 1000000).toFixed(1) + 'M';
+            if (mpValue >= 1000) return (mpValue / 1000).toFixed(1) + 'K';
+            return mpValue;
+        }
+
+        async function syncNetworkData() {
+            try {
+                const res = await fetch(`${dbURL}.json`);
+                globalMagesCache = await res.json() || {};
+                
+                buildRegistryMatrix(globalMagesCache);
+                if (!isEditingPromotion) {
+                    buildHeaderAndAdmin(globalMagesCache);
+                }
+                updateLocalDisplay(globalMagesCache);
+            } catch (e) {
+                console.error("Sync line hold...", e);
+            }
+        }
+
+        function buildHeaderAndAdmin(networkUsers) {
+            const container = document.getElementById('userPanel');
+            if (!session) {
+                container.innerHTML = `Guest Core &bull; <button class="logout-btn" onclick="window.location.href='login.html'">Login</button>`;
+                return;
+            }
+
+            const myUser = networkUsers[session.username];
+            if (!myUser) return;
+
+            container.innerHTML = `Linked: <strong>${session.username}</strong> [<span style="color:var(--accent-color);">${myUser.rank}</span>] <button class="logout-btn" onclick="terminateSession()">Disconnect</button>`;
+
+            if (myUser.hasLicense) {
+                document.getElementById('adminZone').style.display = 'block';
+                const rosterContainer = document.getElementById('promotionRoster');
+                rosterContainer.innerHTML = '';
+
+                const myWeight = rankWeights[myUser.rank] || 0;
+                const isActualOwner = (session.username === "AdminOwner");
+                let targetsAvailable = false;
+
+                Object.keys(networkUsers).forEach(targetName => {
+                    if (targetName === session.username) return;
+                    const targetUser = networkUsers[targetName];
+                    const targetWeight = rankWeights[targetUser.rank] || 0;
+
+                    if (myWeight > targetWeight) {
+                        targetsAvailable = true;
+                        const row = document.createElement('div');
+                        row.className = 'promotion-row';
+                        
+                        let optionStrings = "";
+                        Object.keys(rankWeights).forEach(rName => {
+                            let rankWeight = rankWeights[rName];
+                            
+                            if (rName === "Grandfather" || rName === "Overseer") {
+                                if (isActualOwner) {
+                                    optionStrings += `<option value="${rName}" ${targetUser.rank === rName ? 'selected' : ''}>${rName}</option>`;
+                                }
+                            } else if (rankWeight < myWeight && rName !== "Grandmaster") {
+                                optionStrings += `<option value="${rName}" ${targetUser.rank === rName ? 'selected' : ''}>${rName}</option>`;
+                            }
+                        });
+
+                        row.innerHTML = `
+                            <div><strong>${targetName}</strong> (<span style="color:var(--accent-color)">${targetUser.rank}</span>)</div>
+                            <div>
+                                <select id="rankSelect-${targetName.replace(/\s+/g, '_')}" class="rank-select" onfocus="isEditingPromotion=true" onblur="setTimeout(()=>isEditingPromotion=false, 2000)">
+                                    ${optionStrings}
+                                </select>
+                                <label style="margin-right:15px; font-size:0.85rem;"><input type="checkbox" id="licCheck-${targetName.replace(/\s+/g, '_')}" ${targetUser.hasLicense ? 'checked' : ''}> Grant License</label>
+                                <button class="promo-btn" onclick="executePromotion('${targetName}')">Authorize</button>
+                            </div>`;
+                        rosterContainer.appendChild(row);
+                    }
+                });
+
+                if (!targetsAvailable) {
+                    rosterContainer.innerHTML = `<p style="font-style:italic; color:#555; text-align:center;">No subordinate mages configured beneath your authorization matrix.</p>`;
+                }
+            }
+        }
+
+        function terminateSession() {
+            sessionStorage.removeItem('current_mage_session');
+            window.location.reload();
+        }
+
+        function buildRegistryMatrix(networkUsers) {
+            const tbody = document.getElementById('matrixBody');
+            tbody.innerHTML = '';
+
+            let sorted = Object.keys(networkUsers).map(k => ({ username: k, ...networkUsers[k] }));
+            sorted.sort((a,b) => {
+                const weightB = rankWeights[b.rank] || 0;
+                const weightA = rankWeights[a.rank] || 0;
+                if (weightB !== weightA) return weightB - weightA;
+                const scoreB = b.rank === "Grandmaster" ? Infinity : (b.power || 0);
+                const scoreA = a.rank === "Grandmaster" ? Infinity : (a.power || 0);
+                return scoreB - scoreA;
+            });
+
+            sorted.forEach(u => {
+                const isInf = u.rank === "Grandmaster";
+                let scoreField;
+                if (isInf) {
+                    scoreField = `<span class="infinite-text">∞ MP</span>`;
+                } else {
+                    const processedMP = u.power !== undefined ? u.power : calculateDiminishingMP(u.rawEnergy || 0);
+                    scoreField = `${formatArcaneMP(processedMP)} MP`;
+                }
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td><strong>${u.username}</strong> ${isInf?'👑':''}</td><td><span class="badge rank-${u.rank}">${u.rank}</span></td><td>${scoreField}</td><td>${u.hasLicense ? '📜' : '❌'}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateLocalDisplay(networkUsers) {
+            if (!session || session.username === "AdminOwner") return;
+            const pDisplay = document.getElementById('powerDisplay');
+            if (!pDisplay) return;
+            const myUser = networkUsers[session.username] || { power: 0, rawEnergy: 0 };
+            const currentMP = myUser.power !== undefined ? myUser.power : calculateDiminishingMP(myUser.rawEnergy || 0);
+            pDisplay.innerText = `${formatArcaneMP(currentMP)} MP`;
+        }
+
+        function writeToConsole(text, color = "#a4b0be") {
+            const logBox = document.getElementById('consoleLog');
+            logBox.innerHTML += `<div style="color:${color}; margin-top:2px;">&gt; ${text}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function parseCommandInput(rawString) {
+            const result = [];
+            let currentStr = "";
+            let inBrackets = false;
+
+            for (let i = 0; i < rawString.length; i++) {
+                let char = rawString[i];
+                if (char === '[') {
+                    inBrackets = true;
+                } else if (char === ']') {
+                    inBrackets = false;
+                    if (currentStr.trim()) {
+                        result.push(currentStr.trim());
+                        currentStr = "";
+                    }
+                } else if (char === ' ' && !inBrackets) {
+                    if (currentStr.trim()) {
+                        result.push(currentStr.trim());
+                        currentStr = "";
+                    }
+                } else {
+                    currentStr += char;
+                }
+            }
+            if (currentStr.trim()) {
+                result.push(currentStr.trim());
+            }
+            return result;
+        }
+
+        function buildActionTerminal() {
+            if (!session) return;
+            document.getElementById('trialArena').style.display = 'none';
+            document.getElementById('activeTrialControls').style.display = 'block';
+
+            const pDisplay = document.getElementById('powerDisplay');
+            const consoleInput = document.getElementById('consoleInput');
+            const consoleSubmit = document.getElementById('consoleSubmit');
+
+            const isOwner = (session.username === "AdminOwner");
+
+            if (isOwner) {
+                pDisplay.innerHTML = `<span class="infinite-text">∞ MP</span>`;
+                document.getElementById('ownerNotice').style.display = 'block';
+            }
+
+            async function processCommand() {
+                const fullCmd = consoleInput.value.trim();
+                consoleInput.value = "";
+                if (!fullCmd) return;
+
+                writeToConsole(fullCmd, "#fff");
+
+                const parts = parseCommandInput(fullCmd);
+                const commandName = parts[0] ? parts[0].toLowerCase() : "";
+                const targetArg = parts[1];
+                const valueArg = parts[2];
+
+                const userProfile = globalMagesCache[session.username] || { rank: "Novice", rawEnergy: 0 };
+                const userRank = userProfile.rank;
+
+                // --- 1. BASIC USER COMMANDS ---
+                if (commandName === "/help") {
+                    writeToConsole("Mage Spells: /channel, /meditate, /absorb, /fuse, /gamble [amt], /transfer [name] [amt], /drain [name] [amt], /diagnose, /clear");
+                    if (userRank === "Grandfather" || userRank === "Overseer" || isOwner) {
+                        writeToConsole("Grandfather: /syncpool, /auracast, /bless [name]");
+                    }
+                    if (userRank === "Overseer" || isOwner) {
+                        writeToConsole("🔥 OVERSEER ENFORCER: /siphon [name] [amt], /strip [name], /freeze [name], /scan [name], /trace [name], /warn [name], /metrics");
+                    }
+                    if (isOwner) {
+                        writeToConsole("Grandmaster Root: /take [name] [amt], /overload [name], /smite [name], /ascend [name], /descend [name], /inject [name] [amt], /multinject [amt]");
+                    }
+                    return;
+                }
+
+                if (commandName === "/clear") {
+                    document.getElementById('consoleLog').innerHTML = `<div style="color:#555;">Terminal display buffer reset completely.</div>`;
+                    return;
+                }
+
+                if (commandName === "/diagnose") {
+                    writeToConsole(`Identity Core: ${session.username} | Order Clearance Rank: ${userRank}`);
+                    return;
+                }
+
+                if (commandName === "/channel") {
+                    if (isOwner) { writeToConsole("Static infinity overrides system channel matrices.", "var(--danger-color)"); return; }
+                    let currentRawEnergy = userProfile.rawEnergy || 0;
+                    const rollChaos = Math.random();
+                    let newRawEnergy = currentRawEnergy;
+
+                    if (rollChaos > 0.25) {
+                        const energyBurst = Math.floor(Math.random() * 850) + 150;
+                        newRawEnergy = currentRawEnergy + energyBurst;
+                        writeToConsole(`✨ Channeling Complete! Captured +${energyBurst} Raw Sparks.`, "var(--success-color)");
+                    } else {
+                        const energyDrain = Math.floor(currentRawEnergy * 0.15) + 100;
+                        newRawEnergy = Math.max(0, currentRawEnergy - energyDrain);
+                        writeToConsole(`💥 Channel Backfire! Leaked -${energyDrain} Arcane Sparks.`, "var(--danger-color)");
+                    }
+
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRawEnergy) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newRawEnergy)) });
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/absorb") {
+                    if (isOwner) return;
+                    let currentRawEnergy = userProfile.rawEnergy || 0;
+                    const safeGains = Math.floor(Math.random() * 40) + 10;
+                    let newRawEnergy = currentRawEnergy + safeGains;
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRawEnergy) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newRawEnergy)) });
+                    writeToConsole(`🍃 Absorbed +${safeGains} sparks cleanly.`, "var(--success-color)");
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/meditate") {
+                    if (isOwner) return;
+                    let currentRawEnergy = userProfile.rawEnergy || 0;
+                    const safeGains = Math.floor(Math.random() * 80) + 20;
+                    let newRawEnergy = currentRawEnergy + safeGains;
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRawEnergy) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newRawEnergy)) });
+                    writeToConsole(`🧘 Matrix stabilized. Gained +${safeGains} Sparks.`, "var(--success-color)");
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/gamble") {
+                    if (isOwner) return;
+                    const amount = parseInt(targetArg);
+                    let currentRawEnergy = userProfile.rawEnergy || 0;
+                    if (isNaN(amount) || amount <= 0 || amount > currentRawEnergy) { writeToConsole("Invalid wager amount.", "var(--danger-color)"); return; }
+
+                    let newRawEnergy = currentRawEnergy;
+                    if (Math.random() >= 0.50) {
+                        newRawEnergy += amount;
+                        writeToConsole(`🎲 Won! Gained +${amount} Sparks.`, "var(--success-color)");
+                    } else {
+                        newRawEnergy -= amount;
+                        writeToConsole(`🎲 Lost! Vaporized -${amount} Sparks.`, "var(--danger-color)");
+                    }
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newRawEnergy) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newRawEnergy)) });
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/drain") {
+                    if (isOwner) return;
+                    const targetUser = targetArg;
+                    const amount = parseInt(valueArg);
+
+                    if (!targetUser || isNaN(amount) || amount <= 0) { writeToConsole("Usage: /drain [username] [amount]", "var(--danger-color)"); return; }
+                    if (!globalMagesCache[targetUser]) { writeToConsole("Target not detected.", "var(--danger-color)"); return; }
+                    if (targetUser === "AdminOwner" || globalMagesCache[targetUser].rank === "Overseer") { writeToConsole("Fatal Error: Caster target immune to standard drains.", "var(--danger-color)"); return; }
+
+                    let targetRaw = globalMagesCache[targetUser].rawEnergy || 0;
+                    if (targetRaw < amount) { writeToConsole("Target lacks that much power to harvest.", "var(--danger-color)"); return; }
+
+                    let myRaw = userProfile.rawEnergy || 0;
+
+                    if (Math.random() < 0.40) {
+                        let newMyRaw = myRaw + amount;
+                        let newTargRaw = targetRaw - amount;
+                        await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newMyRaw) });
+                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newMyRaw)) });
+                        await fetch(`${dbURL}/${targetUser}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newTargRaw) });
+                        await fetch(`${dbURL}/${targetUser}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newTargRaw)) });
+                        writeToConsole(`🩸 Leech Success! Siphoned ${amount} Sparks away from ${targetUser}.`, "var(--success-color)");
+                    } else {
+                        let backlash = Math.floor(amount * 0.5);
+                        let newMyRaw = Math.max(0, myRaw - backlash);
+                        await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newMyRaw) });
+                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newMyRaw)) });
+                        writeToConsole(`💥 Leech Resistance Backfired! You leaked -${backlash} Sparks onto the void floor.`, "var(--danger-color)");
+                    }
+                    await syncNetworkData();
+                    return;
+                }
+
+                if (commandName === "/transfer") {
+                    if (isOwner) return;
+                    const targetUser = targetArg;
+                    const amount = parseInt(valueArg);
+                    if (!targetUser || isNaN(amount) || amount <= 0 || (userProfile.rawEnergy || 0) < amount || !globalMagesCache[targetUser]) { writeToConsole("Invalid transfer arguments.", "var(--danger-color)"); return; }
+
+                    let donorRaw = (userProfile.rawEnergy || 0) - amount;
+                    let receiverRaw = (globalMagesCache[targetUser].rawEnergy || 0) + amount;
+
+                    await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(donorRaw) });
+                    await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
+                    await fetch(`${dbURL}/${targetUser}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(receiverRaw) });
+                    await fetch(`${dbURL}/${targetUser}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(receiverRaw)) });
+                    writeToConsole(`🤝 Channeled ${amount} Raw Sparks safely over to ${targetUser}!`, "var(--success-color)");
+                    await syncNetworkData();
+                    return;
+                }
+
+                // --- 2. GRANDFATHER TIER COMMANDS ---
+                if (commandName === "/syncpool" || commandName === "/auracast" || commandName === "/bless") {
+                    if (userRank !== "Grandfather" && userRank !== "Overseer" && !isOwner) { writeToConsole("Error: Requester identity lack Elder keys.", "var(--danger-color)"); return; }
+                    
+                    if (commandName === "/auracast") { writeToConsole("🌌 Ambient aura fields standardized.", "var(--accent-color)"); return; }
+                    if (commandName === "/syncpool") { writeToConsole("Sub-networks synchronized.", "var(--success-color)"); return; }
+                    if (commandName === "/bless") {
+                        const targetData = globalMagesCache[targetArg];
+                        if (!targetArg || !targetData) { writeToConsole("Specify target username."); return; }
+                        let updatedRaw = (targetData.rawEnergy || 0) + 2500;
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
+                        writeToConsole(`🌌 Bestowed Elder Blessing upon ${targetArg}! (+2,500 Sparks)`, "var(--accent-color)");
+                        await syncNetworkData();
+                        return;
+                    }
+                }
+
+                // --- 3. HIGH-POWERED SUPREME OVERSEER COMMAND SET ---
+                if (commandName === "/siphon" || commandName === "/strip" || commandName === "/freeze" || commandName === "/scan" || commandName === "/trace" || commandName === "/warn" || commandName === "/metrics") {
+                    if (userRank !== "Overseer" && !isOwner) {
+                        writeToConsole("Fatal Error: Absolute domain commands restricted exclusively to high-clearance Overseers.", "var(--danger-color)");
+                        return;
+                    }
+
+                    if (commandName === "/metrics") {
+                        writeToConsole(`Active nodes registered: ${Object.keys(globalMagesCache).length}`);
+                        return;
+                    }
+
+                    if (!targetArg) { writeToConsole("Specify target profile argument.", "var(--danger-color)"); return; }
+                    if (targetArg === "AdminOwner") { writeToConsole("Root core is immune to Overseer enforcement protocols.", "var(--danger-color)"); return; }
+                    
+                    const targetData = globalMagesCache[targetArg];
+                    if (!targetData) { writeToConsole("Target node is completely offline.", "var(--danger-color)"); return; }
+
+                    if (commandName === "/siphon") {
+                        const amount = parseInt(valueArg);
+                        if (isNaN(amount) || amount <= 0) { writeToConsole("Usage: /siphon [username] [amount]"); return; }
+                        let targRaw = targetData.rawEnergy || 0;
+                        if (targRaw < amount) { writeToConsole("Target has insufficient fuel to extract."); return; }
+
+                        let updatedTargRaw = targRaw - amount;
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedTargRaw) });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedTargRaw)) });
+
+                        if (!isOwner) {
+                            let myNewRaw = (userProfile.rawEnergy || 0) + amount;
+                            await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(myNewRaw) });
+                            await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(myNewRaw)) });
+                        }
+
+                        writeToConsole(`⚡ OVERSEER SIPHON COMPLETE: Extracted ${amount} Sparks from ${targetArg} into enforcer node pool.`, "var(--accent-color)");
+                    }
+                    else if (commandName === "/strip") {
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: 0 });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: 0 });
+                        writeToConsole(`⚡ COMMAND STRIP: Wiped power parameters of ${targetArg} down to absolute 0 MP.`, "var(--danger-color)");
+                    }
+                    else if (commandName === "/freeze") {
+                        writeToConsole(`🧊 LOCK PROTOCOL: Terminal pipeline of [${targetArg}] has been forcefully frozen. Input channels suppressed.`, "var(--danger-color)");
+                    }
+                    else if (commandName === "/scan") {
+                        writeToConsole(`[Overseer Scan Output] ${targetArg}: Rank=${targetData.rank} | RawSparks=${targetData.rawEnergy || 0}`);
+                    }
+                    else if (commandName === "/trace") {
+                        writeToConsole(`[Ley-line Trace Output]: Latency nominal. Profile verification verified for ${targetArg}.`);
+                    }
+                    else if (commandName === "/warn") {
+                        writeToConsole(`⚠️ OVERSEER WRIT ISSUED FOR [${targetArg}]: Misbehavior detected. Terminal lock flagged.`, "var(--danger-color)");
+                    }
+
+                    await syncNetworkData();
+                    return;
+                }
+
+                // --- 4. EXCLUSIVE ADMINOWNER ROOT COMMANDS ---
+                if (commandName === "/take" || commandName === "/overload" || commandName === "/smite" || commandName === "/ascend" || commandName === "/descend" || commandName === "/inject" || commandName === "/multinject") {
+                    if (!isOwner) { writeToConsole("Fatal Error: Grandmaster root restriction.", "var(--danger-color)"); return; }
+
+                    if (commandName === "/multinject") {
+                        const amount = parseInt(targetArg);
+                        if (isNaN(amount) || amount <= 0) return;
+                        for (let key of Object.keys(globalMagesCache)) {
+                            if (key === "AdminOwner") continue;
+                            let newR = (globalMagesCache[key].rawEnergy || 0) + amount;
+                            await fetch(`${dbURL}/${key}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(newR) });
+                            await fetch(`${dbURL}/${key}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(newR)) });
+                        }
+                        writeToConsole(` Mass Forced Injection complete across all channels.`, "var(--success-color)");
+                        await syncNetworkData();
+                        return;
+                    }
+
+                    if (!targetArg || targetArg === "AdminOwner") return;
+                    
+                    // Offline handling check
+                    const targetData = globalMagesCache[targetArg];
+                    if (!targetData) {
+                        writeToConsole(`Target entity "${targetArg}" is offline or does not exist in local cache. Attempting forced direct database execution...`, "#ffa502");
+                    }
+
+                    if (commandName === "/take") {
+                        const amount = parseInt(valueArg);
+                        if (isNaN(amount) || amount <= 0) { writeToConsole("Usage: /take [username] [amount]", "var(--danger-color)"); return; }
+                        
+                        // Grab database current state directly or fallback to 0
+                        let currentRaw = targetData ? (targetData.rawEnergy || 0) : 0;
+                        let updatedRaw = Math.max(0, currentRaw - amount);
+                        
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
+                        
+                        writeToConsole(`👑 DIRECT ROOT TAKE: Forcefully extracted ${amount} sparks from [${targetArg}] database file storage.`, "var(--danger-color)");
+                        await syncNetworkData();
+                        return;
+                    }
+
+                    if (!targetData) { writeToConsole("Target node must be initialized to accept structural adjustments.", "var(--danger-color)"); return; }
+
+                    if (commandName === "/overload") {
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: 0 });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: 0 });
+                        writeToConsole(`⚡ Core Collapse Transmitted! Target ${targetArg} drained to 0.`, "var(--danger-color)");
+                    } 
+                    else if (commandName === "/smite") {
+                        await fetch(`${dbURL}/${targetArg}/rank.json`, { method: 'PUT', body: JSON.stringify("Novice") });
+                        await fetch(`${dbURL}/${targetArg}/hasLicense.json`, { method: 'PUT', body: false });
+                        writeToConsole(`⚡ Smote privileges and status of ${targetArg} down to Novice!`, "var(--danger-color)");
+                    } 
+                    else if (commandName === "/ascend") {
+                        await fetch(`${dbURL}/${targetArg}/rank.json`, { method: 'PUT', body: JSON.stringify("Overseer") });
+                        writeToConsole(`⚡ Ascended ${targetArg} directly into the supreme Overseer Enforcer tier.`, "var(--success-color)");
+                    }
+                    else if (commandName === "/descend") {
+                        let currentIdx = rankList.indexOf(targetData.rank);
+                        let nextIdx = Math.max(0, currentIdx - 1);
+                        await fetch(`${dbURL}/${targetArg}/rank.json`, { method: 'PUT', body: JSON.stringify(rankList[nextIdx]) });
+                        writeToConsole(`⚡ Demoted ${targetArg} safely down one rank index step.`);
+                    }
+                    else if (commandName === "/inject") {
+                        const amount = parseInt(valueArg); if (isNaN(amount)) return;
+                        let updatedRaw = (targetData.rawEnergy || 0) + amount;
+                        await fetch(`${dbURL}/${targetArg}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
+                        await fetch(`${dbURL}/${targetArg}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
+                        writeToConsole(`💉 Injected +${amount} Raw Sparks into ${targetArg}.`, "var(--success-color)");
+                    }
+
+                    await syncNetworkData();
+                    return;
+                }
+
+                writeToConsole(`Spell format unrecognized: "${commandName}". Query /help for options.`, "var(--danger-color)");
+            }
+
+            consoleSubmit.onclick = processCommand;
+            consoleInput.onkeydown = function(e) { if (e.key === "Enter") processCommand(); };
+        }
+
+        async function executePromotion(target) {
+            isEditingPromotion = true; 
+            const elementId = `rankSelect-${target.replace(/\s+/g, '_')}`;
+            const licId = `licCheck-${target.replace(/\s+/g, '_')}`;
+            
+            const chosenRank = document.getElementById(elementId).value;
+            const giveLicense = document.getElementById(licId).checked;
+            
+            await fetch(`${dbURL}/${target}/rank.json`, { method: 'PUT', body: JSON.stringify(chosenRank) });
+            await fetch(`${dbURL}/${target}/hasLicense.json`, { method: 'PUT', body: JSON.stringify(giveLicense) });
+            
+            alert(`Jurisdiction record updated successfully for ${target}!`);
+            isEditingPromotion = false;
+            syncNetworkData();
+        }
+
+        syncNetworkData().then(() => { buildActionTerminal(); });
+        setInterval(syncNetworkData, 4000); 
+    </script>
+</body>
+</html>
