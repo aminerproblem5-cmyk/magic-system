@@ -10,7 +10,7 @@
             --panel-bg: #151922;
             --text-color: #c5a880;
             --text-light: #fff;
-            --accent-color: #2ed573; /* Match the green vault link */
+            --accent-color: #2ed573;
             --danger-color: #ff4d4d;
             --cyan-color: #45f3ff;
         }
@@ -26,7 +26,7 @@
         .back-btn:hover { background: rgba(69, 243, 255, 0.05); }
 
         /* File Upload Drop Zone Styles */
-        .drop-zone { border: 2px dashed #2ed573; border-radius: 6px; background: rgba(46, 213, 115, 0.02); padding: 40px 20px; text-align: center; cursor: pointer; transition: background 0.3s ease; }
+        .drop-zone { border: 2px dashed #2ed573; border-radius: 6px; background: rgba(46, 213, 115, 0.02); padding: 40px 20px; text-align: center; cursor: pointer; transition: background 0.3s ease; display: block; }
         .drop-zone.drag-over { background: rgba(46, 213, 115, 0.1); border-color: var(--text-light); }
         .drop-zone p { font-size: 1.1rem; color: #a4b0be; margin-bottom: 10px; }
         .drop-zone span { font-size: 0.85rem; color: #666; font-family: monospace; }
@@ -35,11 +35,23 @@
         /* Media Grid Display */
         .vault-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 15px; }
         .vault-card { background: #07080c; border: 1px solid #1f2430; border-radius: 4px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .vault-card video, .vault-card img { width: 100%; height: auto; border-radius: 3px; background: #000; border: 1px solid #222; }
-        .file-info { font-family: monospace; font-size: 0.85rem; color: #a4b0be; word-break: break-all; }
+        
+        /* Media Elements & Interaction */
+        .media-preview-container { cursor: pointer; overflow: hidden; border-radius: 3px; border: 1px solid #222; background: #000; display: flex; align-items: center; justify-content: center; height: 140px; position: relative; }
+        .media-preview-container:hover::after { content: "🔍 Click to Zoom"; position: absolute; background: rgba(0,0,0,0.7); color: #fff; padding: 4px 8px; font-size: 0.8rem; border-radius: 4px; font-family: monospace; }
+        .vault-card video, .vault-card img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        
+        .file-info { font-family: monospace; font-size: 0.85rem; color: #a4b0be; word-break: break-all; margin-top: 5px; }
         .file-meta { font-size: 0.75rem; color: #555; display: flex; justify-content: space-between; }
         
         .status-msg { color: var(--cyan-color); font-family: monospace; font-size: 0.9rem; margin-top: 10px; text-align: center; min-height: 20px; }
+
+        /* Fullscreen Lightbox Overlay */
+        .lightbox-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(7, 9, 13, 0.95); display: none; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; gap: 20px; padding: 20px; }
+        .lightbox-content { max-width: 90%; max-height: 75vh; box-shadow: 0 0 30px rgba(46, 213, 115, 0.2); border: 2px solid #2d3748; border-radius: 6px; background: #000; }
+        .lightbox-btn { background: transparent; border: 2px solid var(--danger-color); color: var(--danger-color); padding: 10px 24px; font-size: 1rem; font-weight: bold; cursor: pointer; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; transition: all 0.2s ease; }
+        .lightbox-btn:hover { background: var(--danger-color); color: #000; box-shadow: 0 0 15px var(--danger-color); }
+        .lightbox-title { color: #fff; font-family: monospace; font-size: 1.1rem; }
     </style>
 </head>
 <body>
@@ -50,14 +62,14 @@
                 <span>🎬 Grand Arcanum Video Vault</span>
                 <a href="index.html" class="back-btn">← Return to Gates</a>
             </h1>
-            <p style="color: #a4b0be; margin-top: 5px;">Secure repository matrix module. Transmit and review localized record logs here.</p>
+            <p style="color: #a4b0be; margin-top: 5px;">Secure repository matrix module. Transmit and click media files below to view in widescreen mode.</p>
         </div>
 
         <div class="panel">
             <h2>File Ingestion Terminal</h2>
             <label for="fileInput" class="drop-zone" id="dropZone">
                 <p>Drag & Drop Record File Here or Click to Browse</p>
-                <span>Accepts video configurations, image footprints, or data elements</span>
+                <span>Accepts video configurations or image footprints</span>
                 <input type="file" id="fileInput" accept="video/*,image/*">
             </label>
             <div class="status-msg" id="statusMessage">System Idle. Awaiting ingestion sequence...</div>
@@ -67,7 +79,9 @@
             <h2>Archived Matrix Files</h2>
             <div class="vault-grid" id="vaultGrid">
                 <div class="vault-card">
-                    <div style="height: 130px; display:flex; align-items:center; justify-content:center; background:#111; color:#333; font-size:3rem; border-radius:3px;">🎬</div>
+                    <div class="media-preview-container" onclick="openLightbox('sample_council_record.mp4', 'video', 'https://www.w3schools.com/html/mov_bbb.mp4')">
+                        <video src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+                    </div>
                     <div class="file-info"><strong>sample_council_record.mp4</strong></div>
                     <div class="file-meta"><span>Size: 4.2 MB</span><span>Uploaded: System</span></div>
                 </div>
@@ -75,24 +89,30 @@
         </div>
     </div>
 
+    <div class="lightbox-overlay" id="lightboxOverlay">
+        <div class="lightbox-title" id="lightboxTitle">File View</div>
+        <div id="lightboxMediaContainer" style="display: flex; justify-content: center; width: 100%;">
+            </div>
+        <button class="lightbox-btn" onclick="closeLightbox()">✕ Close View</button>
+    </div>
+
     <script>
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('fileInput');
         const statusMessage = document.getElementById('statusMessage');
         const vaultGrid = document.getElementById('vaultGrid');
+        
+        const lightboxOverlay = document.getElementById('lightboxOverlay');
+        const lightboxTitle = document.getElementById('lightboxTitle');
+        const lightboxMediaContainer = document.getElementById('lightboxMediaContainer');
 
-        // Prevent standard system window default actions on drags
+        // Prevent dragging page collision faults
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
             document.body.addEventListener(eventName, preventDefaults, false);
         });
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
 
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        // Highlight drag toggles
         ['dragenter', 'dragover'].forEach(eventName => {
             dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
         });
@@ -100,14 +120,9 @@
             dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
         });
 
-        // Capture dropped files
         dropZone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleUploadedFiles(files);
+            handleUploadedFiles(e.dataTransfer.files);
         });
-
-        // Capture clicked selection
         fileInput.addEventListener('change', function() {
             handleUploadedFiles(this.files);
         });
@@ -120,58 +135,80 @@
             statusMessage.style.color = 'var(--cyan-color)';
 
             const reader = new FileReader();
-            
-            // Read file chunk data into format base string to store or preview
             reader.onload = function(e) {
                 const fileDataUrl = e.target.result;
-                displayNewArchiveCard(file.name, file.size, file.type, fileDataUrl);
+                const isVideo = file.type.startsWith('video/');
+                const typeStr = isVideo ? 'video' : 'image';
+
+                displayNewArchiveCard(file.name, file.size, typeStr, fileDataUrl);
                 
                 statusMessage.innerText = `Success: Archive block written for "${file.name}".`;
                 statusMessage.style.color = 'var(--accent-color)';
-                
-                /* OPTIONAL FIREBASE LINKAGE:
-                   If you want to sync this to your real database table under a path like "/vault", 
-                   you can add code here to fetch/push the data to your URL:
-                   
-                   fetch('https://magic-system-78da8-default-rtdb.firebaseio.com/vault.json', {
-                       method: 'POST',
-                       body: JSON.stringify({ name: file.name, data: fileDataUrl, timestamp: Date.now() })
-                   });
-                */
             };
-
             reader.onerror = function() {
                 statusMessage.innerText = `Critical Core Error: Could not parse document elements.`;
                 statusMessage.style.color = 'var(--danger-color)';
             };
-
-            // Read the binary file directly into local URL for injection strings
             reader.readAsDataURL(file);
         }
 
-        function displayNewArchiveCard(name, size, type, dataUrl) {
+        function displayNewArchiveCard(name, size, typeStr, dataUrl) {
             const card = document.createElement('div');
             card.className = 'vault-card';
             
-            let previewElement = `<div style="height: 130px; display:flex; align-items:center; justify-content:center; background:#111; color:#444; font-size:3rem; border-radius:3px;">📁</div>`;
-            
-            // Generate visual markup matching type rules
-            if (type.startsWith('video/')) {
-                previewElement = `<video src="${dataUrl}" controls></video>`;
-            } else if (type.startsWith('image/')) {
-                previewElement = `<img src="${dataUrl}" alt="Preview Asset">`;
+            let elementMarkup = '';
+            if (typeStr === 'video') {
+                elementMarkup = `<video src="${dataUrl}"></video>`;
+            } else {
+                elementMarkup = `<img src="${dataUrl}" alt="Preview Asset">`;
             }
 
             const sizeFormatted = (size / (1024 * 1024)).toFixed(2) + ' MB';
 
+            // Escaping single quotes in strings for safe execution inline
+            const safeName = name.replace(/'/g, "\\'");
+            const safeUrl = dataUrl.replace(/'/g, "\\'");
+
             card.innerHTML = `
-                ${previewElement}
+                <div class="media-preview-container" onclick="openLightbox('${safeName}', '${typeStr}', '${safeUrl}')">
+                    ${elementMarkup}
+                </div>
                 <div class="file-info"><strong>${name}</strong></div>
                 <div class="file-meta"><span>Size: ${sizeFormatted}</span><span>Uploaded: Just Now</span></div>
             `;
             
-            // Insert newest items directly at the head of the grid box line
             vaultGrid.insertBefore(card, vaultGrid.firstChild);
+        }
+
+        /* LIGHTBOX CORE MATRIX FUNCTIONS */
+        function openLightbox(name, type, url) {
+            lightboxTitle.innerText = `Viewing Element Matrix Node: ${name}`;
+            lightboxMediaContainer.innerHTML = ''; // Reset container context
+
+            if (type === 'video') {
+                const videoEl = document.createElement('video');
+                videoEl.src = url;
+                videoEl.className = 'lightbox-content';
+                videoEl.controls = true;
+                videoEl.autoplay = true;
+                lightboxMediaContainer.appendChild(videoEl);
+            } else {
+                const imgEl = document.createElement('img');
+                imgEl.src = url;
+                imgEl.className = 'lightbox-content';
+                lightboxMediaContainer.appendChild(imgEl);
+            }
+
+            lightboxOverlay.style.display = 'flex';
+        }
+
+        function closeLightbox() {
+            // Stop any playing audio streams on screen dismantle sequences
+            const videoEl = lightboxMediaContainer.querySelector('video');
+            if(videoEl) videoEl.pause();
+            
+            lightboxOverlay.style.display = 'none';
+            lightboxMediaContainer.innerHTML = '';
         }
     </script>
 </body>
