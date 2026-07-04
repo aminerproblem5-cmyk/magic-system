@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcane Leyline Matrix Terminal</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --panel-bg: #151922;
+            --text-color: #c5a880;
+            --text-light: #fff;
+            --accent-color: #2ed573;
+            --danger-color: #ff4d4d;
+            --cyan-color: #45f3ff;
+            --gold-color: #f1c40f;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; padding: 40px 20px; }
+        
+        .game-container { max-width: 800px; width: 100%; margin: 0 auto; display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 768px) {
+            .game-container { grid-template-columns: 1fr 1fr; }
+            .full-span { grid-column: span 2; }
+        }
+
+        .panel { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 25px; height: fit-content; }
+        h1, h2 { color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+        h1 { font-size: 1.6rem; border-bottom: 2px solid #222; padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;}
+        
+        .back-btn { background: transparent; border: 1px solid var(--cyan-color); color: var(--cyan-color); padding: 8px 16px; font-size: 0.9rem; text-decoration: none; border-radius: 4px; font-weight: bold; text-transform: uppercase;}
+        .back-btn:hover { background: rgba(69, 243, 255, 0.05); }
+
+        /* Game Core Interface Styles */
+        .game-header { text-align: center; background: #07080c; border: 1px dashed var(--gold-color); border-radius: 4px; padding: 20px; margin-bottom: 20px; }
+        .score-display { font-size: 2.5rem; font-weight: bold; color: var(--gold-color); font-family: monospace; margin: 5px 0; }
+        
+        .clicker-area { display: flex; justify-content: center; align-items: center; padding: 20px 0; }
+        .core-orb { width: 150px; height: 150px; background: radial-gradient(circle, rgba(69,243,255,0.2) 0%, rgba(11,12,16,1) 70%); border: 3px solid var(--cyan-color); border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; color: var(--cyan-color); font-size: 3rem; transition: transform 0.1s ease, box-shadow 0.3s ease; box-shadow: 0 0 15px rgba(69, 243, 255, 0.2); user-select: none; }
+        .core-orb:active { transform: scale(0.95); box-shadow: 0 0 25px var(--cyan-color); }
+
+        .upgrade-list { display: flex; flex-direction: column; gap: 12px; }
+        .upgrade-row { display: flex; justify-content: space-between; align-items: center; background: #07080c; padding: 12px; border-radius: 4px; border-left: 3px solid var(--gold-color); }
+        .upgrade-btn { background: var(--gold-color); color: #000; border: none; padding: 8px 14px; font-weight: bold; border-radius: 3px; cursor: pointer; font-family: monospace; }
+        .upgrade-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+        
+        .status-log { background: #07080c; border: 1px solid #222; font-family: monospace; font-size: 0.85rem; padding: 10px; color: #888; border-radius: 4px; min-height: 40px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="panel full-span">
+            <h1>
+                <span>⚡ Leyline Matrix Terminal</span>
+                <a href="index.html" class="back-btn">← Return to Gates</a>
+            </h1>
+            <p style="color: #a4b0be; margin-top: 5px;">Extract arcane metrics, construct automation relays, and upload your high scores directly to the network mainframe.</p>
+        </div>
+
+        <div class="panel">
+            <h2>Energy Collector</h2>
+            <div class="game-header">
+                <div style="font-size: 0.85rem; text-transform: uppercase; color: #888; letter-spacing: 1px;">Harvested Mana Packets</div>
+                <div class="score-display" id="dataScoreDisplay">0 Mana</div>
+                <div style="font-size: 0.85rem; color: var(--cyan-color);" id="dpsDisplay">Generating: 0 / sec</div>
+            </div>
+
+            <div class="clicker-area">
+                <div class="core-orb" id="matrixOrb" onclick="manualHarvest()">🔮</div>
+            </div>
+            
+            <div class="status-log" id="statusLog">System Online. Ready for extraction sequence...</div>
+        </div>
+
+        <div class="panel">
+            <h2>Matrix Enhancements</h2>
+            <div class="upgrade-list" id="upgradeContainer">
+                
+                <div class="upgrade-row">
+                    <div>
+                        <strong>Auto-Siphon Node</strong><br>
+                        <span style="font-size:0.8rem; color:#aaa;">+1 Mana packet/sec</span>
+                    </div>
+                    <button class="upgrade-btn" id="upgBtn-0" onclick="purchaseUpgrade(0)">Cost: 15</button>
+                </div>
+                
+                <div class="upgrade-row">
+                    <div>
+                        <strong>Crystal Capacitor</strong><br>
+                        <span style="font-size:0.8rem; color:#aaa;">+8 Mana packets/sec</span>
+                    </div>
+                    <button class="upgrade-btn" id="upgBtn-1" onclick="purchaseUpgrade(1)">Cost: 100</button>
+                </div>
+                
+                <div class="upgrade-row">
+                    <div>
+                        <strong>Arcane Core Server</strong><br>
+                        <span style="font-size:0.8rem; color:#aaa;">+50 Mana packets/sec</span>
+                    </div>
+                    <button class="upgrade-btn" id="upgBtn-2" onclick="purchaseUpgrade(2)">Cost: 1100</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database configurations
+        const dbUsersURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
+
+        const dataScoreDisplay = document.getElementById('dataScoreDisplay');
+        const dpsDisplay = document.getElementById('dpsDisplay');
+        const statusLog = document.getElementById('statusLog');
+        
+        let currentMage = JSON.parse(sessionStorage.getItem('current_mage_session'));
+
+        // Game local state values
+        let gameState = {
+            dataPoints: 0,
+            upgradesOwned: [0, 0, 0]
+        };
+
+        const upgradeMeta = [
+            { baseCost: 15, dps: 1 },
+            { baseCost: 100, dps: 8 },
+            { baseCost: 1100, dps: 50 }
+        ];
+
+        // Fetch saved stats from Firebase on initial load execution
+        async function initGameState() {
+            if (!currentMage) {
+                statusLog.innerText = "⚠️ Alert: No mage session detected. Progress will run locally but won't back up.";
+                statusLog.style.color = 'var(--danger-color)';
+                return;
+            }
+            
+            statusLog.innerText = `Connecting to cloud matrix for Mage: ${currentMage.username}...`;
+            
+            try {
+                const res = await fetch(`${dbUsersURL}/${currentMage.username}/matrixMinigame.json`);
+                const data = await res.json();
+                if (data) {
+                    gameState.dataPoints = data.dataPoints || 0;
+                    gameState.upgradesOwned = data.upgradesOwned || [0, 0, 0];
+                    statusLog.innerText = "🔒 Cloud synchronization successful. Progress loaded.";
+                    statusLog.style.color = 'var(--accent-color)';
+                } else {
+                    statusLog.innerText = "New terminal matrix allocated for this profile.";
+                }
+            } catch(e) {
+                statusLog.innerText = "⚠️ Cloud connection failed. Switching to internal sandbox mode.";
+            }
+            updateGameUI();
+        }
+
+        // Push state tracking variables to database network
+        async function saveGameStateToNetwork() {
+            if (!currentMage) return;
+            try {
+                await fetch(`${dbUsersURL}/${currentMage.username}/matrixMinigame.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify(gameState)
+                });
+            } catch(e) {}
+        }
+
+        function calculateCost(index) {
+            return Math.round(upgradeMeta[index].baseCost * Math.pow(1.15, gameState.upgradesOwned[index]));
+        }
+
+        function calculateTotalDPS() {
+            return gameState.upgradesOwned.reduce((sum, count, idx) => sum + (count * upgradeMeta[idx].dps), 0);
+        }
+
+        function manualHarvest() {
+            gameState.dataPoints += 1;
+            updateGameUI();
+        }
+
+        function purchaseUpgrade(index) {
+            let cost = calculateCost(index);
+            if (gameState.dataPoints >= cost) {
+                gameState.dataPoints -= cost;
+                gameState.upgradesOwned[index]++;
+                updateGameUI();
+                saveGameStateToNetwork();
+            }
+        }
+
+        function updateGameUI() {
+            dataScoreDisplay.innerText = `${Math.floor(gameState.dataPoints)} Mana`;
+            dpsDisplay.innerText = `Generating: ${calculateTotalDPS()} / sec`;
+
+            for(let i=0; i<upgradeMeta.length; i++) {
+                let btn = document.getElementById(`upgBtn-${i}`);
+                let currentCost = calculateCost(i);
+                btn.innerText = `Buy (${gameState.upgradesOwned[i]}) - ${currentCost}`;
+                btn.disabled = gameState.dataPoints < currentCost;
+            }
+        }
+
+        // Fast interval frame updates for high accuracy calculations (10 ticks per sec)
+        setInterval(() => {
+            let dps = calculateTotalDPS();
+            if (dps > 0) {
+                gameState.dataPoints += (dps / 10);
+                updateGameUI();
+            }
+        }, 100);
+
+        // Slow cloud back up sync interval loop
+        setInterval(saveGameStateToNetwork, 7000);
+
+        // Fire initialization sequence engine
+        initGameState();
+    </script>
+</body>
+</html>
