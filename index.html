@@ -80,12 +80,12 @@
         <div class="navigation-box full-span">
             <h2>Council Nexus Gate</h2>
             <p style="color: #a4b0be; margin-bottom: 15px;">Planetary Server Sync Status Active. Access your core modules below.</p>
-            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; max-width: 900px; margin: 0 auto;">
-                <a href="login.html" class="btn-action" style="border-color: var(--text-color); color: var(--text-color); flex: 1; min-width: 180px; margin: 0; padding: 10px;">Login Vault</a>
-                <a href="chat.html" class="btn-action" style="border-color: var(--accent-color); color: var(--accent-color); flex: 1; min-width: 180px; margin: 0; padding: 10px;">Live Chat Crypt</a>
-                <a href="codex.html" class="btn-action" style="border-color: #9b59b6; color: #9b59b6; flex: 1; min-width: 180px; margin: 0; padding: 10px;">Library Codex</a>
-                <a href="vault.html" class="btn-action" style="border-color: #2ed573; color: #2ed573; flex: 1; min-width: 180px; margin: 0; padding: 10px;">🎬 Video Vault</a>
-                <a href="matrix.html" class="btn-action" style="border-color: #f1c40f; color: #f1c40f; flex: 1; min-width: 180px; margin: 0; padding: 10px;">🔮 Matrix Core</a>
+            <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; max-width: 1000px; margin: 0 auto;">
+                <a href="login.html" class="btn-action" style="border-color: var(--text-color); color: var(--text-color); flex: 1; min-width: 160px; margin: 0; padding: 10px;">Login Vault</a>
+                <a href="chat.html" class="btn-action" style="border-color: var(--accent-color); color: var(--accent-color); flex: 1; min-width: 160px; margin: 0; padding: 10px;">Live Chat Crypt</a>
+                <a href="codex.html" class="btn-action" style="border-color: #9b59b6; color: #9b59b6; flex: 1; min-width: 160px; margin: 0; padding: 10px;">Library Codex</a>
+                <a href="vault.html" class="btn-action" style="border-color: #2ed573; color: #2ed573; flex: 1; min-width: 160px; margin: 0; padding: 10px;">🎬 Video Vault</a>
+                <a href="matrix.html" class="btn-action" style="border-color: #f1c40f; color: #f1c40f; flex: 1; min-width: 160px; margin: 0; padding: 10px;">🔮 Matrix Core</a>
             </div>
         </div>
         
@@ -533,7 +533,6 @@
                     let myRaw = userProfile.rawEnergy || 0;
                     const isGrandmaster = (session.username === "AdminOwner");
 
-                    // 100% success verification for Grandmaster
                     if (isGrandmaster || Math.random() < 0.40) {
                         let bountyBonus = 0;
                         if(globalBounties[realTargetKey.toLowerCase()]) {
@@ -561,7 +560,6 @@
                     return;
                 }
 
-                // --- NEW GLOBAL ANNOUNCEMENT SYSTEM ---
                 if (commandName === "/announce") {
                     if (userRank !== "Overseer" && userRank !== "Grandfather" && !isOwner) { 
                         writeToConsole("Fatal Error: Requires High Command access.", "var(--danger-color)"); 
@@ -611,7 +609,7 @@
                         let donorRaw = myRaw - amount;
                         let receiverRaw = (globalMagesCache[realTargetKey].rawEnergy || 0) + amount;
                         await fetch(`${dbURL}/${session.username}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(donorRaw) });
-                        await fetch(`${dbURL}/.../power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
+                        await fetch(`${dbURL}/${session.username}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(donorRaw)) });
                         await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(receiverRaw) });
                         await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(receiverRaw)) });
                         writeToConsole(`🕵️ Smuggled ${amount} Sparks into ${realTargetKey}'s cache grid.`, "var(--success-color)");
