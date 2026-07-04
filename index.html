@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Grand Arcanum Mainframe - Access Gates</title>
+    <title>The Grand Arcanum Gates - Mainframe Access Terminal</title>
     <style>
         /* ==========================================================================
-           1. ROOT SYSTEM SPECIFICATIONS & CORE PALETTE
+           1. CORE VARIABLE DICTIONARY & DESIGN SYSTEM
            ========================================================================== */
         :root {
             --bg-deep-core: #07080c;
@@ -70,7 +70,7 @@
         }
 
         /* ==========================================================================
-           3. BACKGROUND AMBIENCE & MATRIX BACKGROUND LAYERS
+           3. BACKGROUND AMBIENCE & MATRIX LAYER COMPONENT SPECS
            ========================================================================== */
         .matrix-ambient-canvas {
             position: fixed;
@@ -371,6 +371,28 @@
             color: var(--text-high-bright);
         }
 
+        /* Security Integrity Checklist Panel */
+        .integrity-checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        .integrity-node {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted-gray);
+        }
+
+        .integrity-node input[type="checkbox"] {
+            margin-top: 2px;
+            accent-color: var(--neon-cyan-active);
+        }
+
         /* ==========================================================================
            8. PORTAL GRID MATRIX ARCHITECTURE (MAIN CONTENT)
            ========================================================================== */
@@ -488,308 +510,9 @@
             line-height: 1.5;
         }
 
-        /* Realtime Network Activity Log Frame */
-        .terminal-log-module {
-            margin-top: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .terminal-screen {
-            background: #040508;
-            border: 1px solid var(--border-matrix-dim);
-            border-radius: 4px;
+        /* Information Alert Callouts */
+        .information-notice-box {
+            background: rgba(69, 243, 255, 0.02);
+            border: 1px dashed var(--border-matrix-glow);
             padding: 15px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            color: var(--neon-cyan-active);
-            min-height: 120px;
-            max-height: 180px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
-        }
-
-        .log-entry {
-            display: flex;
-            gap: 10px;
-            line-height: 1.4;
-        }
-
-        .log-entry .timestamp {
-            color: var(--text-dark-shadow);
-            flex-shrink: 0;
-            user-select: none;
-        }
-
-        .log-entry .system-tag {
-            color: var(--neon-gold-legend);
-            flex-shrink: 0;
-        }
-
-        .log-entry.err .message-body { color: var(--neon-red-failure); }
-        .log-entry.ok .message-body { color: var(--neon-green-success); }
-
-        /* ==========================================================================
-           9. SYSTEM FOOTER CONFIGURATIONS
-           ========================================================================== */
-        .mainframe-footer {
-            margin-top: auto;
-            border-top: 1px solid var(--border-matrix-dim);
-            padding: 20px 0 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: monospace;
-            font-size: 0.75rem;
-            color: var(--text-dark-shadow);
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        /* ==========================================================================
-           10. KEYFRAME ANIMATION MATRIX DEFINITIONS
-           ========================================================================== */
-        @keyframes badgePulse {
-            0% { opacity: 0.4; box-shadow: 0 0 2px var(--neon-green-success); }
-            100% { opacity: 1; box-shadow: 0 0 10px var(--neon-green-success); }
-        }
-    </style>
-</head>
-<body>
-
-    <!-- Background Canvas Layout Layers -->
-    <div class="matrix-ambient-canvas"></div>
-    <div class="matrix-grid-lines"></div>
-
-    <!-- Layout Base Architecture Container -->
-    <div class="mainframe-wrapper">
-        
-        <!-- App Header Module -->
-        <header class="system-banner">
-            <div class="banner-header-row">
-                <div class="banner-title-block">
-                    <h1>The Grand Arcanum Gates</h1>
-                    <p>Core Mainframe Matrix Connection Terminals</p>
-                </div>
-                <div class="system-diagnostic-badges">
-                    <div class="badge">
-                        <div class="indicator pulse"></div>
-                        <span>Database Stream: Live</span>
-                    </div>
-                    <div class="badge">
-                        <span>Sync: 2026.Hz</span>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Content Split Workspace View -->
-        <main class="workspace-grid">
-            
-            <!-- LEFT: Core Control Sidebar Widgets -->
-            <aside class="control-sidebar">
-                
-                <!-- Authentication Panel Widget -->
-                <section class="panel-widget">
-                    <div class="widget-title">
-                        <span>Identity Profile</span>
-                        <span class="accent">// AUTH</span>
-                    </div>
-                    
-                    <!-- Form Frame (De-authenticated) -->
-                    <div class="identity-auth-matrix" id="authBox">
-                        <div class="input-structure">
-                            <label for="usernameInput">Identity Signature</label>
-                            <input type="text" id="usernameInput" placeholder="Enter alphanumeric tag...">
-                        </div>
-                        <button class="action-trigger-btn" onclick="initializeMageSession()">Bind Matrix Node</button>
-                    </div>
-
-                    <!-- Verified View Frame (Authenticated) -->
-                    <div class="identity-profile-active" id="profileDisplay">
-                        <button class="disconnect-trigger" onclick="terminateSession()">Drop</button>
-                        <div class="profile-badge-title" id="welcomeUser">Mage: Undefined</div>
-                        <div class="profile-meta-details">
-                            Node Security Status: Clear<br>
-                            Authorization Node: Level 1<br>
-                            Session Tracker: Active
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Core Server Specs Metric Widget -->
-                <section class="panel-widget">
-                    <div class="widget-title">
-                        <span>Node Diagnostics</span>
-                        <span class="accent">// AMBIENT</span>
-                    </div>
-                    <div class="system-metrics-list">
-                        <div class="metric-row"><span>Protocol</span><span>HTTPS / REST</span></div>
-                        <div class="metric-row"><span>Data Format</span><span>JSON Object</span></div>
-                        <div class="metric-row"><span>Local Storage</span><span>Session Tokens</span></div>
-                        <div class="metric-row"><span>Encryption Layer</span><span>Base64 Base Array</span></div>
-                    </div>
-                </section>
-
-            </aside>
-
-            <!-- RIGHT: Primary Gateways Hub Grid Navigation -->
-            <section class="main-portal-hub">
-                <div class="hub-title-block">
-                    <h2>Available Portal Framework Pathways</h2>
-                    <p>Select a destination mainframe node sub-layer below to pipeline operation scripts.</p>
-                </div>
-
-                <div class="portal-gateways-grid">
-                    
-                    <!-- Gateway Module Link: Video Vault -->
-                    <a href="vault.html" class="gateway-card variant-vault">
-                        <div class="card-icon">🎬</div>
-                        <div class="card-meta">
-                            <h3>Video Archive Vault</h3>
-                            <p>Pipeline raw media configurations, bypass size array constraints, and load optimized streaming files across the shared layout framework nodes.</p>
-                        </div>
-                    </a>
-
-                    <!-- Gateway Module Link: Matrix Game Core -->
-                    <a href="matrix.html" class="gateway-card variant-matrix">
-                        <div class="card-icon">🔮</div>
-                        <div class="card-meta">
-                            <h3>Leyline Matrix Core</h3>
-                            <p>Extract ambient energy metrics, buy automation loop logic relays, and risk your balance pool points inside the 777 custom core engine.</p>
-                        </div>
-                    </a>
-
-                </div>
-
-                <!-- Network Mainframe Activity Log Panel -->
-                <div class="terminal-log-module">
-                    <div class="widget-title" style="margin-bottom: 5px; font-size: 0.9rem;">
-                        <span>System Activity Console Pipeline</span>
-                    </div>
-                    <div class="terminal-screen" id="terminalScreen">
-                        <!-- Entries added dynamically via JS runtime scripts -->
-                    </div>
-                </div>
-            </section>
-
-        </main>
-
-        <!-- Mainframe Global Footer -->
-        <footer class="mainframe-footer">
-            <span>Grand Arcanum Systems Framework v4.7.2</span>
-            <span>Status Terminal: SECURE // 2026</span>
-        </footer>
-
-    </div>
-
-    <!-- ==========================================================================
-       11. MAIN ENGINE OPERATIONS RUNTIME SCRIPTS
-       ========================================================================== -->
-    <script>
-        // Realtime Network Database configuration endpoint routes
-        const dbMagesURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
-
-        const authBox = document.getElementById('authBox');
-        const profileDisplay = document.getElementById('profileDisplay');
-        const usernameInput = document.getElementById('usernameInput');
-        const welcomeUser = document.getElementById('welcomeUser');
-        const terminalScreen = document.getElementById('terminalScreen');
-
-        // Append structured logs straight into the virtual engine console interface
-        function pushLog(message, level = 'info') {
-            const entry = document.createElement('div');
-            entry.className = `log-entry ${level}`;
-            
-            const timeStr = new Date().toLocaleTimeString();
-            
-            entry.innerHTML = `
-                <span class="timestamp">[${timeStr}]</span>
-                <span class="system-tag">[SYS_LOG]</span>
-                <span class="message-body">${message}</span>
-            `;
-            
-            terminalScreen.appendChild(entry);
-            terminalScreen.scrollTop = terminalScreen.scrollHeight;
-        }
-
-        // Evaluate active storage tokens on layout rendering
-        function checkSession() {
-            const currentMage = sessionStorage.getItem('current_mage_session');
-            if (currentMage) {
-                const mageObj = JSON.parse(currentMage);
-                authBox.style.display = 'none';
-                profileDisplay.style.display = 'block';
-                welcomeUser.innerText = `🔮 Mage: ${mageObj.username}`;
-                pushLog(`Matrix handshake linked for identifier: ${mageObj.username}`, 'ok');
-            } else {
-                authBox.style.display = 'block';
-                profileDisplay.style.display = 'none';
-                pushLog("Identity signature missing. Portal channels running in read-only status.");
-            }
-        }
-
-        // Handshake binding operations routing directly to remote database paths
-        async function initializeMageSession() {
-            const rawUsername = usernameInput.value.trim();
-            if (!rawUsername) {
-                pushLog("Binding cancellation: Identity target argument cannot check null.", "err");
-                return;
-            }
-
-            // Remove illegal character blocks to maintain safe path mapping
-            const cleanUsername = rawUsername.replace(/[^a-zA-Z0-9_-]/g, "");
-            if (cleanUsername.length === 0) {
-                pushLog("Binding cancellation: Character expression mismatch array error.", "err");
-                return;
-            }
-
-            pushLog(`Transmitting authorization packets for destination node: "${cleanUsername}"...`);
-
-            try {
-                const response = await fetch(`${dbMagesURL}/${cleanUsername}.json`);
-                let profileData = await response.json();
-
-                if (!profileData) {
-                    pushLog(`No existing tracking matrices matched. Constructing registration records...`);
-                    profileData = {
-                        username: cleanUsername,
-                        createdTimestamp: new Date().getTime(),
-                        role: "Initiate Mage"
-                    };
-                    
-                    await fetch(`${dbMagesURL}/${cleanUsername}.json`, {
-                        method: 'PATCH',
-                        body: JSON.stringify(profileData)
-                    });
-                    pushLog(`New character entry synchronized to Firebase node structure successfully.`, 'ok');
-                } else {
-                    pushLog(`Handshake validation sequence cleared. Node record found.`, 'ok');
-                }
-
-                sessionStorage.setItem('current_mage_session', JSON.stringify({ username: cleanUsername }));
-                usernameInput.value = '';
-                
-                checkSession();
-            } catch (err) {
-                pushLog("Network handshake rejection. Check endpoint connection strings.", "err");
-                console.error(err);
-            }
-        }
-
-        // Wipe session context structures
-        function terminateSession() {
-            sessionStorage.removeItem('current_mage_session');
-            pushLog("Handshake terminated. Token values flushed from local memory configurations.");
-            checkSession();
-        }
-
-        // Fire entry checks on complete engine launch loops
-        checkSession();
-    </script>
-</body>
-</html>
+            border-radius:
