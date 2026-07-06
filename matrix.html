@@ -28,6 +28,14 @@
         @media (min-width: 750px) { .clicker-zone { grid-template-columns: 1fr 1fr; } .full-width { grid-column: span 2; } }
 
         .panel { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 25px; height: fit-content; }
+        .scrollable-list { max-height: 500px; overflow-y: auto; padding-right: 5px; }
+        
+        /* Custom Scrollbar for massive lists */
+        .scrollable-list::-webkit-scrollbar { width: 6px; }
+        .scrollable-list::-webkit-scrollbar-track { background: #0b0c10; }
+        .scrollable-list::-webkit-scrollbar-thumb { background: #2d3748; border-radius: 3px; }
+        .scrollable-list::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
+
         h2 { color: var(--text-light); font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
         
         /* Clicker Elements */
@@ -48,13 +56,13 @@
         .crystal-orb:hover { box-shadow: 0 0 45px rgba(69, 243, 255, 0.6), inset 0 0 25px #fff; transform: scale(1.02); }
         .crystal-orb:active { transform: scale(0.95); }
         
-        /* Upgrades & Generators UI */
+        /* Upgrades UI */
         .upgrade-list { display: flex; flex-direction: column; gap: 10px; list-style: none; }
         .upgrade-card { background: #0b0c10; border: 1px solid #222; border-radius: 4px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
         .upgrade-card:hover { border-color: var(--accent-color); }
         .upgrade-info h3 { color: #fff; font-size: 1rem; margin-bottom: 3px; }
         .upgrade-info p { font-size: 0.8rem; color: #888; }
-        .buy-btn { background: #233a42; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 8px 16px; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: monospace; min-width: 110px; text-align: center; }
+        .buy-btn { background: #233a42; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 8px 16px; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: monospace; min-width: 115px; text-align: center; }
         .buy-btn:hover:not(:disabled) { background: var(--accent-color); color: #000; }
         .buy-btn:disabled { border-color: #444; color: #555; background: transparent; cursor: not-allowed; }
 
@@ -95,58 +103,24 @@
                 <p style="font-size: 0.85rem; color: #555; font-style: italic;">Tap the matrix core resonance node to force-extract pure Sparks.</p>
             </div>
 
-            <!-- Active Manipulation Modifiers -->
+            <!-- Active Upgrades Box -->
             <div class="panel">
-                <h2>Active Modulation Inscriptions</h2>
-                <ul class="upgrade-list">
-                    <li class="upgrade-card">
-                        <div class="upgrade-info">
-                            <h3 id="upgClickTitle">Amplified Runes</h3>
-                            <p>Increases manual extraction by +1 per click.</p>
-                        </div>
-                        <button class="buy-btn" id="btnBuyClick" onclick="buyClickUpgrade()">Cost: 15</button>
-                    </li>
-                    <li class="upgrade-card">
-                        <div class="upgrade-info">
-                            <h3 id="upgOverclockTitle">Matrix Overclock Protocols</h3>
-                            <p>Boosts click baseline power by +25% sequentially.</p>
-                        </div>
-                        <button class="buy-btn" id="btnBuyOverclock" onclick="buyOverclockUpgrade()">Cost: 120</button>
-                    </li>
-                    <li class="upgrade-card">
-                        <div class="upgrade-info">
-                            <h3 id="upgCritTitle">Crit-Strike Catalysts</h3>
-                            <p>Grants a 12% chance for clicks to strike high damage.</p>
-                        </div>
-                        <button class="buy-btn" id="btnBuyCrit" onclick="buyCritUpgrade()">Cost: 250</button>
-                    </li>
-                    <li class="upgrade-card">
-                        <div class="upgrade-info">
-                            <h3 id="upgLinkTitle">Neural Link Sync</h3>
-                            <p>Adds +0.50x to Critical Hit multipliers.</p>
-                        </div>
-                        <button class="buy-btn" id="btnBuyLinkSync" onclick="buyLinkSyncUpgrade()">Cost: 1200</button>
-                    </li>
-                </ul>
-                
-                <h2 style="margin-top: 25px; color: var(--purple-color); border-color: #3b284c;">Matrix Overdrive Systems</h2>
-                <ul class="upgrade-list">
-                    <li class="upgrade-card">
-                        <div class="upgrade-info">
-                            <h3 id="upgMultTitle">Temporal Stability Matrix</h3>
-                            <p>Multiplies your cumulative total SPS output by +10%.</p>
-                        </div>
-                        <button class="buy-btn" style="border-color: var(--purple-color); color: var(--purple-color);" id="btnBuyMult" onclick="buyMultUpgrade()">Cost: 5000</button>
-                    </li>
-                </ul>
+                <h2>Active Modulation Inscriptions (25 Upgrades)</h2>
+                <div class="scrollable-list">
+                    <ul class="upgrade-list" id="activeUpgradesContainer">
+                        <!-- Filled by code dynamically -->
+                    </ul>
+                </div>
             </div>
 
-            <!-- Passive Production Infrastructure -->
+            <!-- Passive Infrastructure Box -->
             <div class="panel">
-                <h2>Automated Leyline Infrastructure</h2>
-                <ul class="upgrade-list" id="generatorContainer">
-                    <!-- Generators drawn automatically by loop setup -->
-                </ul>
+                <h2>Automated Leyline Infrastructure (25 Upgrades)</h2>
+                <div class="scrollable-list">
+                    <ul class="upgrade-list" id="passiveGeneratorsContainer">
+                        <!-- Filled by code dynamically -->
+                    </ul>
+                </div>
             </div>
 
         </div>
@@ -171,192 +145,190 @@
         const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/matrix_leaderboard";
         let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
 
-        // Local state indicators starting purely from zero
+        // Local State
         let localMatrixSparks = 0;
-        
-        let clickPower = 1;
-        let clickUpgradeCost = 15;
-        let clickUpgradeCount = 0;
+        let finalClickPower = 1;
 
-        let overclockLevel = 0;
-        let overclockCost = 120;
+        // 25 Active Upgrades Dataset
+        const activeUpgrades = [
+            { id: 'act_1', name: 'Amplified Runes', baseCost: 15, scaling: 1.4, mult: 1, count: 0, desc: 'Increases click extraction power by +1 base.' },
+            { id: 'act_2', name: 'Siphoning Thimbles', baseCost: 100, scaling: 1.42, mult: 2, count: 0, desc: 'Increases click extraction power by +2 base.' },
+            { id: 'act_3', name: 'Crit-Strike Catalysts', baseCost: 250, scaling: 1.45, mult: 5, count: 0, desc: 'Increases click extraction power by +5 base.' },
+            { id: 'act_4', name: 'Overclock Pulse', baseCost: 750, scaling: 1.48, mult: 12, count: 0, desc: 'Increases click extraction power by +12 base.' },
+            { id: 'act_5', name: 'Resonance Harmonizers', baseCost: 2000, scaling: 1.5, mult: 30, count: 0, desc: 'Increases click extraction power by +30 base.' },
+            { id: 'act_6', name: 'Focusing Crystals', baseCost: 6500, scaling: 1.52, mult: 85, count: 0, desc: 'Increases click extraction power by +85 base.' },
+            { id: 'act_7', name: 'Channeled Conduit', baseCost: 18000, scaling: 1.55, mult: 240, count: 0, desc: 'Increases click extraction power by +240 base.' },
+            { id: 'act_8', name: 'Kinetic Re-routers', baseCost: 50000, scaling: 1.58, mult: 650, count: 0, desc: 'Increases click extraction power by +650 base.' },
+            { id: 'act_9', name: 'Neural Link Sync', baseCost: 140000, scaling: 1.6, mult: 1800, count: 0, desc: 'Increases click extraction power by +1.8K base.' },
+            { id: 'act_10', name: 'Leyline Tap Hook', baseCost: 400000, scaling: 1.62, mult: 5000, count: 0, desc: 'Increases click extraction power by +5K base.' },
+            { id: 'act_11', name: 'Aetheric Forceps', baseCost: 1200000, scaling: 1.65, mult: 14000, count: 0, desc: 'Increases click extraction power by +14K base.' },
+            { id: 'act_12', name: 'Matrix Needle Array', baseCost: 4000000, scaling: 1.68, mult: 40000, count: 0, desc: 'Increases click extraction power by +40K base.' },
+            { id: 'act_13', name: 'Dimension Piercers', baseCost: 15000000, scaling: 1.7, mult: 115000, count: 0, desc: 'Increases click extraction power by +115K base.' },
+            { id: 'act_14', name: 'Spiritual Excavators', baseCost: 55000000, scaling: 1.72, mult: 330000, count: 0, desc: 'Increases click extraction power by +330K base.' },
+            { id: 'act_15', name: 'Chronos Tweak Array', baseCost: 200000000, scaling: 1.75, mult: 1000000, count: 0, desc: 'Increases click extraction power by +1M base.' },
+            { id: 'act_16', name: 'Void Compressor Pins', baseCost: 850000000, scaling: 1.78, mult: 3200000, count: 0, desc: 'Increases click extraction power by +3.2M base.' },
+            { id: 'act_17', name: 'Sub-Atomic Tweezers', baseCost: 3500000000, scaling: 1.8, mult: 10000000, count: 0, desc: 'Increases click extraction power by +10M base.' },
+            { id: 'act_18', name: 'Singularity Anchors', baseCost: 15000000000, scaling: 1.82, mult: 33000000, count: 0, desc: 'Increases click extraction power by +33M base.' },
+            { id: 'act_19', name: 'Entropy Inverters', baseCost: 75000000000, scaling: 1.85, mult: 110000000, count: 0, desc: 'Increases click extraction power by +110M base.' },
+            { id: 'act_20', name: 'Probability Matrices', baseCost: 400000000000, scaling: 1.88, mult: 400000000, count: 0, desc: 'Increases click extraction power by +400M base.' },
+            { id: 'act_21', name: 'Cosmic Core Strippers', baseCost: 2000000000000, scaling: 1.9, mult: 1500000000, count: 0, desc: 'Increases click extraction power by +1.5B base.' },
+            { id: 'act_22', name: 'Infinity Drills', baseCost: 12000000000000, scaling: 1.92, mult: 6000000000, count: 0, desc: 'Increases click extraction power by +6B base.' },
+            { id: 'act_23', name: 'Multiverse Spigots', baseCost: 80000000000000, scaling: 1.95, mult: 25000000000, count: 0, desc: 'Increases click extraction power by +25B base.' },
+            { id: 'act_24', name: 'Paradox Weavers', baseCost: 500000000000000, scaling: 1.98, mult: 110000000000, count: 0, desc: 'Increases click extraction power by +110B base.' },
+            { id: 'act_25', name: 'Ultimate Reality Core', baseCost: 4000000000000000, scaling: 2.1, mult: 500000000000, count: 0, desc: 'Increases click extraction power by +500B base.' }
+        ];
 
-        let critLevel = 0;
-        let critUpgradeCost = 250;
-
-        let linkSyncLevel = 0;
-        let linkSyncCost = 1200;
-
-        let globalMultiplierLevel = 0;
-        let globalMultiplierCost = 5000;
-        
-        // Extended Automation Schema Mappings
-        const generators = [
-            { id: 'scribe', name: 'Automated Ink-Scribe', baseCost: 50, sps: 1, count: 0 },
-            { id: 'wellspring', name: 'Mana Wellspring Arc', baseCost: 400, sps: 8, count: 0 },
-            { id: 'spire', name: 'Celestial Siphon Spire', baseCost: 3000, sps: 45, count: 0 },
-            { id: 'rift', name: 'Void Singularity Rift', baseCost: 25000, sps: 290, count: 0 },
-            { id: 'hub', name: 'Arcane Leyline Hub', baseCost: 150000, sps: 1450, count: 0 },
-            { id: 'reactor', name: 'Nexus Fusion Reactor', baseCost: 950000, sps: 7800, count: 0 },
-            { id: 'harvester', name: 'Aether Resonance Harvester', baseCost: 7000000, sps: 44000, count: 0 },
-            { id: 'quantum', name: 'Quantum Core Stabilizer', baseCost: 45000000, sps: 260000, count: 0 }
+        // 25 Passive Generators Dataset
+        const passiveGenerators = [
+            { id: 'pas_1', name: 'Automated Ink-Scribe', baseCost: 50, scaling: 1.15, sps: 1, count: 0 },
+            { id: 'pas_2', name: 'Mana Wellspring Arc', baseCost: 400, scaling: 1.15, sps: 8, count: 0 },
+            { id: 'pas_3', name: 'Celestial Siphon Spire', baseCost: 3000, scaling: 1.15, sps: 45, count: 0 },
+            { id: 'pas_4', name: 'Void Singularity Rift', baseCost: 25000, scaling: 1.16, sps: 290, count: 0 },
+            { id: 'pas_5', name: 'Arcane Leyline Hub', baseCost: 150000, scaling: 1.16, sps: 1450, count: 0 },
+            { id: 'pas_6', name: 'Nexus Fusion Reactor', baseCost: 950000, scaling: 1.17, sps: 7800, count: 0 },
+            { id: 'pas_7', name: 'Resonance Harvester', baseCost: 7000000, scaling: 1.17, sps: 44000, count: 0 },
+            { id: 'pas_8', name: 'Quantum Core Stabilizer', baseCost: 45000000, scaling: 1.18, sps: 260000, count: 0 },
+            { id: 'pas_9', name: 'Aether Compressor', baseCost: 300000000, scaling: 1.18, sps: 1500000, count: 0 },
+            { id: 'pas_10', name: 'Chronos Engine Block', baseCost: 2000000000, scaling: 1.19, sps: 9000000, count: 0 },
+            { id: 'pas_11', name: 'Supercluster Siphon', baseCost: 14000000000, scaling: 1.19, sps: 55000000, count: 0 },
+            { id: 'pas_12', name: 'Dimensional Transmuter', baseCost: 95000000000, scaling: 1.2, sps: 340000000, count: 0 },
+            { id: 'pas_13', name: 'Starlight Filament Array', baseCost: 650000000000, scaling: 1.2, sps: 2100000000, count: 0 },
+            { id: 'pas_14', name: 'Galaxy Core Core-Pump', baseCost: 4500000000000, scaling: 1.21, sps: 13500000000, count: 0 },
+            { id: 'pas_15', name: 'Void Engine Harness', baseCost: 32000000000000, scaling: 1.21, sps: 85000000000, count: 0 },
+            { id: 'pas_16', name: 'Dark Energy Reactor', baseCost: 220000000000000, scaling: 1.22, sps: 550000000000, count: 0 },
+            { id: 'pas_17', name: 'Hyperspace Conduit', baseCost: 1600000000000000, scaling: 1.22, sps: 3600000000000, count: 0 },
+            { id: 'pas_18', name: 'Antimatter Condenser', baseCost: 11000000000000000, scaling: 1.23, sps: 24000000000000, count: 0 },
+            { id: 'pas_19', name: 'Macro-Cosmic Forge', baseCost: 80000000000000000, scaling: 1.23, sps: 160000000000000, count: 0 },
+            { id: 'pas_20', name: 'Time-Loop Loom', baseCost: 600000000000000000, scaling: 1.24, sps: 1100000000000000, count: 0 },
+            { id: 'pas_21', name: 'Pluriverse Matrix Grid', baseCost: 4500000000000000000, scaling: 1.24, sps: 7500000000000000, count: 0 },
+            { id: 'pas_22', name: 'Singularity Grid Loom', baseCost: 35000000000000000000, scaling: 1.25, sps: 52000000000000000, count: 0 },
+            { id: 'pas_23', name: 'Omniverse Siphon Thread', baseCost: 280000000000000000000, scaling: 1.25, sps: 380000000000000000, count: 0 },
+            { id: 'pas_24', name: 'Total Reality Overlord', baseCost: 2200000000000000000000, scaling: 1.26, sps: 2800000000000000000, count: 0 },
+            { id: 'pas_25', name: 'Absolute Infinity Generator', baseCost: 18000000000000000000000, scaling: 1.3, sps: 22000000000000000000, count: 0 }
         ];
 
         if (!session) {
-            alert("Matrix grid mapping requires authorization. Returning to Vault.");
+            alert("Matrix authorization missing.");
             window.location.href = "login.html";
         } else {
             document.getElementById('userPanel').innerHTML = `Matrix Core Node: <strong>${session.username}</strong>`;
         }
 
         function formatArcaneMS(value) {
-            if (value >= 1000000000) return (value / 1000000000).toFixed(2) + 'B';
-            if (value >= 1000000) return (value / 1000000).toFixed(2) + 'M';
+            if (value >= 1e21) return (value / 1e21).toFixed(2) + 'Sx';
+            if (value >= 1e18) return (value / 1e18).toFixed(2) + 'Qi';
+            if (value >= 1e15) return (value / 1e15).toFixed(2) + 'Qa';
+            if (value >= 1e12) return (value / 1e12).toFixed(2) + 'T';
+            if (value >= 1e9) return (value / 1e9).toFixed(2) + 'B';
+            if (value >= 1e6) return (value / 1e6).toFixed(2) + 'M';
             if (value >= 1000) return (value / 1000).toFixed(1) + 'K';
             return Math.round(value);
         }
 
-        async function fetchInitialDatabaseData() {
-            try {
-                const res = await fetch(`${dbURL}/${session.username}.json`);
-                const userData = await res.json();
-                if (userData) {
-                    if (userData.matrixSparks) localMatrixSparks = userData.matrixSparks;
-                    
-                    if (userData.clickUpgradeCount) {
-                        clickUpgradeCount = userData.clickUpgradeCount;
-                        clickUpgradeCost = Math.round(15 * Math.pow(1.5, clickUpgradeCount));
-                    }
-                    if (userData.overclockLevel) {
-                        overclockLevel = userData.overclockLevel;
-                        overclockCost = Math.round(120 * Math.pow(1.6, overclockLevel));
-                    }
-                    if (userData.critLevel) {
-                        critLevel = userData.critLevel;
-                        critUpgradeCost = Math.round(250 * Math.pow(1.75, critLevel));
-                    }
-                    if (userData.linkSyncLevel) {
-                        linkSyncLevel = userData.linkSyncLevel;
-                        linkSyncCost = Math.round(1200 * Math.pow(1.85, linkSyncLevel));
-                    }
-                    if (userData.globalMultiplierLevel) {
-                        globalMultiplierLevel = userData.globalMultiplierLevel;
-                        globalMultiplierCost = Math.round(5000 * Math.pow(2.2, globalMultiplierLevel));
-                    }
-                    
-                    recalculateClickPower();
-                    
-                    generators.forEach(gen => {
-                        if (userData[`gen_${gen.id}`]) {
-                            gen.count = userData[`gen_${gen.id}`];
-                        }
-                    });
-                }
-                renderGeneratorInterface();
-                updateUserMatrixViews();
-                fetchGlobalLeaderboard();
-            } catch (err) {
-                console.error("Network initialization core alignment dropped", err);
-            }
-        }
-
+        // Calculation Engines
         function recalculateClickPower() {
-            let base = 1 + clickUpgradeCount;
-            let multiplier = 1 + (overclockLevel * 0.25);
-            clickPower = Math.round(base * multiplier);
+            let total = 1;
+            activeUpgrades.forEach(upg => {
+                total += (upg.count * upg.mult);
+            });
+            finalClickPower = total;
         }
 
-        function renderGeneratorInterface() {
-            const container = document.getElementById('generatorContainer');
+        function getModifiedSPS() {
+            let total = 0;
+            passiveGenerators.forEach(gen => {
+                total += (gen.count * gen.sps);
+            });
+            return total;
+        }
+
+        // Render Interfaces dynamically
+        function renderActiveUpgrades() {
+            const container = document.getElementById('activeUpgradesContainer');
             container.innerHTML = '';
-            generators.forEach((gen, index) => {
-                const cost = Math.round(gen.baseCost * Math.pow(1.15, gen.count));
+            activeUpgrades.forEach((upg, idx) => {
+                const currentCost = Math.round(upg.baseCost * Math.pow(upg.scaling, upg.count));
                 const li = document.createElement('li');
                 li.className = 'upgrade-card';
                 li.innerHTML = `
                     <div class="upgrade-info">
-                        <h3>${gen.name} (${gen.count})</h3>
-                        <p>Generates +${formatArcaneMS(gen.sps)} Sparks each second.</p>
+                        <h3>${upg.name} (${upg.count})</h3>
+                        <p>${upg.desc}</p>
                     </div>
-                    <button class="buy-btn" id="btnGen-${gen.id}" onclick="buyGenerator(${index})">Cost: ${formatArcaneMS(cost)}</button>
+                    <button class="buy-btn" id="btnAct-${upg.id}" onclick="buyActiveUpgrade(${idx})">Cost: ${formatArcaneMS(currentCost)}</button>
                 `;
                 container.appendChild(li);
             });
         }
 
-        function getBaseSPS() {
-            let total = 0;
-            generators.forEach(gen => { total += (gen.count * gen.sps); });
-            return total;
-        }
-
-        function getModifiedSPS() {
-            let base = getBaseSPS();
-            let mult = 1 + (globalMultiplierLevel * 0.10);
-            return Math.round(base * mult);
-        }
-
-        function updateUserMatrixViews() {
-            document.getElementById('msCounter').innerText = `${formatArcaneMS(localMatrixSparks)} MS`;
-            
-            document.getElementById('upgClickTitle').innerText = `Amplified Runes (Lvl ${clickUpgradeCount})`;
-            const clickBtn = document.getElementById('btnBuyClick');
-            clickBtn.innerText = `Cost: ${formatArcaneMS(clickUpgradeCost)}`;
-            clickBtn.disabled = (localMatrixSparks < clickUpgradeCost);
-
-            document.getElementById('upgOverclockTitle').innerText = `Matrix Overclock (Lvl ${overclockLevel})`;
-            const overclockBtn = document.getElementById('btnBuyOverclock');
-            overclockBtn.innerText = `Cost: ${formatArcaneMS(overclockCost)}`;
-            overclockBtn.disabled = (localMatrixSparks < overclockCost);
-
-            document.getElementById('upgCritTitle').innerText = `Crit Catalysts (Lvl ${critLevel})`;
-            const critBtn = document.getElementById('btnBuyCrit');
-            critBtn.innerText = `Cost: ${formatArcaneMS(critUpgradeCost)}`;
-            critBtn.disabled = (localMatrixSparks < critUpgradeCost);
-
-            document.getElementById('upgLinkTitle').innerText = `Neural Link Sync (Lvl ${linkSyncLevel})`;
-            const linkBtn = document.getElementById('btnBuyLinkSync');
-            linkBtn.innerText = `Cost: ${formatArcaneMS(linkSyncCost)}`;
-            linkBtn.disabled = (localMatrixSparks < linkSyncCost);
-
-            document.getElementById('upgMultTitle').innerText = `Temporal Matrix (Lvl ${globalMultiplierLevel})`;
-            const multBtn = document.getElementById('btnBuyMult');
-            multBtn.innerText = `Cost: ${formatArcaneMS(globalMultiplierCost)}`;
-            multBtn.disabled = (localMatrixSparks < globalMultiplierCost);
-
-            generators.forEach((gen) => {
-                const cost = Math.round(gen.baseCost * Math.pow(1.15, gen.count));
-                const btn = document.getElementById(`btnGen-${gen.id}`);
-                if (btn) {
-                    btn.innerText = `Cost: ${formatArcaneMS(cost)}`;
-                    btn.disabled = (localMatrixSparks < cost);
-                }
+        function renderPassiveGenerators() {
+            const container = document.getElementById('passiveGeneratorsContainer');
+            container.innerHTML = '';
+            passiveGenerators.forEach((gen, idx) => {
+                const currentCost = Math.round(gen.baseCost * Math.pow(gen.scaling, gen.count));
+                const li = document.createElement('li');
+                li.className = 'upgrade-card';
+                li.innerHTML = `
+                    <div class="upgrade-info">
+                        <h3>${gen.name} (${gen.count})</h3>
+                        <p>Generates +${formatArcaneMS(gen.sps)} MS every second.</p>
+                    </div>
+                    <button class="buy-btn" id="btnPas-${gen.id}" onclick="buyPassiveGenerator(${idx})">Cost: ${formatArcaneMS(currentCost)}</button>
+                `;
+                container.appendChild(li);
             });
+        }
+
+        function updateUIElements() {
+            document.getElementById('msCounter').innerText = `${formatArcaneMS(localMatrixSparks)} MS`;
             document.getElementById('spsCounter').innerText = `+${formatArcaneMS(getModifiedSPS())} Sparks / sec`;
+
+            activeUpgrades.forEach((upg) => {
+                const currentCost = Math.round(upg.baseCost * Math.pow(upg.scaling, upg.count));
+                const btn = document.getElementById(`btnAct-${upg.id}`);
+                if (btn) btn.disabled = (localMatrixSparks < currentCost);
+            });
+
+            passiveGenerators.forEach((gen) => {
+                const currentCost = Math.round(gen.baseCost * Math.pow(gen.scaling, gen.count));
+                const btn = document.getElementById(`btnPas-${gen.id}`);
+                if (btn) btn.disabled = (localMatrixSparks < currentCost);
+            });
+        }
+
+        // Purchase Modifiers
+        function buyActiveUpgrade(idx) {
+            const upg = activeUpgrades[idx];
+            const currentCost = Math.round(upg.baseCost * Math.pow(upg.scaling, upg.count));
+            if (localMatrixSparks >= currentCost) {
+                localMatrixSparks -= currentCost;
+                upg.count++;
+                recalculateClickPower();
+                renderActiveUpgrades();
+                updateUIElements();
+                pushDataToDatabase();
+            }
+        }
+
+        function buyPassiveGenerator(idx) {
+            const gen = passiveGenerators[idx];
+            const currentCost = Math.round(gen.baseCost * Math.pow(gen.scaling, gen.count));
+            if (localMatrixSparks >= currentCost) {
+                localMatrixSparks -= currentCost;
+                gen.count++;
+                renderPassiveGenerators();
+                updateUIElements();
+                pushDataToDatabase();
+            }
         }
 
         function handleCoreClick(e) {
-            let damage = clickPower;
-            let isCrit = false;
-
-            if (critLevel > 0 && Math.random() < 0.12) {
-                let critMult = 5 + (critLevel * 0.5) + (linkSyncLevel * 0.5);
-                damage = Math.round(clickPower * critMult);
-                isCrit = true;
-            }
-
-            localMatrixSparks += damage;
-            updateUserMatrixViews();
+            localMatrixSparks += finalClickPower;
+            updateUIElements();
             
             const floating = document.createElement('div');
             floating.className = 'click-floating-text';
-            if (isCrit) {
-                floating.style.color = 'var(--danger-color)';
-                floating.style.fontSize = '1.6rem';
-                floating.innerText = `CRIT! +${formatArcaneMS(damage)}`;
-            } else {
-                floating.innerText = `+${formatArcaneMS(damage)}`;
-            }
+            floating.innerText = `+${formatArcaneMS(finalClickPower)}`;
             floating.style.left = `${e.clientX - 20}px`;
             floating.style.top = `${e.clientY - 20}px`;
             floating.style.position = 'fixed';
@@ -364,90 +336,44 @@
             setTimeout(() => floating.remove(), 800);
         }
 
-        function buyClickUpgrade() {
-            if (localMatrixSparks >= clickUpgradeCost) {
-                localMatrixSparks -= clickUpgradeCost;
-                clickUpgradeCount++;
-                clickUpgradeCost = Math.round(15 * Math.pow(1.5, clickUpgradeCount));
-                recalculateClickPower();
-                updateUserMatrixViews();
-                pushDataToDatabase();
-            }
-        }
+        // Database Pipelines
+        async function fetchInitialDatabaseData() {
+            try {
+                const res = await fetch(`${dbURL}/${session.username}.json`);
+                const userData = await res.json();
+                if (userData) {
+                    if (userData.matrixSparks) localMatrixSparks = userData.matrixSparks;
+                    
+                    activeUpgrades.forEach(upg => {
+                        if (userData[upg.id]) upg.count = userData[upg.id];
+                    });
+                    passiveGenerators.forEach(gen => {
+                        if (userData[gen.id]) gen.count = userData[gen.id];
+                    });
 
-        function buyOverclockUpgrade() {
-            if (localMatrixSparks >= overclockCost) {
-                localMatrixSparks -= overclockCost;
-                overclockLevel++;
-                overclockCost = Math.round(120 * Math.pow(1.6, overclockLevel));
-                recalculateClickPower();
-                updateUserMatrixViews();
-                pushDataToDatabase();
-            }
-        }
-
-        function buyCritUpgrade() {
-            if (localMatrixSparks >= critUpgradeCost) {
-                localMatrixSparks -= critUpgradeCost;
-                critLevel++;
-                critUpgradeCost = Math.round(250 * Math.pow(1.75, critLevel));
-                updateUserMatrixViews();
-                pushDataToDatabase();
-            }
-        }
-
-        function buyLinkSyncUpgrade() {
-            if (localMatrixSparks >= linkSyncCost) {
-                localMatrixSparks -= linkSyncCost;
-                linkSyncLevel++;
-                linkSyncCost = Math.round(1200 * Math.pow(1.85, linkSyncLevel));
-                updateUserMatrixViews();
-                pushDataToDatabase();
-            }
-        }
-
-        function buyMultUpgrade() {
-            if (localMatrixSparks >= globalMultiplierCost) {
-                localMatrixSparks -= globalMultiplierCost;
-                globalMultiplierLevel++;
-                globalMultiplierCost = Math.round(5000 * Math.pow(2.2, globalMultiplierLevel));
-                updateUserMatrixViews();
-                pushDataToDatabase();
-            }
-        }
-
-        function buyGenerator(index) {
-            const gen = generators[index];
-            const cost = Math.round(gen.baseCost * Math.pow(1.15, gen.count));
-            if (localMatrixSparks >= cost) {
-                localMatrixSparks -= cost;
-                gen.count++;
-                renderGeneratorInterface();
-                updateUserMatrixViews();
-                pushDataToDatabase();
+                    recalculateClickPower();
+                }
+                renderActiveUpgrades();
+                renderPassiveGenerators();
+                updateUIElements();
+                fetchGlobalLeaderboard();
+            } catch (err) {
+                console.error("Database lineup misalignment", err);
             }
         }
 
         async function pushDataToDatabase() {
             try {
-                const payload = {
-                    matrixSparks: localMatrixSparks,
-                    clickUpgradeCount: clickUpgradeCount,
-                    overclockLevel: overclockLevel,
-                    critLevel: critLevel,
-                    linkSyncLevel: linkSyncLevel,
-                    globalMultiplierLevel: globalMultiplierLevel
-                };
-                generators.forEach(gen => {
-                    payload[`gen_${gen.id}`] = gen.count;
-                });
+                const payload = { matrixSparks: localMatrixSparks };
+                activeUpgrades.forEach(upg => payload[upg.id] = upg.count);
+                passiveGenerators.forEach(gen => payload[gen.id] = gen.count);
 
                 await fetch(`${dbURL}/${session.username}.json`, {
                     method: 'PATCH',
                     body: JSON.stringify(payload)
                 });
             } catch (err) {
-                console.error("Transmission error syncing data back home", err);
+                console.error("Sync error", err);
             }
         }
 
@@ -472,21 +398,21 @@
                     tbody.appendChild(tr);
                 });
             } catch (e) {
-                console.error("Matrix leaderboard sync dropped a tick.", e);
+                console.error("Leaderboard tick drop", e);
             }
         }
 
-        // Gameloop Tick Cycles 
+        // Loop Hooks
         setInterval(() => {
             let passiveGains = getModifiedSPS();
             if (passiveGains > 0) {
                 localMatrixSparks += passiveGains;
-                updateUserMatrixViews();
+                updateUIElements();
             }
         }, 1000);
 
-        setInterval(pushDataToDatabase, 5000);
-        setInterval(fetchGlobalLeaderboard, 7000);
+        setInterval(pushDataToDatabase, 6000);
+        setInterval(fetchGlobalLeaderboard, 10000);
 
         fetchInitialDatabaseData();
     </script>
