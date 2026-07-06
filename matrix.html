@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Arcanum Matrix Core — Clicker Vault</title>
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --panel-bg: #151922;
+            --text-color: #c5a880;
+            --text-light: #fff;
+            --accent-color: #45f3ff;
+            --danger-color: #ff4d4d;
+            --success-color: #2ed573;
+            --purple-color: #9b59b6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Georgia', serif; background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; min-height: 100vh; }
+        header { background: linear-gradient(to bottom, #11141a, var(--bg-color)); padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
+        .user-panel { background: #1f2833; padding: 10px 20px; border-radius: 4px; border: 1px solid #333; color: #fff; font-size: 0.9rem; }
+        .back-btn { background: transparent; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 5px 12px; cursor: pointer; border-radius: 3px; text-decoration: none; font-size: 0.9rem; }
+        
+        .matrix-grid { max-width: 1400px; width: 100%; margin: 25px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr; gap: 25px; }
+        @media (min-width: 1000px) { .matrix-grid { grid-template-columns: 1fr 380px; } }
+        
+        .clicker-zone { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media (min-width: 650px) { .clicker-zone { grid-template-columns: 1fr 1fr; } .full-width { grid-column: span 2; } }
+
+        .panel { background: var(--panel-bg); border: 1px solid #2d3748; border-radius: 6px; padding: 25px; height: fit-content; }
+        h2 { color: var(--text-light); font-size: 1.2rem; margin-bottom: 15px; border-bottom: 1px solid #222; padding-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* Clicker Elements */
+        .core-display-box { text-align: center; background: #07080c; border: 1px dashed #333; padding: 30px; border-radius: 6px; position: relative; overflow: hidden; }
+        .mp-counter { font-size: 3rem; font-weight: bold; color: #fff; text-shadow: 0 0 15px rgba(69, 243, 255, 0.4); }
+        .sps-counter { font-size: 1rem; color: var(--accent-color); font-family: monospace; margin-top: 5px; }
+        
+        .crystal-orb-container { display: flex; justify-content: center; align-items: center; margin: 30px 0; }
+        .crystal-orb {
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, #45f3ff 0%, #11141a 80%);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 30px rgba(69, 243, 255, 0.3), inset 0 0 20px #fff;
+            transition: transform 0.05s, box-shadow 0.2s;
+            position: relative;
+        }
+        .crystal-orb:hover { box-shadow: 0 0 45px rgba(69, 243, 255, 0.6), inset 0 0 25px #fff; transform: scale(1.02); }
+        .crystal-orb:active { transform: scale(0.95); }
+        
+        /* Upgrades & Generators UI */
+        .upgrade-list { display: flex; flex-direction: column; gap: 10px; list-style: none; }
+        .upgrade-card { background: #0b0c10; border: 1px solid #222; border-radius: 4px; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
+        .upgrade-card:hover { border-color: var(--accent-color); }
+        .upgrade-info h3 { color: #fff; font-size: 1rem; margin-bottom: 3px; }
+        .upgrade-info p { font-size: 0.8rem; color: #888; }
+        .buy-btn { background: #233a42; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 8px 16px; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: monospace; min-width: 110px; text-align: center; }
+        .buy-btn:hover:not(:disabled) { background: var(--accent-color); color: #000; }
+        .buy-btn:disabled { border-color: #444; color: #555; background: transparent; cursor: not-allowed; }
+
+        /* Leaderboard styling */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th { text-align: left; color: #666; font-size: 0.75rem; text-transform: uppercase; padding: 10px; border-bottom: 2px solid #222; }
+        td { padding: 12px 10px; border-bottom: 1px solid #1a202c; color: #e2e8f0; font-size: 0.9rem; }
+        .rank-badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; color: #000; background: #888; text-transform: uppercase; }
+        .me-row { background: rgba(69, 243, 255, 0.05); border-left: 3px solid var(--accent-color); }
+        
+        /* Floating particles text injection */
+        .click-floating-text { position: absolute; color: #fff; font-weight: bold; font-family: monospace; font-size: 1.2rem; pointer-events: none; animation: floatUp 0.8s ease-out forwards; text-shadow: 0 0 5px var(--accent-color); }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-60px); } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <a href="index.html" class="back-btn">&larr; Return to Council</a>
+            <h1 style="color: #fff; font-size: 1.3rem; letter-spacing: 1px; display: inline-block; margin-left: 15px; vertical-align: middle;">Matrix Siphoning Core</h1>
+        </div>
+        <div class="user-panel" id="userPanel">Connecting Core...</div>
+    </header>
+
+    <div class="matrix-grid">
+        
+        <!-- Main Clicker Core Terminal Frame -->
+        <div class="clicker-zone">
+            
+            <div class="panel full-width core-display-box" id="clickAreaContainer">
+                <h2>The Nexus Singularity</h2>
+                <div class="mp-counter" id="mpCounter">0 MP</div>
+                <div class="sps-counter" id="spsCounter">+0 Sparks / sec</div>
+                
+                <div class="crystal-orb-container">
+                    <div class="crystal-orb" id="crystalCore" onclick="handleCoreClick(event)"></div>
+                </div>
+                <p style="font-size: 0.85rem; color: #555; font-style: italic;">Tap the matrix core resonance node to force-extract pure Sparks.</p>
+            </div>
+
+            <!-- Active Manipulation Modifiers -->
+            <div class="panel">
+                <h2>Active Modulation Inscriptions</h2>
+                <ul class="upgrade-list">
+                    <li class="upgrade-card">
+                        <div class="upgrade-info">
+                            <h3 id="upgClickTitle">Amplified Runes</h3>
+                            <p>Increases manual extraction by +1 per click.</p>
+                        </div>
+                        <button class="buy-btn" id="btnBuyClick" onclick="buyClickUpgrade()">Cost: 15</button>
+                    </li>
+                    <li class="upgrade-card">
+                        <div class="upgrade-info">
+                            <h3 id="upgCritTitle">Crit-Strike Catalysts</h3>
+                            <p>Grants a 12% chance for clicks to deal 5x damage.</p>
+                        </div>
+                        <button class="buy-btn" id="btnBuyCrit" onclick="buyCritUpgrade()">Cost: 250</button>
+                    </li>
+                </ul>
+                
+                <h2 style="margin-top: 25px; color: var(--purple-color); border-color: #3b284c;">Matrix Overdrive Systems</h2>
+                <ul class="upgrade-list">
+                    <li class="upgrade-card">
+                        <div class="upgrade-info">
+                            <h3 id="upgMultTitle">Temporal Stability Matrix</h3>
+                            <p>Multiplies your cumulative total SPS output by +10%.</p>
+                        </div>
+                        <button class="buy-btn" style="border-color: var(--purple-color); color: var(--purple-color);" id="btnBuyMult" onclick="buyMultUpgrade()">Cost: 5000</button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Passive Production Infrastructure -->
+            <div class="panel">
+                <h2>Automated Leyline Infrastructure</h2>
+                <ul class="upgrade-list" id="generatorContainer">
+                    <!-- Generators drawn automatically by loop setup -->
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Leaderboard Matrix Panel Column -->
+        <div class="panel">
+            <h2>Global Live Registry Matrix</h2>
+            <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">Synced dynamically across network lines.</p>
+            <table>
+                <thead>
+                    <tr><th>Identity</th><th>Rank</th><th>Power Capacity</th></tr>
+                </thead>
+                <tbody id="leaderboardMatrixBody">
+                    <tr><td colspan="3" style="text-align:center; color:#555;">Downloading grid map...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+        const dbURL = "https://magic-system-78da8-default-rtdb.firebaseio.com/mages";
+        let session = JSON.parse(sessionStorage.getItem('current_mage_session'));
+
+        // Local reactive state indicators
+        let localRawEnergy = 0;
+        
+        let clickPower = 1;
+        let clickUpgradeCost = 15;
+        let clickUpgradeCount = 0;
+
+        let critLevel = 0;
+        let critUpgradeCost = 250;
+
+        let globalMultiplierLevel = 0;
+        let globalMultiplierCost = 5000;
+        
+        // Extended Automation Schema Mappings
+        const generators = [
+            { id: 'scribe', name: 'Automated Ink-Scribe', baseCost: 50, sps: 1, count: 0 },
+            { id: 'wellspring', name: 'Mana Wellspring Arc', baseCost: 400, sps: 8, count: 0 },
+            { id: 'spire', name: 'Celestial Siphon Spire', baseCost: 3000, sps: 45, count: 0 },
+            { id: 'rift', name: 'Void Singularity Rift', baseCost: 25000, sps: 290, count: 0 },
+            { id: 'hub', name: 'Arcane Leyline Hub', baseCost: 150000, sps: 1450, count: 0 },
+            { id: 'reactor', name: 'Nexus Fusion Reactor', baseCost: 950000, sps: 7800, count: 0 },
+            { id: 'harvester', name: 'Aether Resonance Harvester', baseCost: 7000000, sps: 44000, count: 0 }
+        ];
+
+        const MAX_MP_LIMIT = 1000000000;
+
+        if (!session) {
+            alert("Matrix grid mapping requires authorization. Returning to Vault.");
+            window.location.href = "login.html";
+        } else {
+            document.getElementById('userPanel').innerHTML = `Matrix Core Node: <strong>${session.username}</strong>`;
+        }
+
+        function calculateDiminishingMP(rawEnergy) {
+            if (!rawEnergy || rawEnergy <= 0) return 0;
+            let calculatedMP = MAX_MP_LIMIT * (1 - Math.exp(-rawEnergy / (MAX_MP_LIMIT * 0.45)));
+            return Math.min(Math.round(calculatedMP), MAX_MP_LIMIT);
+        }
+
+        function formatArcaneMP(mpValue) {
+            if (mpValue >= 1000000) return (mpValue / 1000000).toFixed(2) + 'M';
+            if (mpValue >= 1000) return (mpValue / 1000).toFixed(1) + 'K';
+            return mpValue;
+        }
+
+        async function fetchInitialDatabaseData() {
+            try {
+                const res = await fetch(`${dbURL}/${session.username}.json`);
+                const userData = await res.json();
+                if (userData) {
+                    if (userData.rawEnergy) localRawEnergy = userData.rawEnergy;
+                    
+                    if (userData.clickUpgradeCount) {
+                        clickUpgradeCount = userData.clickUpgradeCount;
+                        clickPower = 1 + clickUpgradeCount;
+                        clickUpgradeCost = Math.round(15 * Math.pow(1.5, clickUpgradeCount));
+                    }
+                    if (userData.critLevel) {
+                        critLevel = userData.critLevel;
+                        critUpgradeCost = Math.round(250 * Math.pow(1.75, critLevel));
+                    }
+                    if (userData.globalMultiplierLevel) {
+                        globalMultiplierLevel = userData.globalMultiplierLevel;
+                        globalMultiplierCost = Math.round(5000 * Math.pow(2.2, globalMultiplierLevel));
+                    }
+                    generators.forEach(gen => {
+                        if (userData[`gen_${gen.id}`]) {
+                            gen.count = userData[`gen_${gen.id}`];
+                        }
+                    });
+                }
+                renderGeneratorInterface();
+                updateUserMatrixViews();
+                fetchGlobalLeaderboard();
+            } catch (err) {
+                console.error("Network initialization core alignment dropped", err);
+            }
+        }
+
+        function renderGeneratorInterface() {
+            const container = document.getElementById('generatorContainer');
+            container.innerHTML = '';
+            generators.forEach((gen, index) => {
+                const cost = Math.round(gen.baseCost * Math.pow(1.15, gen.count));
+                const li = document.createElement('li');
+                li.className = 'upgrade-card';
+                li.innerHTML = `
+                    <div class="upgrade-info">
+                        <h3>${gen.name} (${gen.count})</h3>
+                        <p>Generates +${gen.sps} Sparks each second cycle.</p>
+                    </div>
+                    <button class="buy-btn" id="btnGen-${gen.id}" onclick="buyGenerator(${index})">Cost: ${formatArcaneMP(cost)}</button>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        function getBaseSPS() {
+            let total = 0;
+            generators.forEach(gen => { total += (gen.count * gen.sps); });
+            return total;
+        }
+
+        function getModifiedSPS() {
+            let base = getBaseSPS();
+            let mult = 1 + (globalMultiplierLevel * 0.10);
+            return Math.round(base * mult);
+        }
+
+        function updateUserMatrixViews() {
+            const calculatedMP = calculateDiminishingMP(localRawEnergy);
+            document.getElementById('mpCounter').innerText = `${formatArcaneMP(calculatedMP)} MP`;
+            
+            // Render active state costs configuration details
+            document.getElementById('upgClickTitle').innerText = `Amplified Runes (Lvl ${clickUpgradeCount})`;
+            const clickBtn = document.getElementById('btnBuyClick');
+            clickBtn.innerText = `Cost: ${formatArcaneMP(clickUpgradeCost)}`;
+            clickBtn.disabled = (localRawEnergy < clickUpgradeCost);
+
+            document.getElementById('upgCritTitle').innerText = `Crit-Strike Catalysts (Lvl ${critLevel})`;
+            const critBtn = document.getElementById('btnBuyCrit');
+            critBtn.innerText = `Cost: ${formatArcaneMP(critUpgradeCost)}`;
+            critBtn.disabled = (localRawEnergy < critUpgradeCost);
+
+            document.getElementById('upgMultTitle').innerText = `Temporal Matrix (Lvl ${globalMultiplierLevel})`;
+            const multBtn = document.getElementById('btnBuyMult');
+            multBtn.innerText = `Cost: ${formatArcaneMP(globalMultiplierCost)}`;
+            multBtn.disabled = (localRawEnergy < globalMultiplierCost);
+
+            generators.forEach((gen, idx) => {
+                const cost = Math.round(gen.baseCost * Math.pow(1.15, gen.count));
+                const btn = document.getElementById(`btnGen-${gen.id}`);
+                if (btn) {
+                    btn.innerText = `Cost: ${formatArcaneMP(cost)}`;
+                    btn.disabled = (localRawEnergy < cost);
+                }
+            });
+            document.getElementById('spsCounter').innerText = `+${formatArcaneMP(getModifiedSPS())} Sparks / sec`;
+        }
+
+        function handleCoreClick(e) {
+            let damage = clickPower;
+            let isCrit = false;
+
+            if (critLevel > 0 && Math.random() < 0.12) {
+                damage = clickPower * (5 + (critLevel * 0.5));
+                isCrit = true;
+            }
+
+            localRawEnergy += damage;
+            updateUserMatrixViews();
+            
+            const floating = document.createElement('div');
+            floating.className = 'click-floating-text';
+            if (isCrit) {
+                floating.style.color = 'var(--danger-color)';
+                floating.style.fontSize = '1.6rem';
+                floating.innerText = `CRIT! +${damage}`;
+            } else {
+                floating.innerText = `+${damage}`;
+            }
+            floating.style.left = `${e.clientX - 20}px`;
+            floating.style.top = `${e.clientY - 20}px`;
+            floating.style.position = 'fixed';
+            document.body.appendChild(floating);
+            setTimeout(() => floating.remove(), 800);
+        }
+
+        function buyClickUpgrade() {
+            if (localRawEnergy >= clickUpgradeCost) {
+                localRawEnergy -= clickUpgradeCost;
+                clickUpgradeCount++;
+                clickPower = 1 + clickUpgradeCount;
+                clickUpgradeCost = Math.round(15 * Math.pow(1.5, clickUpgradeCount));
+                updateUserMatrixViews();
+                pushDataToDatabase();
+            }
+        }
+
+        function buyCritUpgrade() {
+            if (localRawEnergy >= critUpgradeCost) {
+                localRawEnergy -= critUpgradeCost;
+                critLevel++;
+                critUpgradeCost = Math.round(250 * Math.pow(1.75, critLevel));
+                updateUserMatrixViews();
+                pushDataToDatabase();
+            }
+        }
+
+        function buyMultUpgrade() {
+            if (localRawEnergy >= globalMultiplierCost) {
+                localRawEnergy -= globalMultiplierCost;
+                globalMultiplierLevel++;
+                globalMultiplierCost = Math.round(5000 * Math.pow(2.2, globalMultiplierLevel));
+                updateUserMatrixViews();
+                pushDataToDatabase();
+            }
+        }
+
+        function buyGenerator(index) {
+            const gen = generators[index];
+            const cost = Math.round(gen.baseCost * Math.pow(1.15, gen.count));
+            if (localRawEnergy >= cost) {
+                localRawEnergy -= cost;
+                gen.count++;
+                renderGeneratorInterface();
+                updateUserMatrixViews();
+                pushDataToDatabase();
+            }
+        }
+
+        async function pushDataToDatabase() {
+            try {
+                const calculatedMP = calculateDiminishingMP(localRawEnergy);
+                const payload = {
+                    rawEnergy: localRawEnergy,
+                    power: calculatedMP,
+                    clickUpgradeCount: clickUpgradeCount,
+                    critLevel: critLevel,
+                    globalMultiplierLevel: globalMultiplierLevel
+                };
+                generators.forEach(gen => {
+                    payload[`gen_${gen.id}`] = gen.count;
+                });
+
+                await fetch(`${dbURL}/${session.username}.json`, {
+                    method: 'PATCH',
+                    body: JSON.stringify(payload)
+                });
+            } catch (err) {
+                console.error("Transmission error syncing data back home", err);
+            }
+        }
+
+        async function fetchGlobalLeaderboard() {
+            try {
+                const res = await fetch(`${dbURL}.json`);
+                const data = await res.json() || {};
+                const tbody = document.getElementById('leaderboardMatrixBody');
+                tbody.innerHTML = '';
+
+                let list = Object.keys(data).map(username => ({ username, ...data[username] }));
+                
+                list.sort((a,b) => {
+                    const scoreB = b.rank === "Grandmaster" ? Infinity : (b.power || 0);
+                    const scoreA = a.rank === "Grandmaster" ? Infinity : (a.power || 0);
+                    return scoreB - scoreA;
+                });
+
+                list.forEach((user, index) => {
+                    const tr = document.createElement('tr');
+                    if(user.username === session.username) tr.className = 'me-row';
+                    
+                    const scoreDisp = user.rank === "Grandmaster" ? "∞ MP" : `${formatArcaneMP(user.power || 0)} MP`;
+                    tr.innerHTML = `
+                        <td><strong>${index + 1}. ${user.username}</strong></td>
+                        <td><span class="rank-badge">${user.rank || 'Novice'}</span></td>
+                        <td style="font-family: monospace; text-align: right;">${scoreDisp}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Matrix leaderboard update skipped frame line index.", e);
+            }
+        }
+
+        // Gameloop Tick Cycle Engine Configuration 
+        setInterval(() => {
+            let passiveGains = getModifiedSPS();
+            if (passiveGains > 0) {
+                localRawEnergy += passiveGains;
+                updateUserMatrixViews();
+            }
+        }, 1000);
+
+        setInterval(pushDataToDatabase, 5000);
+        setInterval(fetchGlobalLeaderboard, 7000);
+
+        fetchInitialDatabaseData();
+    </script>
+</body>
+</html>
