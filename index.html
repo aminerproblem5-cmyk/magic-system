@@ -373,7 +373,7 @@
                         writeToConsole("Grandfather: /syncpool, /auracast, /bless [name], /announce [text]");
                     }
                     if (userRank === "Overseer" || isOwner) {
-                        writeToConsole("🔥 OVERSEER: /siphon [name] [amt], /strip [name], /freeze [name], /scan [name]");
+                        writeToConsole("🔥 OVERSEER: /siphon [name] [amt], /strip [name], /freeze [name], /scan [name], /givepool [name] [amt]");
                     }
                     if (isOwner) {
                         writeToConsole("Grandmaster Root: /take [name] [amt], /overload [name], /smite [name], /ascend [name], /inject [name] [amt]");
@@ -680,7 +680,7 @@
                     }
                 }
 
-                if (commandName === "/siphon" || commandName === "/strip" || commandName === "/freeze" || commandName === "/scan") {
+                if (commandName === "/siphon" || commandName === "/strip" || commandName === "/freeze" || commandName === "/scan" || commandName === "/givepool") {
                     if (userRank !== "Overseer" && !isOwner) { writeToConsole("Fatal Error: Domain restricted.", "var(--danger-color)"); return; }
                     if (!targetArg || targetArg === "AdminOwner") return;
                     
@@ -688,7 +688,18 @@
                     if (!realTargetKey) return;
                     const targetData = globalMagesCache[realTargetKey];
 
-                    if (commandName === "/siphon") {
+                    if (commandName === "/givepool") {
+                        const amount = parseInt(valueArg);
+                        if (isNaN(amount) || amount <= 0) {
+                            writeToConsole("Format Error: Use /givepool [name] [amount]", "var(--danger-color)");
+                            return;
+                        }
+                        let updatedRaw = (targetData.rawEnergy || 0) + amount;
+                        await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedRaw) });
+                        await fetch(`${dbURL}/${realTargetKey}/power.json`, { method: 'PUT', body: JSON.stringify(calculateDiminishingMP(updatedRaw)) });
+                        writeToConsole(`🔮 DISPATCH SUCCESS: Added +${amount} Sparks cleanly into [${realTargetKey}]'s mana reservoir.`, "var(--success-color)");
+                    }
+                    else if (commandName === "/siphon") {
                         const amount = parseInt(valueArg); if (isNaN(amount)) return;
                         let updatedTargRaw = Math.max(0, (targetData.rawEnergy || 0) - amount);
                         await fetch(`${dbURL}/${realTargetKey}/rawEnergy.json`, { method: 'PUT', body: JSON.stringify(updatedTargRaw) });
