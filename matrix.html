@@ -302,7 +302,6 @@
             let damage = clickPower;
             let isCrit = false;
 
-            // Simple crit engine check (12% baseline chance)
             if (critLevel > 0 && Math.random() < 0.12) {
                 damage = clickPower * (5 + (critLevel * 0.5));
                 isCrit = true;
